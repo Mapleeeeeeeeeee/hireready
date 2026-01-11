@@ -1,0 +1,51 @@
+{
+  "common": {
+    "appName": "HireReady",
+    "loading": "載入中...",
+    "error": "發生錯誤",
+    "retry": "重試"
+  },
+  "nav": {
+    "home": "首頁",
+    "interview": "開始面試",
+    "login": "登入",
+    "logout": "登出"
+  },
+  "home": {
+    "title": "AI 面試模擬平台",
+    "subtitle": "透過 AI 練習行為面試，提升你的面試技巧",
+    "startButton": "開始練習",
+    "features": {
+      "voice": "語音對話",
+      "voiceDesc": "與 AI 進行真實的語音面試對話",
+      "video": "視訊練習",
+      "videoDesc": "開啟攝影機練習眼神交流和肢體語言",
+      "feedback": "即時回饋",
+      "feedbackDesc": "獲得 AI 對你面試表現的分析建議"
+    }
+  },
+  "interview": {
+    "title": "面試練習",
+    "selectScenario": "選擇面試情境",
+    "scenarios": {
+      "selfIntro": "自我介紹",
+      "whyLeave": "離職原因",
+      "teamwork": "團隊合作經驗",
+      "challenge": "克服困難的經歷",
+      "strength": "個人優缺點"
+    },
+    "selectLanguage": "選擇面試語言",
+    "languages": {
+      "zh": "中文",
+      "en": "English"
+    },
+    "startInterview": "開始面試",
+    "endInterview": "結束面試",
+    "permissionRequired": "需要麥克風和攝影機權限",
+    "grantPermission": "授予權限"
+  },
+  "auth": {
+    "loginWithGoogle": "使用 Google 登入",
+    "welcomeBack": "歡迎回來"
+  }
+}

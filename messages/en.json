@@ -1,0 +1,51 @@
+{
+  "common": {
+    "appName": "HireReady",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry"
+  },
+  "nav": {
+    "home": "Home",
+    "interview": "Start Interview",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "home": {
+    "title": "AI Interview Practice Platform",
+    "subtitle": "Practice behavioral interviews with AI to improve your interview skills",
+    "startButton": "Start Practice",
+    "features": {
+      "voice": "Voice Conversation",
+      "voiceDesc": "Have real voice conversations with AI interviewer",
+      "video": "Video Practice",
+      "videoDesc": "Turn on camera to practice eye contact and body language",
+      "feedback": "Real-time Feedback",
+      "feedbackDesc": "Get AI analysis and suggestions on your interview performance"
+    }
+  },
+  "interview": {
+    "title": "Interview Practice",
+    "selectScenario": "Select Interview Scenario",
+    "scenarios": {
+      "selfIntro": "Self Introduction",
+      "whyLeave": "Reason for Leaving",
+      "teamwork": "Teamwork Experience",
+      "challenge": "Overcoming Challenges",
+      "strength": "Strengths and Weaknesses"
+    },
+    "selectLanguage": "Select Interview Language",
+    "languages": {
+      "zh": "Chinese",
+      "en": "English"
+    },
+    "startInterview": "Start Interview",
+    "endInterview": "End Interview",
+    "permissionRequired": "Microphone and camera permission required",
+    "grantPermission": "Grant Permission"
+  },
+  "auth": {
+    "loginWithGoogle": "Login with Google",
+    "welcomeBack": "Welcome back"
+  }
+}

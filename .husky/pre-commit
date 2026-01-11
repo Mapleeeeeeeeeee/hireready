@@ -1,0 +1,58 @@
+#!/bin/sh
+# Pre-commit hook for HireReady
+
+echo "🔍 Running pre-commit checks..."
+
+# 1. Secrets Detection - Check for accidentally committed secrets
+echo "🔐 Checking for secrets..."
+
+# Get list of staged files (excluding the pre-commit hook itself)
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -v "\.husky/pre-commit")
+
+if [ -n "$staged_files" ]; then
+    # Check for common secret patterns in staged content (excluding comments and test files)
+    secrets_found=$(git diff --cached --diff-filter=ACMR -- $staged_files 2>/dev/null | \
+        grep -v "^[+-].*#" | \
+        grep -v "^[+-].*\/\/" | \
+        grep -E "^[+].*(['\"][A-Za-z0-9_]{20,}['\"]|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{36}|gho_[A-Za-z0-9]{36})" || true)
+    
+    if [ -n "$secrets_found" ]; then
+        echo "❌ Potential secrets detected!"
+        echo "$secrets_found"
+        exit 1
+    fi
+fi
+
+# Check for .env files being committed
+if git diff --cached --name-only | grep -E "^\.env(\..+)?$"; then
+    echo "❌ Attempting to commit .env file! This is not allowed."
+    exit 1
+fi
+
+# 2. Large file check (prevent files > 5MB)
+echo "📦 Checking file sizes..."
+large_files=""
+for file in $(git diff --cached --name-only --diff-filter=ACMR); do
+    if [ -f "$file" ]; then
+        size=$(wc -c < "$file" | tr -d ' ')
+        if [ "$size" -gt 5242880 ]; then
+            large_files="$large_files\n$file ($(($size / 1024 / 1024))MB)"
+        fi
+    fi
+done
+
+if [ -n "$large_files" ]; then
+    echo "❌ Large files detected (>5MB):"
+    echo "$large_files"
+    exit 1
+fi
+
+# 3. Run lint-staged (ESLint + Prettier)
+echo "✨ Running lint-staged..."
+pnpm lint-staged || exit 1
+
+# 4. Run TypeScript type check
+echo "📝 Running TypeScript type check..."
+pnpm type-check || exit 1
+
+echo "✅ All pre-commit checks passed!"
