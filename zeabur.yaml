@@ -1,0 +1,26 @@
+# Zeabur Deployment Configuration
+# https://zeabur.com/docs/template/template-in-code
+
+services:
+  # Main Next.js Application
+  - name: hireready
+    type: github
+    root: /
+    env:
+      # Better Auth
+      BETTER_AUTH_URL: https://${ZEABUR_WEB_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      # Google OAuth
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      # Gemini API
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      # Database (auto-linked from PostgreSQL service)
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+      # Public
+      NEXT_PUBLIC_APP_URL: https://${ZEABUR_WEB_URL}
+
+  # PostgreSQL Database
+  - name: postgres
+    type: postgres
+    version: 16
