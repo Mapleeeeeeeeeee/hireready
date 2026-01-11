@@ -1,0 +1,39 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":preserveSemverRanges",
+    "group:allNonMajor"
+  ],
+  "labels": ["dependencies"],
+  "schedule": ["before 9am on monday"],
+  "timezone": "Asia/Taipei",
+  "rangeStrategy": "pin",
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "matchPackagePatterns": ["eslint", "prettier", "@typescript-eslint/*"],
+      "groupName": "linters",
+      "automerge": true
+    },
+    {
+      "matchPackagePatterns": ["@types/*"],
+      "groupName": "type definitions",
+      "automerge": true
+    },
+    {
+      "matchPackagePatterns": ["vitest", "@testing-library/*", "playwright"],
+      "groupName": "testing"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  }
+}
