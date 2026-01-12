@@ -46,6 +46,11 @@
     "room": {
       "liveSession": "LIVE SESSION",
       "connected": "Connected",
+      "connecting": "Connecting",
+      "disconnected": "Disconnected",
+      "error": "Connection Error",
+      "notSupported": "Browser Not Supported",
+      "notSupportedMessage": "Your browser does not support voice features. Please use the latest version of Chrome or Edge.",
       "muteMic": "Mute Microphone",
       "unmuteMic": "Unmute Microphone",
       "turnOffCamera": "Turn Off Camera",
@@ -53,14 +58,33 @@
       "endCall": "End Interview",
       "states": {
         "idle": "Ready",
+        "connecting": "Connecting",
         "listening": "Listening",
         "speaking": "Speaking",
-        "processing": "Processing"
+        "processing": "Processing",
+        "error": "Error"
       }
     }
   },
   "auth": {
     "loginWithGoogle": "Login with Google",
     "welcomeBack": "Welcome back"
+  },
+  "errors": {
+    "UNKNOWN_ERROR": "An unknown error occurred, please try again later",
+    "BAD_REQUEST": "Invalid request format",
+    "UNAUTHORIZED": "Please login to continue",
+    "FORBIDDEN": "You do not have permission to perform this action",
+    "NOT_FOUND": "The requested resource was not found",
+    "VALIDATION_ERROR": "Input validation failed",
+    "AUDIO_PERMISSION_DENIED": "Microphone permission denied. Please allow microphone access to continue",
+    "AUDIO_CONTEXT_ERROR": "Audio system initialization failed",
+    "INTERNAL_SERVER_ERROR": "Server error occurred, please try again later",
+    "BAD_GATEWAY": "Unable to connect to service, please try again later",
+    "SERVICE_UNAVAILABLE": "Service temporarily unavailable, please try again later",
+    "WEBSOCKET_ERROR": "Real-time connection error occurred",
+    "WEBSOCKET_CLOSED": "Real-time connection was interrupted",
+    "GEMINI_API_ERROR": "AI service error occurred",
+    "NETWORK_ERROR": "Network connection failed, please check your internet connection"
   }
 }

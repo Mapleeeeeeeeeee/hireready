@@ -6,6 +6,10 @@
  *
  * Usage:
  * import { clientEnv } from '@/lib/config/client';
+ *
+ * SECURITY NOTE:
+ * Sensitive API keys (like GEMINI_API_KEY) should NOT be exposed here.
+ * Use server-side API routes to provide credentials to authenticated users.
  */
 
 export const clientEnv = {

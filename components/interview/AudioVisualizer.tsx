@@ -1,18 +1,33 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import type { SessionState } from '@/lib/gemini/types';
 
-type AudioState = 'idle' | 'listening' | 'speaking' | 'processing';
+// Map SessionState to visual state
+type VisualState = 'idle' | 'listening' | 'speaking' | 'processing';
+
+function mapToVisualState(state: SessionState): VisualState {
+  switch (state) {
+    case 'connecting':
+      return 'processing';
+    case 'error':
+      return 'idle';
+    default:
+      return state;
+  }
+}
 
 interface AudioVisualizerProps {
-  state: AudioState;
+  state: SessionState;
   audioLevel?: number; // 0 to 1
   stateLabel?: string;
 }
 
 export function AudioVisualizer({ state, audioLevel = 0, stateLabel }: AudioVisualizerProps) {
+  const visualState = mapToVisualState(state);
+
   const getColors = () => {
-    switch (state) {
+    switch (visualState) {
       case 'listening':
         return ['bg-terracotta/10', 'bg-terracotta/5'];
       case 'speaking':
@@ -31,11 +46,11 @@ export function AudioVisualizer({ state, audioLevel = 0, stateLabel }: AudioVisu
       {/* Outer Glow Ring - softer blur for "paper" feel */}
       <motion.div
         animate={{
-          scale: state === 'speaking' ? [1, 1.1 + audioLevel, 1] : [1, 1.02, 1],
+          scale: visualState === 'speaking' ? [1, 1.1 + audioLevel, 1] : [1, 1.02, 1],
           opacity: [0.3, 0.6, 0.3],
         }}
         transition={{
-          duration: state === 'speaking' ? 0.4 : 4,
+          duration: visualState === 'speaking' ? 0.4 : 4,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
@@ -45,10 +60,10 @@ export function AudioVisualizer({ state, audioLevel = 0, stateLabel }: AudioVisu
       {/* Inner Core */}
       <motion.div
         animate={{
-          scale: state === 'speaking' ? [1, 1.05 + audioLevel * 0.3, 1] : [1, 1.01, 1],
+          scale: visualState === 'speaking' ? [1, 1.05 + audioLevel * 0.3, 1] : [1, 1.01, 1],
         }}
         transition={{
-          duration: state === 'speaking' ? 0.2 : 3,
+          duration: visualState === 'speaking' ? 0.2 : 3,
           repeat: Infinity,
           ease: 'easeInOut',
         }}

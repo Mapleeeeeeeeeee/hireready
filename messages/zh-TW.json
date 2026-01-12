@@ -46,6 +46,11 @@
     "room": {
       "liveSession": "即時面試",
       "connected": "已連線",
+      "connecting": "連線中",
+      "disconnected": "已斷線",
+      "error": "連線錯誤",
+      "notSupported": "瀏覽器不支援",
+      "notSupportedMessage": "您的瀏覽器不支援語音功能，請使用最新版本的 Chrome 或 Edge。",
       "muteMic": "靜音麥克風",
       "unmuteMic": "取消靜音",
       "turnOffCamera": "關閉攝影機",
@@ -53,14 +58,33 @@
       "endCall": "結束面試",
       "states": {
         "idle": "準備中",
+        "connecting": "連線中",
         "listening": "聆聽中",
         "speaking": "說話中",
-        "processing": "處理中"
+        "processing": "處理中",
+        "error": "發生錯誤"
       }
     }
   },
   "auth": {
     "loginWithGoogle": "使用 Google 登入",
     "welcomeBack": "歡迎回來"
+  },
+  "errors": {
+    "UNKNOWN_ERROR": "發生未知錯誤，請稍後再試",
+    "BAD_REQUEST": "請求格式錯誤",
+    "UNAUTHORIZED": "請先登入以繼續",
+    "FORBIDDEN": "您沒有權限執行此操作",
+    "NOT_FOUND": "找不到請求的資源",
+    "VALIDATION_ERROR": "輸入資料驗證失敗",
+    "AUDIO_PERMISSION_DENIED": "麥克風權限被拒絕，請允許麥克風存取以繼續",
+    "AUDIO_CONTEXT_ERROR": "音訊系統初始化失敗",
+    "INTERNAL_SERVER_ERROR": "伺服器發生錯誤，請稍後再試",
+    "BAD_GATEWAY": "無法連接到服務，請稍後再試",
+    "SERVICE_UNAVAILABLE": "服務暫時無法使用，請稍後再試",
+    "WEBSOCKET_ERROR": "即時連線發生錯誤",
+    "WEBSOCKET_CLOSED": "即時連線已中斷",
+    "GEMINI_API_ERROR": "AI 服務發生錯誤",
+    "NETWORK_ERROR": "網路連線失敗，請檢查您的網路連線"
   }
 }
