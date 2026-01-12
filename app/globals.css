@@ -3,8 +3,11 @@
 @source '../node_modules/.pnpm/@heroui+theme@*/node_modules/@heroui/theme/dist/**/*.{js,mjs}';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Enforce Claude-like Warm Theme always */
+  --background: #faf9f5;
+  /* Warm Paper */
+  --foreground: #141413;
+  /* Charcoal */
 }
 
 @theme inline {
@@ -12,17 +15,37 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
+  --font-serif: var(--font-serif);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Claude-like Theme Colors */
+  --color-warm-paper: #faf9f5;
+  --color-charcoal: #141413;
+  --color-terracotta: #d97757;
+  --color-warm-gray: #b0aea5;
+  --color-soft-clay: #e8e6dc;
+
+  /* Organic Animations */
+  --animate-pulse-soft: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.8;
+      transform: scale(0.95);
+    }
   }
 }
 
+/* Base styles */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

@@ -14,7 +14,7 @@
   "home": {
     "title": "AI 面試模擬平台",
     "subtitle": "透過 AI 練習行為面試，提升你的面試技巧",
-    "startButton": "開始練習",
+    "startButton": "來去面試",
     "features": {
       "voice": "語音對話",
       "voiceDesc": "與 AI 進行真實的語音面試對話",
@@ -42,7 +42,22 @@
     "startInterview": "開始面試",
     "endInterview": "結束面試",
     "permissionRequired": "需要麥克風和攝影機權限",
-    "grantPermission": "授予權限"
+    "grantPermission": "授予權限",
+    "room": {
+      "liveSession": "即時面試",
+      "connected": "已連線",
+      "muteMic": "靜音麥克風",
+      "unmuteMic": "取消靜音",
+      "turnOffCamera": "關閉攝影機",
+      "turnOnCamera": "開啟攝影機",
+      "endCall": "結束面試",
+      "states": {
+        "idle": "準備中",
+        "listening": "聆聽中",
+        "speaking": "說話中",
+        "processing": "處理中"
+      }
+    }
   },
   "auth": {
     "loginWithGoogle": "使用 Google 登入",

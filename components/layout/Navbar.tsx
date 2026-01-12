@@ -17,7 +17,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from '@/lib/auth/auth-client';
 import { saveRedirectUrl, getRedirectUrl, clearRedirectUrl } from '@/lib/auth/utils';
-import { appConfig } from '@/lib/config';
 
 export function Navbar() {
   const t = useTranslations();
@@ -27,10 +26,7 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogin = async () => {
-    // Save current URL for redirect after login
     saveRedirectUrl(pathname);
-
-    // Initiate Google OAuth
     await signIn.social({
       provider: 'google',
       callbackURL: pathname,
@@ -43,7 +39,6 @@ export function Navbar() {
     router.push('/');
   };
 
-  // Check for redirect after login
   useEffect(() => {
     if (session && !isPending) {
       const redirectUrl = getRedirectUrl();
@@ -60,61 +55,86 @@ export function Navbar() {
   ];
 
   return (
-    <HeroNavbar isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen} maxWidth="xl" isBordered>
+    <HeroNavbar
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
+      maxWidth="xl"
+      className="bg-warm-paper/90 border-warm-gray/10 border-b py-4 backdrop-blur-md"
+    >
       {/* Brand and mobile toggle */}
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className="sm:hidden"
+          className="text-charcoal/70 md:hidden"
           srOnlyText={isMenuOpen ? 'Close menu' : 'Open menu'}
         />
         <NavbarBrand>
-          <Link href="/" color="foreground">
-            <p className="font-bold text-inherit">{appConfig.name}</p>
+          <Link href="/" className="text-charcoal transition-opacity hover:opacity-80">
+            <p className="font-serif text-2xl font-semibold tracking-tight text-inherit">
+              HireReady
+            </p>
           </Link>
         </NavbarBrand>
       </NavbarContent>
 
-      {/* Desktop menu */}
-      <NavbarContent className="hidden gap-4 sm:flex" justify="center">
+      {/* Desktop menu - Centered */}
+      <NavbarContent className="hidden gap-8 md:flex" justify="center">
         {menuItems.map((item) => (
           <NavbarItem key={item.key} isActive={pathname === item.href}>
-            <Link color={pathname === item.href ? 'primary' : 'foreground'} href={item.href}>
+            <Link
+              href={item.href}
+              className={`text-sm font-medium tracking-wide transition-colors ${
+                pathname === item.href ? 'text-terracotta' : 'text-charcoal/60 hover:text-charcoal'
+              }`}
+            >
               {item.label}
             </Link>
           </NavbarItem>
         ))}
       </NavbarContent>
 
-      {/* Auth section */}
+      {/* Auth section - Minimalist */}
       <NavbarContent justify="end">
         {isPending ? (
           <NavbarItem>
-            <Button isLoading size="sm" variant="flat">
+            <Button isLoading size="sm" variant="light" className="text-charcoal/50">
               {t('common.loading')}
             </Button>
           </NavbarItem>
         ) : session?.user ? (
           <>
-            <NavbarItem className="hidden sm:flex">
-              <span className="text-sm">{session.user.name}</span>
+            <NavbarItem className="hidden md:flex">
+              <span className="text-charcoal/60 pr-3 font-serif text-sm font-medium italic">
+                {session.user.name?.split(' ')[0]}
+              </span>
             </NavbarItem>
             <NavbarItem>
               <Avatar
                 size="sm"
                 src={session.user.image || undefined}
                 name={session.user.name || undefined}
+                className="ring-warm-gray/20 h-8 w-8 ring-1"
               />
             </NavbarItem>
             <NavbarItem>
-              <Button size="sm" variant="flat" onPress={handleLogout}>
+              <Button
+                size="sm"
+                variant="light"
+                onPress={handleLogout}
+                className="text-terracotta/80 hover:text-terracotta min-w-16 px-2 font-medium"
+              >
                 {t('nav.logout')}
               </Button>
             </NavbarItem>
           </>
         ) : (
           <NavbarItem>
-            <Button size="sm" color="primary" onPress={handleLogin}>
+            <Button
+              size="md"
+              variant="light"
+              className="text-charcoal/80 hover:text-charcoal hover:bg-warm-gray/10 rounded-lg px-5 font-medium transition-all"
+              onPress={handleLogin}
+            >
               {t('nav.login')}
             </Button>
           </NavbarItem>
@@ -122,12 +142,13 @@ export function Navbar() {
       </NavbarContent>
 
       {/* Mobile menu */}
-      <NavbarMenu>
+      <NavbarMenu className="bg-warm-paper pt-8">
         {menuItems.map((item) => (
           <NavbarMenuItem key={item.key}>
             <Link
-              className="w-full"
-              color={pathname === item.href ? 'primary' : 'foreground'}
+              className={`w-full py-3 font-serif text-xl ${
+                pathname === item.href ? 'text-terracotta' : 'text-charcoal'
+              }`}
               href={item.href}
               size="lg"
             >
@@ -138,14 +159,20 @@ export function Navbar() {
 
         {session?.user && (
           <NavbarMenuItem>
-            <div className="flex items-center gap-2 py-2">
+            <div className="border-warm-gray/10 mt-6 flex items-center gap-3 border-t py-6">
               <Avatar
                 size="sm"
                 src={session.user.image || undefined}
                 name={session.user.name || undefined}
               />
-              <span className="text-sm">{session.user.name}</span>
+              <span className="text-charcoal text-lg font-medium">{session.user.name}</span>
             </div>
+            <Button
+              className="border-terracotta/20 text-terracotta mt-2 w-full border bg-transparent text-lg"
+              onPress={handleLogout}
+            >
+              {t('nav.logout')}
+            </Button>
           </NavbarMenuItem>
         )}
       </NavbarMenu>

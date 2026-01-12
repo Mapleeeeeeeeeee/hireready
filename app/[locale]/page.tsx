@@ -1,46 +1,55 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Button, Card, CardBody, Link } from '@heroui/react';
+import { Button, Link } from '@heroui/react';
+import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
   const t = useTranslations();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <div className="mx-auto max-w-4xl text-center">
-        <h1 className="mb-4 text-4xl font-bold">{t('home.title')}</h1>
-        <p className="mb-8 text-xl text-gray-600 dark:text-gray-400">{t('home.subtitle')}</p>
+    <main className="bg-warm-paper text-charcoal selection:bg-terracotta/20 relative flex min-h-screen flex-col items-center justify-center p-8">
+      <div className="z-10 mx-auto max-w-4xl text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mb-16"
+        >
+          {/* Badge */}
+          <div className="bg-terracotta/10 border-terracotta/20 mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1">
+            <span className="text-terracotta text-xs font-bold tracking-widest uppercase">
+              AI-Powered Practice
+            </span>
+          </div>
 
-        <Button as={Link} href="/interview" color="primary" size="lg" className="mb-12">
-          {t('home.startButton')}
-        </Button>
+          {/* Brand Display */}
+          <h1 className="text-charcoal mb-4 font-serif text-7xl font-semibold tracking-tight sm:text-9xl">
+            HireReady
+          </h1>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <Card>
-            <CardBody className="p-6 text-center">
-              <div className="mb-4 text-4xl">🎙️</div>
-              <h3 className="mb-2 text-lg font-semibold">{t('home.features.voice')}</h3>
-              <p className="text-gray-600 dark:text-gray-400">{t('home.features.voiceDesc')}</p>
-            </CardBody>
-          </Card>
+          {/* Functional Title */}
+          <h2 className="text-charcoal/60 mb-8 font-sans text-2xl font-medium sm:text-3xl">
+            {t('home.title')}
+          </h2>
 
-          <Card>
-            <CardBody className="p-6 text-center">
-              <div className="mb-4 text-4xl">📹</div>
-              <h3 className="mb-2 text-lg font-semibold">{t('home.features.video')}</h3>
-              <p className="text-gray-600 dark:text-gray-400">{t('home.features.videoDesc')}</p>
-            </CardBody>
-          </Card>
+          <p className="text-charcoal/70 mx-auto mb-10 max-w-xl text-xl leading-relaxed font-light">
+            {t('home.subtitle')}
+          </p>
 
-          <Card>
-            <CardBody className="p-6 text-center">
-              <div className="mb-4 text-4xl">💡</div>
-              <h3 className="mb-2 text-lg font-semibold">{t('home.features.feedback')}</h3>
-              <p className="text-gray-600 dark:text-gray-400">{t('home.features.feedbackDesc')}</p>
-            </CardBody>
-          </Card>
-        </div>
+          <Button
+            as={Link}
+            href="/interview"
+            size="lg"
+            className="group bg-terracotta shadow-terracotta/20 hover:shadow-terracotta/30 relative rounded-xl px-10 py-7 text-lg font-medium text-white shadow-md transition-all hover:shadow-lg"
+          >
+            <span className="flex items-center gap-2">
+              {t('home.startButton')}{' '}
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </span>
+          </Button>
+        </motion.div>
       </div>
     </main>
   );

@@ -14,7 +14,7 @@
   "home": {
     "title": "AI Interview Practice Platform",
     "subtitle": "Practice behavioral interviews with AI to improve your interview skills",
-    "startButton": "Start Practice",
+    "startButton": "Go to Interview",
     "features": {
       "voice": "Voice Conversation",
       "voiceDesc": "Have real voice conversations with AI interviewer",
@@ -42,7 +42,22 @@
     "startInterview": "Start Interview",
     "endInterview": "End Interview",
     "permissionRequired": "Microphone and camera permission required",
-    "grantPermission": "Grant Permission"
+    "grantPermission": "Grant Permission",
+    "room": {
+      "liveSession": "LIVE SESSION",
+      "connected": "Connected",
+      "muteMic": "Mute Microphone",
+      "unmuteMic": "Unmute Microphone",
+      "turnOffCamera": "Turn Off Camera",
+      "turnOnCamera": "Turn On Camera",
+      "endCall": "End Interview",
+      "states": {
+        "idle": "Ready",
+        "listening": "Listening",
+        "speaking": "Speaking",
+        "processing": "Processing"
+      }
+    }
   },
   "auth": {
     "loginWithGoogle": "Login with Google",

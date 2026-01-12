@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * Server-side environment configuration
  * All server-only environment variables should be accessed through this module
