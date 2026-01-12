@@ -5,6 +5,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/lib/i18n/routing';
 import { Providers } from './providers';
+import { Navbar } from '@/components/layout/Navbar';
 import '../globals.css';
 
 const geistSans = Geist({
@@ -40,7 +41,10 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html lang={locale} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
-          <Providers>{children}</Providers>
+          <Providers>
+            <Navbar />
+            <main className="min-h-screen">{children}</main>
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>

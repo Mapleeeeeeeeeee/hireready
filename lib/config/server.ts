@@ -25,12 +25,12 @@ export const serverEnv = {
   betterAuthUrl: getEnvVar('BETTER_AUTH_URL'),
   betterAuthSecret: getEnvVar('BETTER_AUTH_SECRET'),
 
-  // Google OAuth
-  googleClientId: getEnvVar('GOOGLE_CLIENT_ID'),
-  googleClientSecret: getEnvVar('GOOGLE_CLIENT_SECRET'),
+  // Google OAuth (optional - set up later)
+  googleClientId: getEnvVar('GOOGLE_CLIENT_ID', false),
+  googleClientSecret: getEnvVar('GOOGLE_CLIENT_SECRET', false),
 
-  // Gemini API
-  geminiApiKey: getEnvVar('GEMINI_API_KEY'),
+  // Gemini API (optional)
+  geminiApiKey: getEnvVar('GEMINI_API_KEY', false),
 
   // Database
   databaseUrl: getEnvVar('DATABASE_URL'),
