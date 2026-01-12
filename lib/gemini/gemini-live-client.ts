@@ -312,8 +312,14 @@ export class GeminiLiveClient {
    * Send audio data to Gemini
    */
   sendAudio(base64Chunk: string): Result<void> {
-    if (!this.session) {
+    // Check if session exists and is in a valid state for sending
+    if (!this.session || this._isDisposed) {
       return Err(new WebSocketError('Session not connected'));
+    }
+
+    // Only send audio when in listening or processing state
+    if (this._state !== 'listening' && this._state !== 'processing') {
+      return Ok(undefined); // Silently skip when not ready
     }
 
     try {
@@ -331,6 +337,16 @@ export class GeminiLiveClient {
 
       return Ok(undefined);
     } catch (error) {
+      // Handle WebSocket already closed error gracefully
+      const errorMsg = (error as Error).message || '';
+      if (errorMsg.includes('CLOSING') || errorMsg.includes('CLOSED')) {
+        logger.debug('WebSocket closed, skipping audio send', {
+          module: 'gemini-client',
+          action: 'sendAudio',
+        });
+        return Ok(undefined);
+      }
+
       logger.error('Failed to send audio', error as Error, {
         module: 'gemini-client',
         action: 'sendAudio',

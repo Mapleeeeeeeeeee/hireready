@@ -75,8 +75,14 @@ export class AudioStreamer {
    * Initialize the audio context
    */
   async initialize(): Promise<void> {
-    if (this.audioContext) {
+    // Already initialized
+    if (this.audioContext && this.audioContext.state !== 'closed') {
       return;
+    }
+
+    // Already disposed, don't reinitialize
+    if (this._disposed) {
+      throw new AudioContextError('Audio streamer has been disposed');
     }
 
     try {
@@ -84,12 +90,29 @@ export class AudioStreamer {
         sampleRate: AUDIO_CONFIG.OUTPUT_SAMPLE_RATE,
       });
 
+      // Check if disposed during async operations (React StrictMode)
+      if (this._disposed) {
+        this.audioContext.close();
+        this.audioContext = null;
+        throw new AudioContextError('Audio streamer disposed during initialization');
+      }
+
       // Create gain node for volume control
       this.gainNode = this.audioContext.createGain();
       this.gainNode.gain.value = 1.0;
 
       // Load volume meter worklet
       await this.audioContext.audioWorklet.addModule('/worklets/volume-meter.js');
+
+      // Check again if disposed during async worklet loading
+      if (this._disposed || !this.audioContext || this.audioContext.state === 'closed') {
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+          this.audioContext.close();
+        }
+        this.audioContext = null;
+        this.gainNode = null;
+        throw new AudioContextError('Audio streamer disposed during initialization');
+      }
 
       // Create worklet node for volume metering
       this.workletNode = new AudioWorkletNode(this.audioContext, 'volume-meter-processor');
@@ -108,6 +131,18 @@ export class AudioStreamer {
         sampleRate: this.audioContext.sampleRate,
       });
     } catch (error) {
+      // Clean up partial initialization
+      if (this.audioContext && this.audioContext.state !== 'closed') {
+        try {
+          this.audioContext.close();
+        } catch {
+          // Ignore close errors
+        }
+      }
+      this.audioContext = null;
+      this.gainNode = null;
+      this.workletNode = null;
+
       throw new AudioContextError(
         `Failed to initialize audio streamer: ${(error as Error).message}`
       );
@@ -142,6 +177,15 @@ export class AudioStreamer {
    * Add PCM16 audio data to the playback queue
    */
   addPCM16(data: ArrayBuffer): void {
+    logger.info('addPCM16 called', {
+      module: 'audio-streamer',
+      action: 'addPCM16',
+      dataByteLength: data.byteLength,
+      hasAudioContext: !!this.audioContext,
+      audioContextState: this.audioContext?.state,
+      hasGainNode: !!this.gainNode,
+    });
+
     if (!this.audioContext || !this.gainNode) {
       logger.warn('Audio streamer not initialized', {
         module: 'audio-streamer',
@@ -153,11 +197,23 @@ export class AudioStreamer {
     // Convert PCM16 to Float32
     const float32Data = this.pcm16ToFloat32(data);
 
+    logger.info('Converted to Float32', {
+      module: 'audio-streamer',
+      action: 'addPCM16',
+      float32Length: float32Data.length,
+      sampleValues: [float32Data[0], float32Data[100], float32Data[float32Data.length - 1]],
+    });
+
     // Add to queue
     this.audioQueue.push(float32Data);
 
     // Start playback if not already playing
     if (!this._isPlaying) {
+      logger.info('Starting playback', {
+        module: 'audio-streamer',
+        action: 'addPCM16',
+        queueLength: this.audioQueue.length,
+      });
       this.startPlayback();
     }
   }

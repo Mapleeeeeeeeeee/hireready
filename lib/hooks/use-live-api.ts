@@ -5,37 +5,19 @@
 
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   useInterviewStore,
   selectVisualizerVolume,
   type InterviewStoreState,
 } from '@/lib/stores/interview-store';
-import { GeminiLiveClient } from '@/lib/gemini/gemini-live-client';
+import { GeminiProxyClient } from '@/lib/gemini/gemini-proxy-client';
 import { AudioRecorder, isAudioRecordingSupported } from '@/lib/gemini/audio-recorder';
 import { AudioStreamer, isAudioPlaybackSupported } from '@/lib/gemini/audio-streamer';
 import { getInterviewerPrompt, type SupportedLanguage } from '@/lib/gemini/prompts';
 import { createTranscriptEntry, type SessionState } from '@/lib/gemini/types';
 import { logger } from '@/lib/utils/logger';
 import { BadRequestError } from '@/lib/utils/errors';
-import { apiGet } from '@/lib/utils/api-client';
-
-// ============================================================
-// Session Credentials
-// ============================================================
-
-interface SessionCredentials {
-  apiKey: string;
-  model: string;
-  expiresAt: string;
-}
-
-/**
- * Fetch session credentials from server (authenticated endpoint)
- */
-async function fetchSessionCredentials(): Promise<SessionCredentials> {
-  return await apiGet<SessionCredentials>('/api/interview/session');
-}
 
 // ============================================================
 // Types
@@ -84,14 +66,22 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
   const visualizerVolume = useInterviewStore(selectVisualizerVolume);
 
   // Refs for instances
-  const clientRef = useRef<GeminiLiveClient | null>(null);
+  const clientRef = useRef<GeminiProxyClient | null>(null);
   const recorderRef = useRef<AudioRecorder | null>(null);
   const streamerRef = useRef<AudioStreamer | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Check browser support
-  const isSupported =
-    typeof window !== 'undefined' && isAudioRecordingSupported() && isAudioPlaybackSupported();
+  // Check browser support (delayed to avoid SSR hydration mismatch)
+  const [isSupported, setIsSupported] = useState(true); // Default true to avoid showing error during SSR
+
+  useEffect(() => {
+    // Check actual support on client side
+    // Using queueMicrotask to avoid synchronous setState warning in effect
+    queueMicrotask(() => {
+      const supported = isAudioRecordingSupported() && isAudioPlaybackSupported();
+      setIsSupported(supported);
+    });
+  }, []);
 
   /**
    * Start the session timer
@@ -130,9 +120,15 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
     // Connection events
     client.on('open', () => {
       startTimer();
+
+      // Trigger AI to start the interview (interviewer introduces themselves first)
+      // Small delay to ensure audio streamer is ready
+      setTimeout(() => {
+        client.sendText('請開始面試，先簡短自我介紹並說明面試流程');
+      }, 500);
     });
 
-    client.on('close', (_code, _reason) => {
+    client.on('close', () => {
       stopTimer();
     });
 
@@ -218,7 +214,8 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
   }, [store]);
 
   /**
-   * Connect to Gemini and start the interview
+   * Connect to Gemini via WebSocket proxy and start the interview
+   * API key stays on server - maximum security
    */
   const connect = useCallback(async () => {
     if (!isSupported) {
@@ -226,7 +223,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       return;
     }
 
-    logger.info('Starting interview session', {
+    logger.info('Starting interview session via proxy', {
       module: 'use-live-api',
       action: 'connect',
       language,
@@ -238,27 +235,17 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
     store.setSessionState('connecting');
 
     try {
-      // Fetch session credentials from server (requires authentication)
-      const credentials = await fetchSessionCredentials();
-
-      logger.debug('Session credentials received', {
-        module: 'use-live-api',
-        action: 'connect',
-        model: credentials.model,
-        expiresAt: credentials.expiresAt,
-      });
-
       // Initialize audio streamer first (needs to be ready before receiving audio)
       streamerRef.current = new AudioStreamer();
       await streamerRef.current.initialize();
       setupStreamerEvents();
 
-      // Initialize Gemini client
-      clientRef.current = new GeminiLiveClient();
+      // Initialize Gemini proxy client (no API key needed on client!)
+      clientRef.current = new GeminiProxyClient();
       setupClientEvents();
 
-      // Connect to Gemini
-      const connectResult = await clientRef.current.connect(credentials.apiKey, {
+      // Connect to Gemini via our secure proxy
+      const connectResult = await clientRef.current.connect({
         systemInstruction: getInterviewerPrompt(language),
         responseModalities: ['AUDIO'],
         inputAudioTranscription: true,
@@ -290,6 +277,18 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
         action: 'connect',
       });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      // Ignore errors caused by React StrictMode unmounting during initialization
+      // These are expected in development mode and the second mount will succeed
+      if (errorMessage.includes('disposed during initialization')) {
+        logger.debug('Ignoring StrictMode unmount during initialization', {
+          module: 'use-live-api',
+          action: 'connect',
+        });
+        return;
+      }
+
       logger.error('Failed to start interview', error as Error, {
         module: 'use-live-api',
         action: 'connect',
@@ -298,9 +297,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       if (error instanceof Error && 'code' in error) {
         store.setError(error as Parameters<typeof store.setError>[0]);
       } else {
-        store.setError(
-          new BadRequestError(error instanceof Error ? error.message : 'Failed to start interview')
-        );
+        store.setError(new BadRequestError(errorMessage || 'Failed to start interview'));
       }
     }
   }, [isSupported, language, store, setupClientEvents, setupRecorderEvents, setupStreamerEvents]);

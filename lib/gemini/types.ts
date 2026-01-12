@@ -72,8 +72,15 @@ export interface GeminiLiveConfig {
 /**
  * Default Gemini configuration
  */
+/**
+ * Live API compatible model - use this for real-time audio streaming
+ * Only this model supports bidiGenerateContent (WebSocket streaming)
+ * @see https://ai.google.dev/gemini-api/docs/models
+ */
+export const LIVE_API_MODEL = 'gemini-2.5-flash-native-audio-preview-12-2025';
+
 export const DEFAULT_GEMINI_CONFIG: Partial<GeminiLiveConfig> = {
-  model: 'gemini-2.0-flash-live-001',
+  model: LIVE_API_MODEL,
   responseModalities: ['AUDIO'],
   inputAudioTranscription: true,
   outputAudioTranscription: true,
