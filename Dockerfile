@@ -22,7 +22,10 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build Next.js
+# Build Next.js (dummy env vars for build-time validation)
+ENV BETTER_AUTH_URL="http://localhost:5555"
+ENV BETTER_AUTH_SECRET="build-time-secret-placeholder"
+ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 RUN pnpm build
 
 # Runner stage
