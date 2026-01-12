@@ -1,5 +1,9 @@
 # HireReady 開發規範
 
+## 專案目的
+
+參加 `https://memu.pro/hackathon/rules/zeabur` 的專案，裡面有提到評分規則跟加分項，開發時請注意
+
 ## 技術棧
 
 - Next.js 16 + TypeScript + HeroUI + Tailwind CSS v4
