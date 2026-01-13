@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VideoOff, User, AlertCircle } from 'lucide-react';
@@ -64,30 +64,27 @@ export function VideoPreview({
 }: VideoPreviewProps) {
   const t = useTranslations('interview.room.video');
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
 
-  // Update stream ref when it changes
+  // Sync video element with stream prop
   useEffect(() => {
-    streamRef.current = stream;
-    // If video element exists and stream changed, update it
-    if (videoRef.current && stream && videoRef.current.srcObject !== stream) {
-      videoRef.current.srcObject = stream;
-      videoRef.current.play()?.catch(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Update srcObject when stream changes
+    if (stream && video.srcObject !== stream) {
+      video.srcObject = stream;
+      video.play()?.catch(() => {
         // Ignore play errors - typically happens during unmount or permission issues
       });
     }
-  }, [stream]);
 
-  // Callback ref for video element - called on mount
-  const handleVideoRef = useCallback((video: HTMLVideoElement | null) => {
-    videoRef.current = video;
-    if (video && streamRef.current && video.srcObject !== streamRef.current) {
-      video.srcObject = streamRef.current;
-      video.play()?.catch(() => {
-        // Ignore play errors
-      });
-    }
-  }, []);
+    // Cleanup: clear srcObject to prevent memory leak
+    return () => {
+      if (video.srcObject) {
+        video.srcObject = null;
+      }
+    };
+  }, [stream]);
 
   return (
     <motion.div
@@ -107,7 +104,7 @@ export function VideoPreview({
             className="h-full w-full"
           >
             <video
-              ref={handleVideoRef}
+              ref={videoRef}
               autoPlay
               playsInline
               muted

@@ -53,27 +53,28 @@ export function InterviewRoom() {
   }, [isMicOn, startMicMonitoring, stopMicMonitoring]);
 
   // Auto-connect to Gemini API on mount (with guard to prevent double connection)
+  // Note: hasConnectedRef is never reset to prevent StrictMode double-connect
   useEffect(() => {
     if (isSupported && !hasConnectedRef.current) {
       hasConnectedRef.current = true;
       connect();
     }
 
-    // Cleanup on unmount
+    // Cleanup on unmount - disconnect but don't reset ref
+    // The ref stays true to prevent StrictMode remount from reconnecting
     return () => {
-      if (hasConnectedRef.current) {
-        disconnect();
-        hasConnectedRef.current = false;
-      }
+      disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSupported]); // Intentionally exclude connect/disconnect to avoid infinite loops
 
-  // Determine which audio level to show:
-  // - When mic is off, always show 0 (muted)
-  // - When connected, use API's visualizerVolume (more accurate with session state)
-  // - When not connected, use local mic monitoring
-  const displayAudioLevel = isMicOn ? (isConnected ? visualizerVolume : micAudioLevel) : 0;
+  // Determine which audio level to show
+  const getDisplayAudioLevel = (): number => {
+    if (!isMicOn) return 0; // Muted
+    if (isConnected) return visualizerVolume; // Use API's volume when connected
+    return micAudioLevel; // Use local mic monitoring when not connected
+  };
+  const displayAudioLevel = getDisplayAudioLevel();
 
   // Format time display
   const formatTime = useCallback((seconds: number) => {

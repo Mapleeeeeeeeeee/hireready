@@ -2,45 +2,11 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-/**
- * Audio Analysis Constants
- *
- * These values are chosen based on Web Audio API best practices and UX requirements:
- */
-
-/**
- * FFT (Fast Fourier Transform) size for frequency analysis.
- * Must be a power of 2 between 32 and 32768.
- * 256 provides 128 frequency bins (fftSize/2), offering a good balance between
- * frequency resolution and performance. Lower values = faster but less detail,
- * higher values = more detail but more CPU intensive.
- */
-export const FFT_SIZE = 256;
-
-/**
- * Smoothing constant for the analyser (0-1).
- * Controls how much the previous analysis frame affects the current one.
- * 0.8 means 80% of the previous value is retained, resulting in smoother
- * transitions that look natural for audio visualizations without being sluggish.
- */
-export const SMOOTHING_TIME_CONSTANT = 0.8;
-
-/**
- * RMS normalization divisor.
- * Web Audio API getByteFrequencyData returns values 0-255 (Uint8Array).
- * The RMS (Root Mean Square) of a full-scale signal would be ~180 (255/sqrt(2)).
- * We use 128 (half of max) to provide headroom and make typical speech/audio
- * register in a comfortable 0.3-0.7 range rather than peaking too easily.
- */
-export const RMS_NORMALIZATION_DIVISOR = 128;
-
-/**
- * Minimum change threshold for state updates.
- * Only update the React state when the audio level changes by more than this amount.
- * This debouncing prevents excessive re-renders while still providing smooth visual feedback.
- * 0.02 (2% change) is imperceptible visually but significantly reduces render frequency.
- */
-export const LEVEL_CHANGE_THRESHOLD = 0.02;
+// Audio Analysis Constants
+export const FFT_SIZE = 256; // Power of 2, balance between resolution and performance
+export const SMOOTHING_TIME_CONSTANT = 0.8; // 0-1, higher = smoother transitions
+export const RMS_NORMALIZATION_DIVISOR = 128; // Normalize RMS to 0-1 range for typical audio
+export const LEVEL_CHANGE_THRESHOLD = 0.02; // Debounce threshold to reduce re-renders
 
 interface UseAudioLevelResult {
   /** Current audio level (0-1) */

@@ -307,6 +307,19 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
   }, [isSupported, language, store, setupClientEvents, setupRecorderEvents, setupStreamerEvents]);
 
   /**
+   * Clean up all resources (shared between disconnect and unmount)
+   */
+  const cleanup = useCallback(() => {
+    stopTimer();
+    recorderRef.current?.dispose();
+    recorderRef.current = null;
+    streamerRef.current?.dispose();
+    streamerRef.current = null;
+    clientRef.current?.dispose();
+    clientRef.current = null;
+  }, [stopTimer]);
+
+  /**
    * Disconnect and clean up
    */
   const disconnect = useCallback(() => {
@@ -314,30 +327,17 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       module: 'use-live-api',
       action: 'disconnect',
     });
-
-    stopTimer();
-
-    // Stop recorder
-    recorderRef.current?.dispose();
-    recorderRef.current = null;
-
-    // Stop streamer
-    streamerRef.current?.dispose();
-    streamerRef.current = null;
-
-    // Disconnect client
-    clientRef.current?.dispose();
-    clientRef.current = null;
-
+    cleanup();
     store.setSessionState('idle');
-  }, [store, stopTimer]);
+  }, [store, cleanup]);
 
   /**
    * Toggle microphone
+   * Note: We toggle store first, then sync recorder via the useEffect below
    */
   const toggleMic = useCallback(() => {
     store.toggleMic();
-    recorderRef.current?.setMuted(!store.isMicOn);
+    // Recorder sync is handled by the useEffect that watches store.isMicOn
   }, [store]);
 
   /**
@@ -355,31 +355,11 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
   }, [autoConnect, connect]);
 
   // Cleanup on unmount
-  // Note: Using refs to avoid stale closure issues with cleanup
-
   useEffect(() => {
-    const mountedRef = { current: true };
-
     return () => {
-      if (!mountedRef.current) return;
-      mountedRef.current = false;
-
-      // Inline cleanup to avoid dependency on disconnect
-      stopTimer();
-
-      // Stop recorder
-      recorderRef.current?.dispose();
-      recorderRef.current = null;
-
-      // Stop streamer
-      streamerRef.current?.dispose();
-      streamerRef.current = null;
-
-      // Disconnect client
-      clientRef.current?.dispose();
-      clientRef.current = null;
+      cleanup();
     };
-  }, [stopTimer]);
+  }, [cleanup]);
 
   // Sync mic state with recorder
   useEffect(() => {
