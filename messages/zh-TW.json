@@ -43,6 +43,58 @@
     "endInterview": "結束面試",
     "permissionRequired": "需要麥克風和攝影機權限",
     "grantPermission": "授予權限",
+    "setup": {
+      "title": "面試設定",
+      "subtitle": "開始前先設定您的面試偏好",
+      "languageTitle": "面試語言",
+      "languageDescription": "選擇您的面試對話語言",
+      "languages": {
+        "zhTW": "繁體中文",
+        "en": "English"
+      },
+      "jdTitle": "職缺描述",
+      "jdDescription": "新增職缺描述可以讓面試問題更貼近您想應徵的職位",
+      "optional": "選填",
+      "startButton": "開始面試",
+      "startHint": "即使沒有新增職缺描述也可以開始面試",
+      "jd": {
+        "inputMode": "輸入方式",
+        "urlTab": "網址",
+        "textTab": "手動輸入",
+        "urlDescription": "貼上 104 或 1111 的職缺網址，自動解析職缺內容",
+        "urlPlaceholder": "https://www.104.com.tw/job/xxxxx",
+        "parse": "解析",
+        "parsing": "解析中...",
+        "supportedSites": "支援網站",
+        "textDescription": "手動輸入您想練習的職位資訊",
+        "jobTitle": "職位名稱",
+        "jobTitlePlaceholder": "例如：前端工程師",
+        "company": "公司名稱",
+        "companyPlaceholder": "例如：ABC 科技公司",
+        "description": "職缺描述",
+        "descriptionPlaceholder": "在此貼上或輸入職缺描述與要求...",
+        "confirm": "確認",
+        "unknownCompany": "未知公司",
+        "viewOriginal": "查看原始職缺",
+        "clear": "清除",
+        "location": "工作地點",
+        "salary": "薪資範圍",
+        "descriptionLabel": "工作內容",
+        "requirementsLabel": "職位要求",
+        "moreRequirements": "項更多要求",
+        "jdReady": "職缺描述已準備好用於面試",
+        "sources": {
+          "manual": "手動輸入"
+        },
+        "errors": {
+          "urlRequired": "請輸入職缺網址",
+          "unsupportedUrl": "僅支援 104.com.tw 和 1111.com.tw 的網址",
+          "parseFailed": "無法解析職缺內容，請重試或使用手動輸入",
+          "titleRequired": "請輸入職位名稱",
+          "descriptionRequired": "請輸入職缺描述"
+        }
+      }
+    },
     "room": {
       "liveSession": "即時面試",
       "connected": "已連線",

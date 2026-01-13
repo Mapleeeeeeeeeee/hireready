@@ -8,6 +8,7 @@ import { devtools } from 'zustand/middleware';
 import { logger } from '@/lib/utils/logger';
 import type { SessionState, TranscriptEntry } from '@/lib/gemini/types';
 import type { AppError } from '@/lib/utils/errors';
+import type { JobDescription } from '@/lib/jd/types';
 
 // ============================================================
 // Types
@@ -31,6 +32,9 @@ export interface InterviewStoreState {
   // Interview metadata
   language: 'en' | 'zh-TW';
   elapsedSeconds: number;
+
+  // Job description (optional)
+  jobDescription: JobDescription | null;
 
   // Error state
   lastError: AppError | null;
@@ -56,6 +60,7 @@ export interface InterviewStoreActions {
   // Interview metadata actions
   setLanguage: (language: 'en' | 'zh-TW') => void;
   incrementTimer: () => void;
+  setJobDescription: (jd: JobDescription | null) => void;
 
   // Error actions
   setError: (error: AppError | null) => void;
@@ -81,6 +86,7 @@ const initialState: InterviewStoreState = {
   interimAiTranscript: '',
   language: 'zh-TW',
   elapsedSeconds: 0,
+  jobDescription: null,
   lastError: null,
 };
 
@@ -175,6 +181,16 @@ export const useInterviewStore = create<InterviewStore>()(
 
       incrementTimer: () => {
         set((state) => ({ elapsedSeconds: state.elapsedSeconds + 1 }));
+      },
+
+      setJobDescription: (jd) => {
+        logger.info('Job description updated', {
+          module: 'interview-store',
+          action: 'setJobDescription',
+          hasJd: jd !== null,
+          title: jd?.title,
+        });
+        set({ jobDescription: jd });
       },
 
       // Error actions

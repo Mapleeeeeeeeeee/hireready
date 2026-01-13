@@ -16,6 +16,7 @@ const createMockStore = () => ({
   elapsedSeconds: 0,
   lastError: null as Error | null,
   language: 'zh-TW',
+  jobDescription: null as null | { title: string; company: string; description: string },
   reset: vi.fn(),
   setLanguage: vi.fn(),
   setSessionState: vi.fn(),
@@ -28,20 +29,29 @@ const createMockStore = () => ({
   clearInterimTranscripts: vi.fn(),
   incrementTimer: vi.fn(),
   toggleMic: vi.fn(),
+  setJobDescription: vi.fn(),
 });
 
 let mockStore = createMockStore();
 
 // Mock dependencies
-vi.mock('@/lib/stores/interview-store', () => ({
-  useInterviewStore: (selector?: (state: typeof mockStore) => unknown) => {
+vi.mock('@/lib/stores/interview-store', () => {
+  const useInterviewStoreMock = (
+    selector?: (state: ReturnType<typeof createMockStore>) => unknown
+  ) => {
     if (selector) {
       return selector(mockStore);
     }
     return mockStore;
-  },
-  selectVisualizerVolume: () => 0,
-}));
+  };
+  // Add getState for direct store access
+  useInterviewStoreMock.getState = () => mockStore;
+
+  return {
+    useInterviewStore: useInterviewStoreMock,
+    selectVisualizerVolume: () => 0,
+  };
+});
 
 // Mock audio support functions
 const mockIsAudioRecordingSupported = vi.fn().mockReturnValue(true);
@@ -98,7 +108,7 @@ vi.mock('@/lib/gemini/gemini-proxy-client', () => ({
 }));
 
 vi.mock('@/lib/gemini/prompts', () => ({
-  getInterviewerPrompt: vi.fn().mockReturnValue('system prompt'),
+  getInterviewerPromptWithJd: vi.fn().mockReturnValue('system prompt'),
   getInterviewStartInstruction: vi.fn().mockReturnValue('start instruction'),
 }));
 

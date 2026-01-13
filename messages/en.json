@@ -43,6 +43,58 @@
     "endInterview": "End Interview",
     "permissionRequired": "Microphone and camera permission required",
     "grantPermission": "Grant Permission",
+    "setup": {
+      "title": "Interview Setup",
+      "subtitle": "Configure your interview settings before starting",
+      "languageTitle": "Interview Language",
+      "languageDescription": "Choose the language for your interview session",
+      "languages": {
+        "zhTW": "Chinese (Traditional)",
+        "en": "English"
+      },
+      "jdTitle": "Job Description",
+      "jdDescription": "Add a job description to get more relevant interview questions tailored to the position",
+      "optional": "optional",
+      "startButton": "Start Interview",
+      "startHint": "You can start the interview even without adding a job description",
+      "jd": {
+        "inputMode": "Input Mode",
+        "urlTab": "URL",
+        "textTab": "Manual Input",
+        "urlDescription": "Paste a job listing URL from 104 or 1111 to automatically parse the job description",
+        "urlPlaceholder": "https://www.104.com.tw/job/xxxxx",
+        "parse": "Parse",
+        "parsing": "Parsing...",
+        "supportedSites": "Supported sites",
+        "textDescription": "Manually enter the job information you want to practice for",
+        "jobTitle": "Job Title",
+        "jobTitlePlaceholder": "e.g., Frontend Engineer",
+        "company": "Company",
+        "companyPlaceholder": "e.g., ABC Tech",
+        "description": "Job Description",
+        "descriptionPlaceholder": "Paste or type the job description and requirements here...",
+        "confirm": "Confirm",
+        "unknownCompany": "Unknown Company",
+        "viewOriginal": "View original",
+        "clear": "Clear",
+        "location": "Location",
+        "salary": "Salary",
+        "descriptionLabel": "Job Description",
+        "requirementsLabel": "Requirements",
+        "moreRequirements": "more requirements",
+        "jdReady": "Job description ready for interview",
+        "sources": {
+          "manual": "Manual"
+        },
+        "errors": {
+          "urlRequired": "Please enter a job listing URL",
+          "unsupportedUrl": "Only 104.com.tw and 1111.com.tw URLs are supported",
+          "parseFailed": "Failed to parse the job listing. Please try again or use manual input.",
+          "titleRequired": "Job title is required",
+          "descriptionRequired": "Job description is required"
+        }
+      }
+    },
     "room": {
       "liveSession": "LIVE SESSION",
       "connected": "Connected",
