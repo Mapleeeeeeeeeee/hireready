@@ -14,7 +14,11 @@ import {
 import { GeminiProxyClient } from '@/lib/gemini/gemini-proxy-client';
 import { AudioRecorder, isAudioRecordingSupported } from '@/lib/gemini/audio-recorder';
 import { AudioStreamer, isAudioPlaybackSupported } from '@/lib/gemini/audio-streamer';
-import { getInterviewerPrompt, type SupportedLanguage } from '@/lib/gemini/prompts';
+import {
+  getInterviewerPrompt,
+  getInterviewStartInstruction,
+  type SupportedLanguage,
+} from '@/lib/gemini/prompts';
 import { createTranscriptEntry, type SessionState } from '@/lib/gemini/types';
 import { logger } from '@/lib/utils/logger';
 import { BadRequestError } from '@/lib/utils/errors';
@@ -124,7 +128,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       // Trigger AI to start the interview (interviewer introduces themselves first)
       // Small delay to ensure audio streamer is ready
       setTimeout(() => {
-        client.sendText('請開始面試，先簡短自我介紹並說明面試流程');
+        client.sendText(getInterviewStartInstruction(language));
       }, 500);
     });
 
@@ -167,7 +171,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
     client.on('interrupted', () => {
       streamerRef.current?.fadeOut();
     });
-  }, [store, startTimer, stopTimer]);
+  }, [language, store, startTimer, stopTimer]);
 
   /**
    * Setup event listeners for the audio recorder

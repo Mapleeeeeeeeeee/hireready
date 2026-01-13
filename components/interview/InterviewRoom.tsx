@@ -3,11 +3,12 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import { AudioVisualizer } from './AudioVisualizer';
 import { ControlBar } from './ControlBar';
+import { VideoPreview } from './VideoPreview';
 import { Activity, AlertCircle, Loader2 } from 'lucide-react';
 import { useLiveApi } from '@/lib/hooks/use-live-api';
-import type { SessionState } from '@/lib/gemini/types';
+import { useVideoPreview } from '@/lib/hooks/use-video-preview';
+import { useAudioLevel } from '@/lib/hooks/use-audio-level';
 import type { SupportedLanguage } from '@/lib/gemini/prompts';
 
 export function InterviewRoom() {
@@ -32,7 +33,26 @@ export function InterviewRoom() {
     toggleMic,
   } = useLiveApi({ language: locale });
 
-  // Auto-connect on mount (with guard to prevent double connection)
+  // Use the Video Preview hook for self-viewing
+  const { isVideoOn, stream: videoStream, toggleVideo, error: videoError } = useVideoPreview();
+
+  // Use the Audio Level hook for real-time microphone visualization
+  const {
+    audioLevel: micAudioLevel,
+    start: startMicMonitoring,
+    stop: stopMicMonitoring,
+  } = useAudioLevel();
+  // Sync microphone monitoring with isMicOn state
+  // Start/stop based on mic toggle button
+  useEffect(() => {
+    if (isMicOn) {
+      startMicMonitoring();
+    } else {
+      stopMicMonitoring();
+    }
+  }, [isMicOn, startMicMonitoring, stopMicMonitoring]);
+
+  // Auto-connect to Gemini API on mount (with guard to prevent double connection)
   useEffect(() => {
     if (isSupported && !hasConnectedRef.current) {
       hasConnectedRef.current = true;
@@ -49,6 +69,12 @@ export function InterviewRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSupported]); // Intentionally exclude connect/disconnect to avoid infinite loops
 
+  // Determine which audio level to show:
+  // - When mic is off, always show 0 (muted)
+  // - When connected, use API's visualizerVolume (more accurate with session state)
+  // - When not connected, use local mic monitoring
+  const displayAudioLevel = isMicOn ? (isConnected ? visualizerVolume : micAudioLevel) : 0;
+
   // Format time display
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -61,14 +87,6 @@ export function InterviewRoom() {
     disconnect();
     router.push('/');
   }, [disconnect, router]);
-
-  // Get state label for display
-  const getStateLabel = useCallback(
-    (state: SessionState): string => {
-      return t(`states.${state}`);
-    },
-    [t]
-  );
 
   // Get connection status display
   const getConnectionStatus = useCallback(() => {
@@ -128,9 +146,7 @@ export function InterviewRoom() {
       <header className="text-charcoal/60 z-10 flex w-full items-center justify-between text-sm font-medium tracking-wide">
         <div className="flex items-center gap-2">
           <div
-            className={`h-2 w-2 rounded-full ${
-              isConnected ? 'bg-terracotta animate-pulse' : 'bg-gray-400'
-            }`}
+            className={`h-2 w-2 rounded-full ${isConnected ? 'bg-terracotta animate-pulse' : 'bg-gray-400'}`}
           />
           {t('liveSession')} • {formatTime(elapsedSeconds)}
         </div>
@@ -149,12 +165,14 @@ export function InterviewRoom() {
         </div>
       )}
 
-      {/* Main Visualizer Area */}
-      <main className="z-10 flex flex-1 flex-col items-center justify-center">
-        <AudioVisualizer
-          state={sessionState}
-          audioLevel={visualizerVolume}
-          stateLabel={getStateLabel(sessionState)}
+      {/* Main Content Area - Video Preview (Google Meet style) */}
+      <main className="z-10 flex w-full flex-1 items-center justify-center p-4">
+        <VideoPreview
+          stream={videoStream}
+          isVideoOn={isVideoOn}
+          sessionState={sessionState}
+          audioLevel={displayAudioLevel}
+          error={videoError}
         />
       </main>
 
@@ -162,9 +180,9 @@ export function InterviewRoom() {
       <div className="z-10 mb-8">
         <ControlBar
           isMicOn={isMicOn}
-          isVideoOn={false}
+          isVideoOn={isVideoOn}
           onToggleMic={toggleMic}
-          onToggleVideo={() => {}} // Video not implemented yet
+          onToggleVideo={toggleVideo}
           onEndCall={handleEndCall}
           labels={{
             muteMic: t('muteMic'),

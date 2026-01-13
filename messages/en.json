@@ -63,6 +63,20 @@
         "speaking": "Speaking",
         "processing": "Processing",
         "error": "Error"
+      },
+      "video": {
+        "cameraOff": "Camera Off",
+        "cameraOffHint": "Click button below to turn on camera",
+        "loadingCamera": "Loading camera...",
+        "you": "You",
+        "live": "LIVE"
+      },
+      "ai": {
+        "name": "Alex (Interviewer)",
+        "speaking": "Speaking...",
+        "thinking": "Thinking...",
+        "listening": "Listening...",
+        "ready": "Ready"
       }
     }
   },

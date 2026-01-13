@@ -127,3 +127,19 @@ export const openingMessages: Record<SupportedLanguage, string> = {
 export function getOpeningMessage(language: SupportedLanguage): string {
   return openingMessages[language];
 }
+
+/**
+ * Instructions to trigger AI to start the interview
+ * These are sent as the first user message to prompt the AI
+ */
+export const interviewStartInstructions: Record<SupportedLanguage, string> = {
+  'zh-TW': '請開始面試，先簡短自我介紹並說明面試流程',
+  en: 'Please start the interview by introducing yourself briefly and explaining the interview process',
+};
+
+/**
+ * Get the interview start instruction for a specific language
+ */
+export function getInterviewStartInstruction(language: SupportedLanguage): string {
+  return interviewStartInstructions[language];
+}
