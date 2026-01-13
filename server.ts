@@ -106,16 +106,17 @@ app.prepare().then(() => {
               systemInstructionLength: systemInstruction?.length ?? 0,
             });
 
-            // Log system instruction content (INFO level for visibility)
+            // Log system instruction metadata (safe for production)
             if (systemInstruction) {
-              logger.info('System instruction configured', {
+              logger.debug('System instruction configured', {
                 ...LOG_CONTEXT,
                 action: 'system-instruction',
                 length: systemInstruction.length,
                 hasJdContext:
                   systemInstruction.includes('目標職缺') ||
                   systemInstruction.includes('Target Position'),
-                preview: systemInstruction.slice(-300), // Show last 300 chars (JD context part)
+                // Only log preview in development to avoid leaking sensitive JD content
+                ...(dev && { preview: systemInstruction.slice(-300) }),
               });
             }
 
