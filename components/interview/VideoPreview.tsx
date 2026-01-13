@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VideoOff, User, AlertCircle } from 'lucide-react';
@@ -64,26 +64,38 @@ export function VideoPreview({
 }: VideoPreviewProps) {
   const t = useTranslations('interview.room.video');
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  // Sync video element with stream prop
+  // Keep stream ref in sync
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    streamRef.current = stream;
+  }, [stream]);
 
-    // Update srcObject when stream changes
-    if (stream && video.srcObject !== stream) {
-      video.srcObject = stream;
-      video.play()?.catch(() => {
-        // Ignore play errors - typically happens during unmount or permission issues
-      });
+  // Callback ref - called when video element mounts/unmounts
+  const setVideoRef = useCallback((video: HTMLVideoElement | null) => {
+    // Cleanup previous video element
+    if (videoRef.current && videoRef.current !== video) {
+      videoRef.current.srcObject = null;
     }
 
-    // Cleanup: clear srcObject to prevent memory leak
-    return () => {
-      if (video.srcObject) {
-        video.srcObject = null;
-      }
-    };
+    videoRef.current = video;
+
+    // Set srcObject when video element mounts
+    if (video && streamRef.current) {
+      video.srcObject = streamRef.current;
+      video.play()?.catch(() => {
+        // Ignore play errors
+      });
+    }
+  }, []);
+
+  // Update srcObject when stream changes (for already mounted video)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && stream && video.srcObject !== stream) {
+      video.srcObject = stream;
+      video.play()?.catch(() => {});
+    }
   }, [stream]);
 
   return (
@@ -104,7 +116,7 @@ export function VideoPreview({
             className="h-full w-full"
           >
             <video
-              ref={videoRef}
+              ref={setVideoRef}
               autoPlay
               playsInline
               muted
