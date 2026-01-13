@@ -127,18 +127,24 @@ export default function InterviewSetupPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="mb-4 flex items-center gap-2">
-              <FileText className="text-terracotta h-5 w-5" />
-              <h2 className="text-charcoal text-lg font-semibold">{t('jdTitle')}</h2>
-              <span className="text-charcoal/40 text-sm">({t('optional')})</span>
-            </div>
-            <p className="text-charcoal/60 mb-4 text-sm">{t('jdDescription')}</p>
+            <Card className="border-warm-gray/20 border bg-white/60 shadow-sm backdrop-blur-sm">
+              <CardBody className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <FileText className="text-terracotta h-5 w-5" />
+                  <h2 className="text-charcoal text-lg font-semibold">{t('jdTitle')}</h2>
+                  <span className="bg-terracotta/10 text-terracotta rounded-full px-2 py-0.5 text-xs font-medium">
+                    {t('optional')}
+                  </span>
+                </div>
+                <p className="text-charcoal/60 mb-4 text-sm">{t('jdDescription')}</p>
 
-            {jobDescription ? (
-              <JdPreview jobDescription={jobDescription} onClear={handleJdClear} />
-            ) : (
-              <JdInput onParsed={handleJdParsed} />
-            )}
+                {jobDescription ? (
+                  <JdPreview jobDescription={jobDescription} onClear={handleJdClear} />
+                ) : (
+                  <JdInput onParsed={handleJdParsed} />
+                )}
+              </CardBody>
+            </Card>
           </motion.div>
 
           {/* Start Interview Button */}

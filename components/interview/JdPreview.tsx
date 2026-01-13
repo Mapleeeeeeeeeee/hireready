@@ -85,7 +85,7 @@ export function JdPreview({ jobDescription, onClear }: JdPreviewProps) {
     description.length > 200 ? `${description.substring(0, 200)}...` : description;
 
   return (
-    <Card className="border-warm-gray/20 w-full border bg-white/80 shadow-sm backdrop-blur-sm">
+    <Card className="border-terracotta/30 w-full border-2 border-dashed bg-white/50 shadow-none">
       <CardHeader className="flex items-start justify-between gap-4 pb-2">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">

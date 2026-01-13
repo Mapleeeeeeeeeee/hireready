@@ -94,15 +94,30 @@ app.prepare().then(() => {
               throw new Error('Model name is required');
             }
 
-            // Log only non-sensitive metadata
+            // Log connection details including system instruction
+            const systemInstruction = message.config?.systemInstruction;
             logger.debug('Connecting to Gemini', {
               ...LOG_CONTEXT,
               action: 'connect',
               model: message.model,
               responseModalities: message.config?.responseModalities,
               voiceName: message.config?.voiceName,
-              hasSystemInstruction: !!message.config?.systemInstruction,
+              hasSystemInstruction: !!systemInstruction,
+              systemInstructionLength: systemInstruction?.length ?? 0,
             });
+
+            // Log system instruction content (INFO level for visibility)
+            if (systemInstruction) {
+              logger.info('System instruction configured', {
+                ...LOG_CONTEXT,
+                action: 'system-instruction',
+                length: systemInstruction.length,
+                hasJdContext:
+                  systemInstruction.includes('目標職缺') ||
+                  systemInstruction.includes('Target Position'),
+                preview: systemInstruction.slice(-300), // Show last 300 chars (JD context part)
+              });
+            }
 
             const ai = new GoogleGenAI({ apiKey });
 
@@ -137,48 +152,7 @@ app.prepare().then(() => {
                     clientWs.send(JSON.stringify({ type: 'error', message: error.message }));
                   },
                   onmessage: (serverMessage: LiveServerMessage) => {
-                    // Debug: log message structure (non-sensitive metadata only)
-                    const msgKeys = Object.keys(serverMessage);
-                    logger.debug('Gemini message received', {
-                      ...LOG_CONTEXT,
-                      action: 'gemini-message',
-                      messageKeys: msgKeys,
-                    });
-
-                    // Check for audio data (log metadata only, not content)
-                    const sc = serverMessage as {
-                      serverContent?: { modelTurn?: { parts?: unknown[] } };
-                    };
-                    if (sc.serverContent?.modelTurn?.parts) {
-                      const partsMetadata = sc.serverContent.modelTurn.parts.map(
-                        (part: unknown, i: number) => {
-                          const p = part as {
-                            inlineData?: { data?: string; mimeType?: string };
-                            text?: string;
-                          };
-                          if (p.inlineData?.data) {
-                            return {
-                              index: i,
-                              type: 'audio',
-                              dataLength: p.inlineData.data.length,
-                              mimeType: p.inlineData.mimeType,
-                            };
-                          }
-                          if (p.text) {
-                            return { index: i, type: 'text', textLength: p.text.length };
-                          }
-                          return { index: i, type: 'unknown' };
-                        }
-                      );
-                      logger.debug('Gemini message parts', {
-                        ...LOG_CONTEXT,
-                        action: 'gemini-parts',
-                        partsCount: sc.serverContent.modelTurn.parts.length,
-                        partsMetadata,
-                      });
-                    }
-
-                    // Forward Gemini messages to client
+                    // Forward Gemini messages to client (no per-message logging to avoid spam)
                     clientWs.send(JSON.stringify({ type: 'gemini_message', data: serverMessage }));
                   },
                 },

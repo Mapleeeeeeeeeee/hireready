@@ -177,14 +177,7 @@ export class AudioStreamer {
    * Add PCM16 audio data to the playback queue
    */
   addPCM16(data: ArrayBuffer): void {
-    logger.info('addPCM16 called', {
-      module: 'audio-streamer',
-      action: 'addPCM16',
-      dataByteLength: data.byteLength,
-      hasAudioContext: !!this.audioContext,
-      audioContextState: this.audioContext?.state,
-      hasGainNode: !!this.gainNode,
-    });
+    // Removed verbose per-chunk logging to avoid spam
 
     if (!this.audioContext || !this.gainNode) {
       logger.warn('Audio streamer not initialized', {
@@ -197,23 +190,11 @@ export class AudioStreamer {
     // Convert PCM16 to Float32
     const float32Data = this.pcm16ToFloat32(data);
 
-    logger.info('Converted to Float32', {
-      module: 'audio-streamer',
-      action: 'addPCM16',
-      float32Length: float32Data.length,
-      sampleValues: [float32Data[0], float32Data[100], float32Data[float32Data.length - 1]],
-    });
-
     // Add to queue
     this.audioQueue.push(float32Data);
 
     // Start playback if not already playing
     if (!this._isPlaying) {
-      logger.info('Starting playback', {
-        module: 'audio-streamer',
-        action: 'addPCM16',
-        queueLength: this.audioQueue.length,
-      });
       this.startPlayback();
     }
   }

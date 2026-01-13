@@ -53,16 +53,16 @@ export function InterviewRoom() {
   }, [isMicOn, startMicMonitoring, stopMicMonitoring]);
 
   // Auto-connect to Gemini API on mount (with guard to prevent double connection)
-  // Note: hasConnectedRef is never reset to prevent StrictMode double-connect
   useEffect(() => {
     if (isSupported && !hasConnectedRef.current) {
       hasConnectedRef.current = true;
       connect();
     }
 
-    // Cleanup on unmount - disconnect but don't reset ref
-    // The ref stays true to prevent StrictMode remount from reconnecting
+    // Cleanup on unmount - reset ref to allow reconnection on remount
+    // This is necessary for React StrictMode which unmounts and remounts
     return () => {
+      hasConnectedRef.current = false;
       disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

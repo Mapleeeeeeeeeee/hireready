@@ -258,8 +258,19 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
 
       // Connect to Gemini via our secure proxy
       // Use JD-enhanced prompt if job description is available
+      const systemInstruction = getInterviewerPromptWithJd(language, jobDescription);
+
+      logger.debug('Connecting to Gemini with system instruction', {
+        module: 'use-live-api',
+        action: 'connect',
+        language,
+        hasJobDescription: jobDescription !== null,
+        jobDescriptionTitle: jobDescription?.title,
+        systemInstructionLength: systemInstruction.length,
+      });
+
       const connectResult = await clientRef.current.connect({
-        systemInstruction: getInterviewerPromptWithJd(language, jobDescription),
+        systemInstruction,
         responseModalities: ['AUDIO'],
         inputAudioTranscription: true,
         outputAudioTranscription: true,

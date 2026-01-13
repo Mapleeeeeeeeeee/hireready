@@ -34,7 +34,10 @@ interface Job104ApiResponse {
       specialty?: Array<{ description?: string }>;
       skill?: Array<{ description?: string }>;
       certificate?: Array<{ description?: string }>;
-      language?: Array<{ language?: string; ability?: string }>;
+      language?: Array<{
+        language?: string;
+        ability?: string | { description?: string };
+      }>;
       workExp?: string;
       edu?: string;
       major?: Array<{ description?: string }>;
@@ -181,7 +184,10 @@ export class Provider104 extends BaseJDProvider {
 
     if (condition.language?.length) {
       const languages = condition.language
-        .map((l) => `${l.language} (${l.ability})`)
+        .map((l) => {
+          const ability = typeof l.ability === 'object' ? l.ability?.description : l.ability;
+          return ability ? `${l.language} (${ability})` : l.language;
+        })
         .filter(Boolean)
         .join(', ');
       if (languages) {

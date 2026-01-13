@@ -5,6 +5,7 @@
 
 import type { JobDescription } from '@/lib/jd/types';
 import { hasJobDescriptionContent } from '@/lib/jd/types';
+import { logger } from '@/lib/utils/logger';
 
 export type SupportedLanguage = 'en' | 'zh-TW';
 
@@ -253,9 +254,35 @@ export function getInterviewerPromptWithJd(
   const basePrompt = interviewerPrompts[language];
 
   if (!hasJobDescriptionContent(jobDescription)) {
+    logger.debug('Building interviewer prompt without JD context', {
+      module: 'prompts',
+      action: 'getInterviewerPromptWithJd',
+      language,
+      hasJd: false,
+    });
     return basePrompt;
   }
 
   const jdContext = generateJdContextPrompt(jobDescription!, language);
-  return `${basePrompt}\n\n${jdContext}`;
+  const fullPrompt = `${basePrompt}\n\n${jdContext}`;
+
+  logger.debug('Building interviewer prompt with JD context', {
+    module: 'prompts',
+    action: 'getInterviewerPromptWithJd',
+    language,
+    hasJd: true,
+    jdTitle: jobDescription!.title,
+    jdCompany: jobDescription!.company,
+    jdContextLength: jdContext.length,
+    fullPromptLength: fullPrompt.length,
+  });
+
+  // Log full prompt content in development
+  logger.debug('Full system prompt content', {
+    module: 'prompts',
+    action: 'getInterviewerPromptWithJd',
+    promptContent: fullPrompt,
+  });
+
+  return fullPrompt;
 }
