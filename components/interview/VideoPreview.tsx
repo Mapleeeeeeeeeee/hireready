@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VideoOff, User, AlertCircle } from 'lucide-react';
 import type { SessionState } from '@/lib/gemini/types';
+import { CaptionOverlay } from './CaptionOverlay';
 
 interface VideoPreviewProps {
   /** The media stream to display */
@@ -19,6 +20,10 @@ interface VideoPreviewProps {
   error?: Error | null;
   /** Optional class name for additional styling */
   className?: string;
+  /** Whether AI captions are enabled */
+  isCaptionOn?: boolean;
+  /** AI's interim transcript */
+  interimAiTranscript?: string;
 }
 
 /**
@@ -56,11 +61,12 @@ function AudioIndicator({ audioLevel }: { audioLevel: number }) {
 export function VideoPreview({
   stream,
   isVideoOn,
-  // sessionState is available for future audio visualization enhancements
-  sessionState: _sessionState = 'idle',
+  sessionState = 'idle',
   audioLevel = 0,
   error,
   className = '',
+  isCaptionOn = false,
+  interimAiTranscript = '',
 }: VideoPreviewProps) {
   const t = useTranslations('interview.room.video');
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -168,6 +174,13 @@ export function VideoPreview({
           <AudioIndicator audioLevel={audioLevel} />
         </div>
       </div>
+
+      {/* Caption Overlay */}
+      <CaptionOverlay
+        isOn={isCaptionOn}
+        interimAiText={interimAiTranscript}
+        sessionState={sessionState}
+      />
     </motion.div>
   );
 }

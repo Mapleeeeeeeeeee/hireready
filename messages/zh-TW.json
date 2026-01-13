@@ -129,7 +129,8 @@
         "thinking": "思考中...",
         "listening": "聆聽中...",
         "ready": "準備中"
-      }
+      },
+      "caption": "AI 字幕"
     }
   },
   "auth": {

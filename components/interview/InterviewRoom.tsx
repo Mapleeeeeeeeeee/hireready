@@ -9,6 +9,7 @@ import { Activity, AlertCircle, Loader2 } from 'lucide-react';
 import { useLiveApi } from '@/lib/hooks/use-live-api';
 import { useVideoPreview } from '@/lib/hooks/use-video-preview';
 import { useAudioLevel } from '@/lib/hooks/use-audio-level';
+import { useInterviewStore } from '@/lib/stores/interview-store';
 import type { SupportedLanguage } from '@/lib/gemini/prompts';
 
 export function InterviewRoom() {
@@ -35,6 +36,11 @@ export function InterviewRoom() {
 
   // Use the Video Preview hook for self-viewing
   const { isVideoOn, stream: videoStream, toggleVideo, error: videoError } = useVideoPreview();
+
+  // Caption state from store
+  const isCaptionOn = useInterviewStore((state) => state.isCaptionOn);
+  const toggleCaption = useInterviewStore((state) => state.toggleCaption);
+  const interimAiTranscript = useInterviewStore((state) => state.interimAiTranscript);
 
   // Use the Audio Level hook for real-time microphone visualization
   const {
@@ -174,6 +180,8 @@ export function InterviewRoom() {
           sessionState={sessionState}
           audioLevel={displayAudioLevel}
           error={videoError}
+          isCaptionOn={isCaptionOn}
+          interimAiTranscript={interimAiTranscript}
         />
       </main>
 
@@ -185,12 +193,15 @@ export function InterviewRoom() {
           onToggleMic={toggleMic}
           onToggleVideo={toggleVideo}
           onEndCall={handleEndCall}
+          isCaptionOn={isCaptionOn}
+          onToggleCaption={toggleCaption}
           labels={{
             muteMic: t('muteMic'),
             unmuteMic: t('unmuteMic'),
             turnOffCamera: t('turnOffCamera'),
             turnOnCamera: t('turnOnCamera'),
             endCall: t('endCall'),
+            caption: t('caption'),
           }}
         />
       </div>

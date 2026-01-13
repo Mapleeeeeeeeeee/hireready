@@ -3,6 +3,7 @@
 import { Button, Tooltip } from '@heroui/react';
 import { motion } from 'framer-motion';
 import { Mic, MicOff, Video, VideoOff, PhoneOff } from 'lucide-react';
+import { CaptionButton } from './CaptionButton';
 
 interface ControlBarProps {
   isMicOn: boolean;
@@ -10,12 +11,15 @@ interface ControlBarProps {
   onToggleMic: () => void;
   onToggleVideo: () => void;
   onEndCall: () => void;
+  isCaptionOn: boolean;
+  onToggleCaption: () => void;
   labels: {
     muteMic: string;
     unmuteMic: string;
     turnOffCamera: string;
     turnOnCamera: string;
     endCall: string;
+    caption: string;
   };
 }
 
@@ -25,6 +29,8 @@ export function ControlBar({
   onToggleMic,
   onToggleVideo,
   onEndCall,
+  isCaptionOn,
+  onToggleCaption,
   labels,
 }: ControlBarProps) {
   return (
@@ -48,6 +54,8 @@ export function ControlBar({
         inactiveIcon={<VideoOff className="h-5 w-5" />}
         label={isVideoOn ? labels.turnOffCamera : labels.turnOnCamera}
       />
+
+      <CaptionButton isOn={isCaptionOn} onToggle={onToggleCaption} label={labels.caption} />
 
       <div className="bg-warm-gray/20 h-6 w-px" />
 

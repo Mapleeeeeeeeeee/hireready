@@ -29,6 +29,9 @@ export interface InterviewStoreState {
   interimUserTranscript: string;
   interimAiTranscript: string;
 
+  // Caption settings (AI captions only)
+  isCaptionOn: boolean;
+
   // Interview metadata
   language: 'en' | 'zh-TW';
   elapsedSeconds: number;
@@ -57,6 +60,9 @@ export interface InterviewStoreActions {
   setInterimAiTranscript: (text: string) => void;
   clearInterimTranscripts: () => void;
 
+  // Caption actions
+  toggleCaption: () => void;
+
   // Interview metadata actions
   setLanguage: (language: 'en' | 'zh-TW') => void;
   incrementTimer: () => void;
@@ -84,6 +90,7 @@ const initialState: InterviewStoreState = {
   transcripts: [],
   interimUserTranscript: '',
   interimAiTranscript: '',
+  isCaptionOn: false,
   language: 'zh-TW',
   elapsedSeconds: 0,
   jobDescription: null,
@@ -168,6 +175,16 @@ export const useInterviewStore = create<InterviewStore>()(
 
       clearInterimTranscripts: () => {
         set({ interimUserTranscript: '', interimAiTranscript: '' });
+      },
+
+      // Caption actions
+      toggleCaption: () => {
+        const newState = !get().isCaptionOn;
+        logger.info(`Captions ${newState ? 'enabled' : 'disabled'}`, {
+          module: 'interview-store',
+          action: 'toggleCaption',
+        });
+        set({ isCaptionOn: newState });
       },
 
       // Interview metadata actions

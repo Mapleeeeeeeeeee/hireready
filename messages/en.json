@@ -129,7 +129,8 @@
         "thinking": "Thinking...",
         "listening": "Listening...",
         "ready": "Ready"
-      }
+      },
+      "caption": "AI Captions"
     }
   },
   "auth": {
