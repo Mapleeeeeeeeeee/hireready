@@ -182,9 +182,9 @@ export default function InterviewSetupPage() {
               size="lg"
               onPress={handleStartInterview}
               className="bg-terracotta hover:bg-terracotta/90 w-full text-white shadow-lg"
+              startContent={<Sparkles className="h-5 w-5" />}
               endContent={<ArrowRight className="h-5 w-5" />}
             >
-              <Sparkles className="mr-2 h-5 w-5" />
               {t('startButton')}
             </Button>
             <p className="text-charcoal/40 mt-3 text-center text-xs">{t('startHint')}</p>

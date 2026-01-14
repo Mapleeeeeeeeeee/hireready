@@ -116,7 +116,7 @@ app.prepare().then(() => {
                   systemInstruction.includes('目標職缺') ||
                   systemInstruction.includes('Target Position'),
                 // Only log preview in development to avoid leaking sensitive JD content
-                ...(dev && { preview: systemInstruction.slice(-300) }),
+                ...(dev && { preview: systemInstruction }),
               });
             }
 

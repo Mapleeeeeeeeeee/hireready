@@ -6,6 +6,65 @@
     "retry": "重試",
     "startInterview": "開始面試"
   },
+  "marketing": {
+    "hero": {
+      "badge": "AI 視訊智能分析 v2.0",
+      "titlePart1": "掌握您的",
+      "titlePart2": "視訊面試",
+      "subtitle": "針對語音、表情與回答內容的真實 AI 分析。這不僅僅是聊天，而是一場全真模擬。",
+      "cta": "開始分析",
+      "demo": "試聽演示"
+    },
+    "interface": {
+      "rec": "錄製中",
+      "hd": "HD 1080p",
+      "analysisActive": "分析進行中",
+      "monitoring": "監測語調與語速",
+      "eyeContact": "眼神接觸",
+      "pace": "語速",
+      "paceValue": "140 字/分 (最佳)",
+      "you": "你",
+      "cameraOff": "攝影機已關閉",
+      "cameraOffHint": "點擊下方按鈕開啟攝影機"
+    },
+    "analysis": {
+      "titlePart1": "不只是文字。",
+      "titlePart2": "全方位感官分析。",
+      "subtitle": "您的面試官是 AI，但回饋如同真人。我們分析您的表達方式，而不僅僅是逐字稿。",
+      "cards": {
+        "nonVerbal": {
+          "title": "非語言訊號",
+          "description": "利用隱私友善的臉部位點技術，追蹤眼神接觸、坐姿與表情自信度。"
+        },
+        "tone": {
+          "title": "口語表達",
+          "description": "分析您的自信度變化以及填充詞（嗯、阿）的使用頻率，確保溝通清晰。"
+        },
+        "context": {
+          "title": "情境智能",
+          "description": "根據特定的職缺描述 (JD) 與角色要求，對您的回答進行評分。",
+          "matchLabel": "匹配度：{percent}%"
+        }
+      }
+    },
+    "footer": {
+      "title": "準備好加速您的職涯發展了嗎？",
+      "subtitle": "加入數千位求職者，使用 HireReady 征服面試。",
+      "cta": "立即開始練習"
+    },
+    "ticker": {
+      "roles": [
+        "前端工程師",
+        "產品經理 (PM)",
+        "UI/UX 設計師",
+        "資料科學家",
+        "行銷專員",
+        "業務代表",
+        "DevOps 工程師",
+        "後端開發者"
+      ]
+    }
+  },
   "nav": {
     "home": "首頁",
     "interview": "開始面試",
