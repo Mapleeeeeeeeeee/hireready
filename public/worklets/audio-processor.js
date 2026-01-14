@@ -99,7 +99,7 @@ class AudioRecorderProcessor extends AudioWorkletProcessor {
    * Process audio input
    * Fix #10: Uses ring buffer for O(1) operations instead of O(n) array operations
    */
-  process(inputs, _outputs, _parameters) {
+  process(inputs) {
     const input = inputs[0];
 
     if (!input || !input[0] || !this._isRecording) {
