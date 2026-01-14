@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
       - name: Run ESLint
         run: pnpm lint
 
@@ -92,6 +95,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
       - name: Run Knip (unused code detection)
         run: pnpm unused
         continue-on-error: true # Report but don't fail initially
@@ -118,6 +124,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
       - name: Build
         run: pnpm build
 
@@ -143,5 +152,53 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
       - name: Run unit tests
         run: pnpm test run
+
+  auto-fix:
+    name: Auto Fix by Claude
+    runs-on: ubuntu-latest
+    needs: [lint-and-type-check]
+    if: failure()
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Configure git
+        run: |
+          git config user.name "Claude Code"
+          git config user.email "claude-code@demo.com"
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run Claude Code to fix errors
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          claude -p "The CI checks failed. Please fix all lint and TypeScript errors by running 'pnpm run lint' and 'pnpm run build', then commit the fixes with message 'fix: auto-fix lint and type errors' and push to origin" \
+            --allowedTools "Bash(pnpm:*)" "Bash(git:*)" "Edit" "Write"

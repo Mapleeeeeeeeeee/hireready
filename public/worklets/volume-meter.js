@@ -26,7 +26,7 @@ class VolumeMeterProcessor extends AudioWorkletProcessor {
     return Math.min(1, rms * 2);
   }
 
-  process(inputs, outputs, parameters) {
+  process(inputs, outputs) {
     const input = inputs[0];
     const output = outputs[0];
 
