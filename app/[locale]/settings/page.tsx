@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button, Spinner } from '@heroui/react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { PageLoadingState, PageErrorState } from '@/components/common';
 import { SettingsForm } from '@/components/user/SettingsForm';
 import { useUserStore } from '@/lib/stores/user-store';
 
@@ -13,7 +13,6 @@ import { useUserStore } from '@/lib/stores/user-store';
 
 function SettingsContent() {
   const t = useTranslations('settings');
-  const tCommon = useTranslations('common');
 
   const { settings, isLoadingSettings, error, fetchSettings } = useUserStore();
 
@@ -23,23 +22,12 @@ function SettingsContent() {
 
   // Loading state
   if (isLoadingSettings && !settings) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner size="lg" color="primary" label={tCommon('loading')} />
-      </div>
-    );
+    return <PageLoadingState />;
   }
 
   // Error state
   if (error && !settings) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <p className="text-charcoal/60">{tCommon('error')}</p>
-        <Button color="primary" variant="flat" onPress={() => fetchSettings()}>
-          {tCommon('retry')}
-        </Button>
-      </div>
-    );
+    return <PageErrorState onRetry={() => fetchSettings()} />;
   }
 
   return (

@@ -1,8 +1,9 @@
 'use client';
 
-import { Card, CardBody, Chip } from '@heroui/react';
+import { Card, CardBody } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { Calendar, Clock, Award, ChevronRight } from 'lucide-react';
+import { StatusChip } from '@/components/common/StatusChip';
 import { formatDate, formatDuration } from '@/lib/utils/date-format';
 import type { InterviewStatus } from '@/lib/constants/enums';
 
@@ -30,24 +31,6 @@ export interface InterviewCardProps {
 // ============================================================
 // Helper Components
 // ============================================================
-
-function StatusChip({ status }: { status: InterviewStatus }) {
-  const t = useTranslations('history.statuses');
-
-  const statusConfig: Record<InterviewStatus, { color: 'warning' | 'primary' | 'success' }> = {
-    pending: { color: 'warning' },
-    in_progress: { color: 'primary' },
-    completed: { color: 'success' },
-  };
-
-  const config = statusConfig[status];
-
-  return (
-    <Chip size="sm" color={config.color} variant="flat">
-      {t(status)}
-    </Chip>
-  );
-}
 
 function InfoItem({ icon: Icon, value }: { icon: React.ElementType; value: string }) {
   return (

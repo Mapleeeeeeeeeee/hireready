@@ -3,7 +3,8 @@
     "appName": "HireReady",
     "loading": "Loading...",
     "error": "An error occurred",
-    "retry": "Retry"
+    "retry": "Retry",
+    "startInterview": "Start Interview"
   },
   "nav": {
     "home": "Home",
@@ -152,7 +153,8 @@
     "totalInterviews": "Total Interviews",
     "averageScore": "Average Score",
     "improvement": "Improvement",
-    "lastWeek": "Last Week"
+    "lastWeek": "Last Week",
+    "viewAll": "View All"
   },
   "history": {
     "title": "Interview History",
@@ -165,6 +167,9 @@
     "duration": "Duration",
     "score": "Score",
     "status": "Status",
+    "backToHistory": "Back to History",
+    "notFound": "Interview not found",
+    "interviewCount": "{count} interviews",
     "statuses": {
       "pending": "Pending",
       "in_progress": "In Progress",

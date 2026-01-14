@@ -3,9 +3,10 @@
 import { useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Button, Spinner, Pagination, Link } from '@heroui/react';
+import { Button, Pagination, Link } from '@heroui/react';
 import { ClipboardList, ArrowRight } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { PageLoadingState, PageErrorState } from '@/components/common';
 import { InterviewCard } from '@/components/history/InterviewCard';
 import { useUserStore, selectTotalPages } from '@/lib/stores/user-store';
 import type { InterviewStatus } from '@/lib/constants/enums';
@@ -50,23 +51,12 @@ function HistoryContent() {
 
   // Loading state
   if (isLoadingInterviews && interviews.length === 0) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner size="lg" color="primary" label={tCommon('loading')} />
-      </div>
-    );
+    return <PageLoadingState />;
   }
 
   // Error state
   if (error && interviews.length === 0) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <p className="text-charcoal/60">{tCommon('error')}</p>
-        <Button color="primary" variant="flat" onPress={() => fetchInterviews()}>
-          {tCommon('retry')}
-        </Button>
-      </div>
-    );
+    return <PageErrorState onRetry={() => fetchInterviews()} />;
   }
 
   return (
@@ -92,7 +82,7 @@ function HistoryContent() {
             endContent={<ArrowRight className="h-4 w-4" />}
             className="bg-terracotta hover:bg-terracotta/90 text-white"
           >
-            Start Interview
+            {tCommon('startInterview')}
           </Button>
         </div>
       ) : (
@@ -130,7 +120,7 @@ function HistoryContent() {
 
           {/* Total count */}
           <p className="text-charcoal/40 text-center text-sm">
-            {interviewsTotal} {interviewsTotal === 1 ? 'interview' : 'interviews'}
+            {t('interviewCount', { count: interviewsTotal })}
           </p>
         </>
       )}

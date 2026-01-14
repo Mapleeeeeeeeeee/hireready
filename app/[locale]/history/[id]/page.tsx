@@ -3,9 +3,10 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
-import { Button, Spinner, Card, CardBody, Chip } from '@heroui/react';
+import { Button, Card, CardBody } from '@heroui/react';
 import { ArrowLeft, Calendar, Clock, Award, Briefcase } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { PageLoadingState, StatusChip } from '@/components/common';
 import { TranscriptViewer, type TranscriptEntry } from '@/components/history/TranscriptViewer';
 import { useUserStore } from '@/lib/stores/user-store';
 import { formatDateLong, formatDuration } from '@/lib/utils/date-format';
@@ -36,24 +37,6 @@ function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
         <span className="text-charcoal font-medium">{value}</span>
       </div>
     </div>
-  );
-}
-
-function StatusChip({ status }: { status: InterviewStatus }) {
-  const t = useTranslations('history.statuses');
-
-  const statusConfig: Record<InterviewStatus, { color: 'warning' | 'primary' | 'success' }> = {
-    pending: { color: 'warning' },
-    in_progress: { color: 'primary' },
-    completed: { color: 'success' },
-  };
-
-  const config = statusConfig[status];
-
-  return (
-    <Chip size="md" color={config.color} variant="flat">
-      {t(status)}
-    </Chip>
   );
 }
 
@@ -94,20 +77,16 @@ function HistoryDetailContent() {
 
   // Loading state
   if (isLoadingInterviewDetail) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner size="lg" color="primary" label={tCommon('loading')} />
-      </div>
-    );
+    return <PageLoadingState />;
   }
 
   // Error state
   if (error || !selectedInterview) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <p className="text-charcoal/60">{error ? tCommon('error') : 'Interview not found'}</p>
+        <p className="text-charcoal/60">{error ? tCommon('error') : t('notFound')}</p>
         <Button color="primary" variant="flat" onPress={handleBack}>
-          {t('viewDetails')}
+          {t('backToHistory')}
         </Button>
       </div>
     );
@@ -133,7 +112,7 @@ function HistoryDetailContent() {
         onPress={handleBack}
         className="text-charcoal/60 hover:text-charcoal -ml-2"
       >
-        Back to History
+        {t('backToHistory')}
       </Button>
 
       {/* Header Card */}
@@ -145,7 +124,7 @@ function HistoryDetailContent() {
               <h1 className="text-charcoal font-serif text-2xl font-semibold">{scenarioLabel}</h1>
               <p className="text-charcoal/60 text-sm">{t('title')}</p>
             </div>
-            <StatusChip status={interview.status as InterviewStatus} />
+            <StatusChip status={interview.status as InterviewStatus} size="md" />
           </div>
 
           {/* Info Grid */}

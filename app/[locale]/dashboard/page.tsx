@@ -3,9 +3,10 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Button, Link, Spinner } from '@heroui/react';
+import { Button, Link } from '@heroui/react';
 import { Calendar, Award, Clock, ArrowRight } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { PageLoadingState, PageErrorState } from '@/components/common';
 import { StatsCard } from '@/components/user/StatsCard';
 import { InterviewCard } from '@/components/history/InterviewCard';
 import { useUserStore } from '@/lib/stores/user-store';
@@ -41,23 +42,12 @@ function DashboardContent({ userName }: DashboardContentProps) {
 
   // Loading state
   if (isLoadingStats && !stats) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner size="lg" color="primary" label={tCommon('loading')} />
-      </div>
-    );
+    return <PageLoadingState />;
   }
 
   // Error state
   if (error && !stats) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <p className="text-charcoal/60">{tCommon('error')}</p>
-        <Button color="primary" variant="flat" onPress={() => fetchStats()}>
-          {tCommon('retry')}
-        </Button>
-      </div>
-    );
+    return <PageErrorState onRetry={() => fetchStats()} />;
   }
 
   const displayName = userName || t('welcome');
@@ -109,7 +99,7 @@ function DashboardContent({ userName }: DashboardContentProps) {
               endContent={<ArrowRight className="h-4 w-4" />}
               className="text-terracotta"
             >
-              View All
+              {t('viewAll')}
             </Button>
           )}
         </div>
@@ -124,7 +114,7 @@ function DashboardContent({ userName }: DashboardContentProps) {
               color="primary"
               className="bg-terracotta hover:bg-terracotta/90 text-white"
             >
-              Start Interview
+              {tCommon('startInterview')}
             </Button>
           </div>
         ) : (

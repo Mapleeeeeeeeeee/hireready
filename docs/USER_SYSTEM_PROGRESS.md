@@ -7,9 +7,9 @@
 | Phase 1: 基礎建設 | ✅ 完成   | 2026-01-14 |
 | Phase 2: API 開發 | ✅ 完成   | 2026-01-14 |
 | Phase 3: 狀態管理 | ✅ 完成   | 2026-01-14 |
-| Phase 4: 組件開發 | 🔄 進行中 | -          |
-| Phase 5: 頁面開發 | ⏳ 待開始 | -          |
-| Phase 6: 導航整合 | ⏳ 待開始 | -          |
+| Phase 4: 組件開發 | ✅ 完成   | 2026-01-14 |
+| Phase 5: 頁面開發 | ✅ 完成   | 2026-01-14 |
+| Phase 6: 導航整合 | 🔄 進行中 | -          |
 
 ---
 
@@ -145,24 +145,54 @@
 
 ---
 
-## Phase 4: 組件開發 🔄
+## Phase 4: 組件開發 ✅
 
-### 待完成
+### 完成項目
 
-- `components/history/InterviewCard.tsx` - 面試卡片
-- `components/history/TranscriptViewer.tsx` - 對話記錄檢視器
-- `components/user/StatsCard.tsx` - 統計卡片
-- `components/user/ProfileForm.tsx` - 個人資料表單
-- `components/user/SettingsForm.tsx` - 設定表單
+1. **面試歷史組件**
+   - `components/history/InterviewCard.tsx` - 面試卡片
+   - `components/history/TranscriptViewer.tsx` - 對話記錄檢視器
+
+2. **用戶組件**
+   - `components/user/StatsCard.tsx` - 統計卡片
+   - `components/user/ProfileForm.tsx` - 個人資料表單
+   - `components/user/SettingsForm.tsx` - 設定表單
+
+3. **共用工具**
+   - `lib/utils/date-format.ts` - 日期/時間格式化工具
+
+4. **測試 (55 個新測試)**
+   - StatsCard.test.tsx, InterviewCard.test.tsx, TranscriptViewer.test.tsx
+   - ProfileForm.test.tsx, SettingsForm.test.tsx
 
 ---
 
-## 後續階段
+## Phase 5: 頁面開發 ✅
 
-### Phase 5: 頁面開發
+### 完成項目
 
-- Dashboard, History, Profile, Settings 頁面
+1. **用戶頁面**
+   - `app/[locale]/dashboard/page.tsx` - 儀表板
+   - `app/[locale]/history/page.tsx` - 面試歷史列表
+   - `app/[locale]/history/[id]/page.tsx` - 面試詳情
+   - `app/[locale]/profile/page.tsx` - 個人資料
+   - `app/[locale]/settings/page.tsx` - 設定
 
-### Phase 6: 導航整合
+2. **共用組件抽取**
+   - `components/common/StatusChip.tsx` - 狀態標籤
+   - `components/common/PageLoadingState.tsx` - 頁面載入狀態
+   - `components/common/PageErrorState.tsx` - 頁面錯誤狀態
 
-- 更新 Navbar 用戶選單
+### Code Review 修復
+
+- ✅ 硬編碼 i18n 字串修復
+- ✅ 重複 StatusChip 抽取為共用組件
+- ✅ 重複 Loading/Error pattern 抽取為共用組件
+
+---
+
+## Phase 6: 導航整合 🔄
+
+### 待完成
+
+- 更新 Navbar 用戶選單，新增 Dashboard、History、Profile、Settings 連結

@@ -3,7 +3,8 @@
     "appName": "HireReady",
     "loading": "載入中...",
     "error": "發生錯誤",
-    "retry": "重試"
+    "retry": "重試",
+    "startInterview": "開始面試"
   },
   "nav": {
     "home": "首頁",
@@ -152,7 +153,8 @@
     "totalInterviews": "總面試次數",
     "averageScore": "平均分數",
     "improvement": "進步幅度",
-    "lastWeek": "過去一週"
+    "lastWeek": "過去一週",
+    "viewAll": "查看全部"
   },
   "history": {
     "title": "面試歷史",
@@ -165,6 +167,9 @@
     "duration": "時長",
     "score": "分數",
     "status": "狀態",
+    "backToHistory": "返回歷史記錄",
+    "notFound": "找不到此面試記錄",
+    "interviewCount": "{count} 場面試",
     "statuses": {
       "pending": "待處理",
       "in_progress": "進行中",
