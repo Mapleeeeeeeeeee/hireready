@@ -127,9 +127,9 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
         aria-label={t('inputMode')}
         variant="underlined"
         classNames={{
-          tabList: 'gap-6 border-b border-warm-gray/20',
-          cursor: 'bg-terracotta',
-          tab: 'text-charcoal/60 data-[selected=true]:text-charcoal font-medium px-0 pb-3',
+          tabList: 'gap-8 border-b border-warm-gray/20 w-full',
+          cursor: 'bg-terracotta h-[2px]',
+          tab: 'text-charcoal/60 data-[selected=true]:text-charcoal font-medium px-2 pb-4 whitespace-nowrap transition-colors data-[selected=true]:font-semibold',
           tabContent: 'group-data-[selected=true]:text-charcoal',
         }}
       >
@@ -143,42 +143,56 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
             </div>
           }
         >
-          <div className="mt-4 space-y-4">
-            <p className="text-charcoal/60 text-sm">{t('urlDescription')}</p>
-            <div className="flex gap-3">
+          <div className="mt-6 space-y-6">
+            <p className="text-charcoal/60 text-sm leading-relaxed">{t('urlDescription')}</p>
+            <div className="flex flex-col gap-4 sm:flex-row">
               <Input
                 type="url"
                 placeholder={t('urlPlaceholder')}
                 value={url}
                 onValueChange={setUrl}
                 isDisabled={isLoading}
+                size="lg"
                 classNames={{
-                  input: 'text-charcoal',
-                  inputWrapper: 'border-warm-gray/30 bg-white/80',
+                  input: 'text-charcoal text-base',
+                  inputWrapper:
+                    'h-12 border-warm-gray/30 bg-white/80 shadow-sm hover:border-terracotta/50 focus-within:border-terracotta transition-colors',
                 }}
-                startContent={<Link2 className="text-charcoal/40 h-4 w-4" />}
+                startContent={
+                  <div className="pointer-events-none mr-3 flex items-center justify-center">
+                    <Link2 className="text-charcoal/40 h-5 w-5" />
+                  </div>
+                }
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     handleParseUrl();
                   }
                 }}
+                className="flex-1"
               />
               <Button
+                size="lg"
                 color="primary"
                 onPress={handleParseUrl}
                 isDisabled={!url.trim() || isLoading}
-                className="bg-terracotta hover:bg-terracotta/90 min-w-[100px] text-white"
+                className="bg-terracotta hover:bg-terracotta/90 h-12 min-w-[120px] text-white shadow-md transition-transform active:scale-[0.98]"
                 startContent={
-                  isLoading ? <Spinner size="sm" color="white" /> : <Search className="h-4 w-4" />
+                  isLoading ? <Spinner size="sm" color="current" /> : <Search className="h-5 w-5" />
                 }
               >
                 {isLoading ? t('parsing') : t('parse')}
               </Button>
             </div>
-            <div className="text-charcoal/50 flex flex-wrap gap-2 text-xs">
-              <span>{t('supportedSites')}:</span>
-              <span className="text-charcoal/70 rounded bg-blue-50 px-2 py-0.5">104.com.tw</span>
-              <span className="text-charcoal/70 rounded bg-green-50 px-2 py-0.5">1111.com.tw</span>
+            <div className="flex flex-wrap items-center gap-3 text-xs">
+              <span className="text-charcoal/50 font-medium">{t('supportedSites')}:</span>
+              <div className="flex gap-2">
+                <span className="text-charcoal/70 rounded-full bg-blue-50 px-3 py-1 font-medium transition-colors hover:bg-blue-100">
+                  104.com.tw
+                </span>
+                <span className="text-charcoal/70 rounded-full bg-green-50 px-3 py-1 font-medium transition-colors hover:bg-green-100">
+                  1111.com.tw
+                </span>
+              </div>
             </div>
           </div>
         </Tab>

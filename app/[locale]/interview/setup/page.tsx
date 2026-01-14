@@ -3,13 +3,53 @@
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import { Card, CardBody, Button, RadioGroup, Radio } from '@heroui/react';
+import {
+  Card,
+  CardBody,
+  Button,
+  RadioGroup,
+  useRadio,
+  VisuallyHidden,
+  RadioProps,
+} from '@heroui/react';
 import { ArrowRight, Languages, FileText, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { JdInput } from '@/components/interview/JdInput';
 import { JdPreview } from '@/components/interview/JdPreview';
 import { useInterviewStore } from '@/lib/stores/interview-store';
 import type { JobDescription } from '@/lib/jd/types';
+
+// ============================================================
+// Custom Components
+// ============================================================
+
+const CustomRadio = (props: RadioProps) => {
+  const { Component, children, isSelected, getBaseProps, getInputProps, getLabelProps } =
+    useRadio(props);
+
+  return (
+    <Component
+      {...getBaseProps()}
+      className={`group hover:bg-warm-gray/10 tap-highlight-transparent relative flex cursor-pointer items-center justify-between rounded-xl border-2 px-4 py-4 transition-all ${isSelected ? 'border-terracotta bg-terracotta/5' : 'bg-warm-gray/5 border-transparent'} `}
+    >
+      <VisuallyHidden>
+        <input {...getInputProps()} />
+      </VisuallyHidden>
+
+      <div className="flex items-center gap-2">
+        <span {...getLabelProps()} className="text-charcoal text-sm font-medium">
+          {children}
+        </span>
+      </div>
+
+      <div
+        className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? 'border-terracotta bg-terracotta' : 'border-warm-gray/30'} `}
+      >
+        {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
+      </div>
+    </Component>
+  );
+};
 
 // ============================================================
 // Component
@@ -95,27 +135,11 @@ export default function InterviewSetupPage() {
                   value={language}
                   onValueChange={handleLanguageChange}
                   classNames={{
-                    wrapper: 'gap-4',
+                    wrapper: 'grid grid-cols-2 gap-4',
                   }}
                 >
-                  <Radio
-                    value="zh-TW"
-                    classNames={{
-                      base: 'border-warm-gray/30 data-[selected=true]:border-terracotta rounded-lg border-2 px-4 py-3 transition-all',
-                      label: 'text-charcoal',
-                    }}
-                  >
-                    {t('languages.zhTW')}
-                  </Radio>
-                  <Radio
-                    value="en"
-                    classNames={{
-                      base: 'border-warm-gray/30 data-[selected=true]:border-terracotta rounded-lg border-2 px-4 py-3 transition-all',
-                      label: 'text-charcoal',
-                    }}
-                  >
-                    {t('languages.en')}
-                  </Radio>
+                  <CustomRadio value="zh-TW">{t('languages.zhTW')}</CustomRadio>
+                  <CustomRadio value="en">{t('languages.en')}</CustomRadio>
                 </RadioGroup>
               </CardBody>
             </Card>

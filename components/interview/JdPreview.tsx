@@ -86,7 +86,7 @@ export function JdPreview({ jobDescription, onClear }: JdPreviewProps) {
 
   return (
     <Card className="border-terracotta/30 w-full border-2 border-dashed bg-white/50 shadow-none">
-      <CardHeader className="flex items-start justify-between gap-4 pb-2">
+      <CardHeader className="flex items-start justify-between gap-4 p-5 pb-2">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <Briefcase className="text-terracotta h-5 w-5" />
@@ -121,7 +121,7 @@ export function JdPreview({ jobDescription, onClear }: JdPreviewProps) {
 
       <Divider className="bg-warm-gray/20" />
 
-      <CardBody className="space-y-4 pt-4">
+      <CardBody className="space-y-4 p-5 pt-4">
         {/* Job Info Grid */}
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <InfoRow icon={Building2} label={t('company')} value={company} />
