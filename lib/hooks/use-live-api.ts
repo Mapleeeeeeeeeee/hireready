@@ -164,8 +164,10 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
           store.addTranscript(createTranscriptEntry('ai', text, true));
           store.setInterimAiTranscript('');
         }, 1500); // Show complete sentence for 1.5 seconds
+      } else {
+        // Show partial transcripts in real-time for better UX
+        store.setInterimAiTranscript(text);
       }
-      // Ignore partial transcripts to avoid word-by-word display
     });
 
     client.on('turnComplete', () => {
