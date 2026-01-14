@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.0.0...v1.1.0) (2026-01-14)
+
+
+### Features
+
+* **auth:** add login page ([#5](https://github.com/Mapleeeeeeeeeee/hireready/issues/5)) ([5a4c446](https://github.com/Mapleeeeeeeeeee/hireready/commit/5a4c446a09f4739b8c3e7eed9fc5f11c0a5585cc))
+
+
+### Bug Fixes
+
+* auto-fix lint and type errors ([c3945f6](https://github.com/Mapleeeeeeeeeee/hireready/commit/c3945f680f341c39a6311a469e1c0cc900c59f5e))
+
 ## 1.0.0 (2026-01-14)
 
 ### Features
