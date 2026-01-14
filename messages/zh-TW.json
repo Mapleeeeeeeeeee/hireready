@@ -147,6 +147,11 @@
     "loginRequired": "需要登入",
     "loginToAccess": "請登入以存取此頁面"
   },
+  "login": {
+    "subtitle": "登入以開始您的面試練習",
+    "termsHint": "登入即表示您同意我們的服務條款與隱私政策",
+    "backToHome": "← 返回首頁"
+  },
   "dashboard": {
     "title": "儀表板",
     "welcome": "歡迎回來",

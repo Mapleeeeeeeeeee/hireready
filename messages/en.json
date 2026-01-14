@@ -147,6 +147,11 @@
     "loginRequired": "Login Required",
     "loginToAccess": "Please login to access this page"
   },
+  "login": {
+    "subtitle": "Sign in to start your interview practice",
+    "termsHint": "By signing in, you agree to our Terms of Service and Privacy Policy",
+    "backToHome": "← Back to home"
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back",
