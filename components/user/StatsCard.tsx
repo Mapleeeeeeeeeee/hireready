@@ -6,12 +6,37 @@ import { Card, CardBody } from '@heroui/react';
 // Types
 // ============================================================
 
+/**
+ * Props for the StatsCard component
+ *
+ * @remarks
+ * All string props (title, subtitle) should be pre-translated using `useTranslations`
+ * before being passed to this component. This component does not handle i18n internally
+ * to maintain flexibility for different use cases.
+ *
+ * @example
+ * ```tsx
+ * const t = useTranslations('dashboard');
+ * <StatsCard
+ *   title={t('totalInterviews')}
+ *   value={42}
+ *   subtitle={t('lastWeek')}
+ *   icon={<Calendar className="h-6 w-6" />}
+ * />
+ * ```
+ */
 export interface StatsCardProps {
-  /** Title of the stat (e.g., "Total Interviews") */
+  /**
+   * Title of the stat (e.g., "Total Interviews")
+   * @remarks Should be a translated string from useTranslations
+   */
   title: string;
   /** The stat value */
   value: string | number;
-  /** Optional subtitle (e.g., "Last 30 days") */
+  /**
+   * Optional subtitle (e.g., "Last 30 days")
+   * @remarks Should be a translated string from useTranslations
+   */
   subtitle?: string;
   /** Optional icon to display */
   icon?: React.ReactNode;

@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Card, CardBody, CardHeader, Divider, ScrollShadow } from '@heroui/react';
 import { User, Bot, MessageSquare } from 'lucide-react';
+import { formatTimestamp } from '@/lib/utils/date-format';
 
 // ============================================================
 // Types
@@ -20,22 +21,6 @@ export interface TranscriptEntry {
 export interface TranscriptViewerProps {
   /** Array of transcript entries */
   transcript: TranscriptEntry[];
-  /** Display language */
-  language?: 'en' | 'zh-TW';
-}
-
-// ============================================================
-// Helper Functions
-// ============================================================
-
-/**
- * Format timestamp from milliseconds to MM:SS format
- */
-function formatTimestamp(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 // ============================================================
@@ -43,7 +28,8 @@ function formatTimestamp(ms: number): string {
 // ============================================================
 
 function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
-  const t = useTranslations('interview.room.ai');
+  const tAi = useTranslations('interview.room.ai');
+  const tVideo = useTranslations('interview.room.video');
   const isUser = entry.role === 'user';
 
   return (
@@ -61,7 +47,7 @@ function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
       <div className={`flex max-w-[80%] flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
         {/* Speaker label and timestamp */}
         <div className="text-charcoal/50 flex items-center gap-2 text-xs">
-          <span>{isUser ? 'You' : t('name')}</span>
+          <span>{isUser ? tVideo('you') : tAi('name')}</span>
           {entry.timestamp !== undefined && (
             <span className="text-charcoal/30">{formatTimestamp(entry.timestamp)}</span>
           )}
@@ -83,14 +69,14 @@ function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
 }
 
 function EmptyState() {
-  const t = useTranslations('history');
+  const t = useTranslations('history.transcript');
 
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="bg-warm-gray/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
         <MessageSquare className="text-charcoal/30 h-8 w-8" />
       </div>
-      <p className="text-charcoal/50 text-sm">{t('empty')}</p>
+      <p className="text-charcoal/50 text-sm">{t('emptyTranscript')}</p>
     </div>
   );
 }
@@ -99,8 +85,8 @@ function EmptyState() {
 // Component
 // ============================================================
 
-export function TranscriptViewer({ transcript, language = 'en' }: TranscriptViewerProps) {
-  const t = useTranslations('history');
+export function TranscriptViewer({ transcript }: TranscriptViewerProps) {
+  const t = useTranslations('history.transcript');
 
   const isEmpty = transcript.length === 0;
 
@@ -108,12 +94,10 @@ export function TranscriptViewer({ transcript, language = 'en' }: TranscriptView
     <Card className="border-warm-gray/10 border bg-white/50 shadow-none">
       <CardHeader className="flex items-center gap-2 pb-2">
         <MessageSquare className="text-terracotta h-5 w-5" />
-        <h3 className="text-charcoal text-lg font-semibold">
-          {language === 'zh-TW' ? '對話記錄' : 'Transcript'}
-        </h3>
+        <h3 className="text-charcoal text-lg font-semibold">{t('title')}</h3>
         {!isEmpty && (
           <span className="text-charcoal/40 text-sm">
-            ({transcript.length} {language === 'zh-TW' ? '則訊息' : 'messages'})
+            ({transcript.length} {t('messages')})
           </span>
         )}
       </CardHeader>

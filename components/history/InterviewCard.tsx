@@ -3,12 +3,12 @@
 import { Card, CardBody, Chip } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { Calendar, Clock, Award, ChevronRight } from 'lucide-react';
+import { formatDate, formatDuration } from '@/lib/utils/date-format';
+import type { InterviewStatus } from '@/lib/constants/enums';
 
 // ============================================================
 // Types
 // ============================================================
-
-export type InterviewStatus = 'pending' | 'in_progress' | 'completed';
 
 export interface InterviewCardProps {
   /** Unique interview ID */
@@ -25,40 +25,6 @@ export interface InterviewCardProps {
   createdAt: string;
   /** Click handler for viewing details */
   onClick?: () => void;
-}
-
-// ============================================================
-// Helper Functions
-// ============================================================
-
-/**
- * Format duration from seconds to human readable string
- */
-function formatDuration(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-
-  if (minutes === 0) {
-    return `${remainingSeconds}s`;
-  }
-
-  if (remainingSeconds === 0) {
-    return `${minutes}m`;
-  }
-
-  return `${minutes}m ${remainingSeconds}s`;
-}
-
-/**
- * Format date string to localized date
- */
-function formatDate(dateString: string, locale: string = 'en'): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(locale === 'zh-TW' ? 'zh-TW' : 'en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
 }
 
 // ============================================================
