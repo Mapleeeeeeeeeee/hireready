@@ -212,6 +212,23 @@
 
 ---
 
+## 整合問題修復 ✅
+
+### 修復項目
+
+1. **Google OAuth 條件配置**
+   - 文件：`lib/auth/auth.ts`
+   - 問題：當 Google OAuth 憑證未設定時會拋出 `CLIENT_ID_AND_SECRET_REQUIRED` 錯誤
+   - 修復：只在憑證存在時才配置 Google provider
+
+2. **Navbar 導航修復**
+   - 文件：`components/layout/Navbar.tsx`
+   - 問題：使用 HeroUI Link 導致 locale 路由不正確
+   - 修復：改用 Next.js Link 以支援正確的 locale 處理
+   - 移除不支援的 `size` 屬性，`onPress` 改為 `onClick`
+
+---
+
 ## 🎉 用戶系統開發完成！
 
 所有 6 個 Phase 已全部完成：
@@ -222,3 +239,4 @@
 - ✅ Phase 4: 組件開發（5 個組件 + 55 個測試）
 - ✅ Phase 5: 頁面開發（5 個頁面 + 3 個共用組件）
 - ✅ Phase 6: 導航整合（Navbar 用戶選單）
+- ✅ 整合問題修復（OAuth 條件配置、導航修復）
