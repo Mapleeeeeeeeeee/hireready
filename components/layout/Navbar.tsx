@@ -21,7 +21,6 @@ import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from '@/lib/auth/auth-client';
-import { useGoogleLogin } from '@/lib/auth/hooks';
 import { getRedirectUrl, clearRedirectUrl } from '@/lib/auth/utils';
 
 export function Navbar() {
@@ -30,7 +29,6 @@ export function Navbar() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const handleLogin = useGoogleLogin();
 
   const handleLogout = async () => {
     await signOut();
@@ -166,10 +164,11 @@ export function Navbar() {
         ) : (
           <NavbarItem>
             <Button
+              as={Link}
+              href="/login"
               size="md"
               variant="light"
               className="text-charcoal/80 hover:text-charcoal hover:bg-warm-gray/10 rounded-lg px-5 font-medium transition-all"
-              onPress={handleLogin}
             >
               {t('nav.login')}
             </Button>
