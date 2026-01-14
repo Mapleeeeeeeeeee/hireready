@@ -153,7 +153,6 @@ jobs:
     if: failure()
     permissions:
       contents: write
-      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -174,12 +173,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Claude Code
-        id: claude
-        uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_args: |
-            --model claude-sonnet-4-5
+      - name: Configure git
+        run: |
+          git config user.name "Claude Code"
+          git config user.email "claude-code@demo.com"
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run Claude Code to fix errors
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "The CI checks failed. Please fix all lint and TypeScript errors by running 'pnpm run lint' and 'pnpm run build', then commit the fixes with message 'fix: auto-fix lint and type errors' and push to origin" \
             --allowedTools "Bash(pnpm:*)" "Bash(git:*)"
-            --system-prompt "The CI checks failed. Please fix all lint and TypeScript errors by running 'pnpm run lint' and 'pnpm run build', then commit the fixes with message 'fix: auto-fix lint and type errors' and push to origin"
