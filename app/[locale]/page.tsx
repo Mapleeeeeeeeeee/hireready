@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
-  const unusedTestVariable = 42; // Intentional lint error for testing Claude auto-fix
   const t = useTranslations();
 
   return (
