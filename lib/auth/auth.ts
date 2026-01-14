@@ -9,6 +9,17 @@ const pool = new Pool({ connectionString: serverEnv.databaseUrl });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+// Only configure Google provider if credentials are set
+const socialProviders =
+  serverEnv.googleClientId && serverEnv.googleClientSecret
+    ? {
+        google: {
+          clientId: serverEnv.googleClientId,
+          clientSecret: serverEnv.googleClientSecret,
+        },
+      }
+    : {};
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
@@ -17,12 +28,7 @@ export const auth = betterAuth({
   baseURL: serverEnv.betterAuthUrl,
   secret: serverEnv.betterAuthSecret,
 
-  socialProviders: {
-    google: {
-      clientId: serverEnv.googleClientId,
-      clientSecret: serverEnv.googleClientSecret,
-    },
-  },
+  socialProviders,
 
   session: {
     cookieCache: {

@@ -10,13 +10,14 @@ import {
   NavbarMenuToggle,
   Button,
   Avatar,
-  Link,
+  Link as HeroLink,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
   DropdownSection,
 } from '@heroui/react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -142,6 +143,7 @@ export function Navbar() {
                   {userMenuItems.map((item) => (
                     <DropdownItem
                       key={item.key}
+                      as={Link}
                       href={item.href}
                       className={pathname === item.href ? 'text-terracotta' : 'text-charcoal'}
                     >
@@ -185,7 +187,6 @@ export function Navbar() {
                 pathname === item.href ? 'text-terracotta' : 'text-charcoal'
               }`}
               href={item.href}
-              size="lg"
             >
               {item.label}
             </Link>
@@ -215,8 +216,7 @@ export function Navbar() {
                     pathname === item.href ? 'text-terracotta' : 'text-charcoal'
                   }`}
                   href={item.href}
-                  size="lg"
-                  onPress={() => setIsMenuOpen(false)}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
                 </Link>
