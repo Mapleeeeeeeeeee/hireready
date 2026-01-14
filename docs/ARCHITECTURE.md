@@ -143,18 +143,37 @@ hireready/
 │   │   ├── page.tsx
 │   │   ├── providers.tsx
 │   │   ├── interview/      # 面試頁面
-│   │   └── auth/           # 認證頁面
+│   │   │   └── setup/      # 面試設置（JD 輸入）
+│   │   ├── dashboard/      # 儀表板
+│   │   ├── history/        # 面試歷史
+│   │   ├── profile/        # 個人資料
+│   │   └── settings/       # 設定
 │   ├── api/                # API 路由
+│   │   ├── auth/           # 認證 API
+│   │   ├── jd/             # JD 解析 API
+│   │   ├── user/           # 用戶 API (stats, profile, settings)
+│   │   ├── interviews/     # 面試 API (CRUD)
+│   │   └── interview/      # 面試進行中 API
 │   └── globals.css
 ├── components/
-│   ├── ui/                 # UI 組件
+│   ├── auth/               # 認證組件 (AuthGuard)
+│   ├── common/             # 共用組件 (StatusChip, Loading, Error)
+│   ├── history/            # 面試歷史組件
 │   ├── interview/          # 面試相關組件
-│   └── layout/             # 佈局組件
+│   ├── layout/             # 佈局組件 (Navbar)
+│   ├── ui/                 # UI 組件
+│   └── user/               # 用戶組件 (StatsCard, ProfileForm, SettingsForm)
 ├── lib/
-│   ├── auth.ts             # Better Auth 設定
-│   ├── gemini.ts           # Gemini Live API
-│   ├── store.ts            # Zustand store
-│   └── i18n/               # i18n 設定
+│   ├── auth/               # Better Auth 設定 + hooks
+│   ├── config/             # 環境變數配置
+│   ├── constants/          # 常數定義
+│   ├── gemini/             # Gemini Live API
+│   ├── i18n/               # i18n 設定
+│   ├── jd/                 # JD 解析服務
+│   ├── stores/             # Zustand stores
+│   ├── types/              # TypeScript 類型
+│   ├── utils/              # 工具函數
+│   └── validators/         # 驗證器
 ├── messages/               # 翻譯檔案
 │   ├── zh-TW.json
 │   └── en.json
@@ -181,27 +200,41 @@ hireready/
 - [x] Vitest + Playwright 測試
 - [x] CLAUDE.md 開發規範
 
-### Phase 2: 認證系統
+### Phase 2: 認證系統 ✅
 
-- [ ] Better Auth + Google OAuth
-- [ ] 登入/登出 UI
-- [ ] JWT token 管理
+- [x] Better Auth + Google OAuth
+- [x] 登入/登出 UI
+- [x] JWT token 管理
+- [x] AuthGuard 組件
+- [x] useGoogleLogin Hook
 
-### Phase 3: 核心面試功能
+### Phase 3: 用戶系統 ✅
 
-- [ ] Gemini Live API 整合
-- [ ] 麥克風權限
-- [ ] 視訊顯示
-- [ ] AI 面試官角色
-- [ ] 面試情境選擇
+- [x] Prisma Schema 更新（UserSettings、Interview 擴展）
+- [x] 用戶 API（stats、profile、settings）
+- [x] 面試 API（列表、詳情、刪除）
+- [x] Zustand user-store 狀態管理
+- [x] 用戶組件（StatsCard、ProfileForm、SettingsForm）
+- [x] 面試歷史組件（InterviewCard、TranscriptViewer）
+- [x] 用戶頁面（Dashboard、History、Profile、Settings）
+- [x] Navbar 用戶選單整合
 
-### Phase 4: UI/UX 優化
+### Phase 4: 核心面試功能 ✅
 
-- [ ] 面試等待畫面
-- [ ] 語音波形顯示
-- [ ] 響應式設計
+- [x] Gemini Live API 整合
+- [x] 麥克風權限
+- [x] 視訊顯示
+- [x] AI 面試官角色
+- [x] 面試情境選擇（JD 輸入、解析）
 
-### Phase 5: 部署
+### Phase 5: UI/UX 優化
+
+- [x] 面試等待畫面
+- [x] 語音波形顯示
+- [x] 響應式設計
+- [ ] 進一步優化
+
+### Phase 6: 部署
 
 - [ ] Zeabur 部署
 - [ ] 環境變數設定
