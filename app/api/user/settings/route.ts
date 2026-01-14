@@ -6,23 +6,23 @@
 
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
-import { ValidationError } from '@/lib/utils/errors';
 import { parseJsonBody } from '@/lib/utils/resource-helpers';
+import { validators } from '@/lib/utils/validation';
 import { Prisma } from '@/lib/generated/prisma/client';
+import {
+  SUPPORTED_LANGUAGES,
+  UI_THEMES,
+  DEFAULT_USER_SETTINGS,
+  type SupportedLanguage,
+  type UITheme,
+} from '@/lib/constants/enums';
+import type { NotificationSettings } from '@/lib/types/user';
 
 type InputJsonValue = Prisma.InputJsonValue;
 
 // ============================================================
 // Types
 // ============================================================
-
-interface NotificationSettings {
-  email?: boolean;
-  push?: boolean;
-  interviewReminders?: boolean;
-  weeklyReport?: boolean;
-  [key: string]: boolean | undefined; // Index signature for Prisma JSON compatibility
-}
 
 interface UserSettingsResponse {
   id: string;
@@ -34,32 +34,48 @@ interface UserSettingsResponse {
 }
 
 interface UpdateSettingsInput {
-  preferredLanguage?: string;
-  theme?: string;
+  preferredLanguage?: SupportedLanguage;
+  theme?: UITheme;
   notifications?: NotificationSettings;
 }
 
 // ============================================================
-// Default Settings
+// Validation Helpers
 // ============================================================
 
-const DEFAULT_SETTINGS: Omit<UserSettingsResponse, 'id' | 'createdAt' | 'updatedAt'> = {
-  preferredLanguage: 'zh-TW',
-  theme: 'light',
-  notifications: {
-    email: true,
-    push: true,
-    interviewReminders: true,
-    weeklyReport: false,
-  },
-};
+function validateSettings(body: UpdateSettingsInput): void {
+  // Validate preferredLanguage if provided
+  if (body.preferredLanguage !== undefined) {
+    const result = validators.oneOf(
+      'preferredLanguage',
+      SUPPORTED_LANGUAGES
+    )(body.preferredLanguage);
+    if (!result.ok) {
+      throw result.error;
+    }
+  }
 
-// ============================================================
-// Validation Constants
-// ============================================================
+  // Validate theme if provided
+  if (body.theme !== undefined) {
+    const result = validators.oneOf('theme', UI_THEMES)(body.theme);
+    if (!result.ok) {
+      throw result.error;
+    }
+  }
 
-const VALID_LANGUAGES = ['en', 'zh-TW'];
-const VALID_THEMES = ['light', 'dark', 'system'];
+  // Validate notifications if provided
+  if (body.notifications !== undefined) {
+    const result = validators.required('notifications', (value) => {
+      if (typeof value !== 'object' || value === null) {
+        return { ok: false, error: new Error('Notifications must be an object') } as never;
+      }
+      return { ok: true, value: value as NotificationSettings };
+    })(body.notifications);
+    if (!result.ok) {
+      throw result.error;
+    }
+  }
+}
 
 // ============================================================
 // GET Handler - Get User Settings
@@ -95,7 +111,9 @@ async function handleGetSettings(request: Request, userId: string): Promise<User
   const now = new Date().toISOString();
   return {
     id: '',
-    ...DEFAULT_SETTINGS,
+    preferredLanguage: DEFAULT_USER_SETTINGS.preferredLanguage,
+    theme: DEFAULT_USER_SETTINGS.theme,
+    notifications: { ...DEFAULT_USER_SETTINGS.notifications },
     createdAt: now,
     updatedAt: now,
   };
@@ -112,32 +130,8 @@ async function handleUpdateSettings(
   // Parse request body with error handling
   const body = await parseJsonBody<UpdateSettingsInput>(request);
 
-  // Validate preferredLanguage if provided
-  if (body.preferredLanguage !== undefined) {
-    if (!VALID_LANGUAGES.includes(body.preferredLanguage)) {
-      throw new ValidationError(
-        'preferredLanguage',
-        `Invalid language. Must be one of: ${VALID_LANGUAGES.join(', ')}`
-      );
-    }
-  }
-
-  // Validate theme if provided
-  if (body.theme !== undefined) {
-    if (!VALID_THEMES.includes(body.theme)) {
-      throw new ValidationError(
-        'theme',
-        `Invalid theme. Must be one of: ${VALID_THEMES.join(', ')}`
-      );
-    }
-  }
-
-  // Validate notifications if provided
-  if (body.notifications !== undefined) {
-    if (typeof body.notifications !== 'object' || body.notifications === null) {
-      throw new ValidationError('notifications', 'Notifications must be an object');
-    }
-  }
+  // Validate using centralized validators
+  validateSettings(body);
 
   // Build update data with proper typing for Prisma JSON fields
   const updateData: {
@@ -161,9 +155,9 @@ async function handleUpdateSettings(
     where: { userId },
     create: {
       userId,
-      preferredLanguage: body.preferredLanguage ?? DEFAULT_SETTINGS.preferredLanguage,
-      theme: body.theme ?? DEFAULT_SETTINGS.theme,
-      notifications: (body.notifications ?? DEFAULT_SETTINGS.notifications) as InputJsonValue,
+      preferredLanguage: body.preferredLanguage ?? DEFAULT_USER_SETTINGS.preferredLanguage,
+      theme: body.theme ?? DEFAULT_USER_SETTINGS.theme,
+      notifications: (body.notifications ?? DEFAULT_USER_SETTINGS.notifications) as InputJsonValue,
     },
     update: updateData,
     select: {

@@ -6,24 +6,14 @@
 
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
-import { ValidationError } from '@/lib/utils/errors';
+import { parsePaginationWithFilters, toPrismaOptions } from '@/lib/utils/pagination';
+import { validators } from '@/lib/utils/validation';
+import { INTERVIEW_STATUSES, type InterviewStatus } from '@/lib/constants/enums';
+import type { InterviewListItem } from '@/lib/types/user';
 
 // ============================================================
 // Types
 // ============================================================
-
-interface InterviewListItem {
-  id: string;
-  scenario: string;
-  status: string;
-  score: number | null;
-  duration: number | null;
-  feedback: string | null;
-  strengths: string[];
-  improvements: string[];
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface InterviewsListResponse {
   interviews: InterviewListItem[];
@@ -36,21 +26,25 @@ interface InterviewsListResponse {
 // Query Parameter Parsing
 // ============================================================
 
-interface QueryParams {
-  page: number;
-  limit: number;
-  status?: string;
+interface InterviewFilters {
+  status?: InterviewStatus;
 }
 
-function parseQueryParams(url: string): QueryParams {
-  const urlObj = new URL(url);
-  const searchParams = urlObj.searchParams;
+function parseInterviewFilters(searchParams: URLSearchParams): InterviewFilters {
+  const statusParam = searchParams.get('status');
+  let status: InterviewStatus | undefined;
 
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10) || 10));
-  const status = searchParams.get('status') || undefined;
+  if (statusParam) {
+    // Validate status using validators.oneOf
+    const result = validators.oneOf('status', INTERVIEW_STATUSES)(statusParam);
+    if (result.ok) {
+      status = result.value;
+    } else {
+      throw result.error;
+    }
+  }
 
-  return { page, limit, status };
+  return { status };
 }
 
 // ============================================================
@@ -61,23 +55,18 @@ async function handleGetInterviews(
   request: Request,
   userId: string
 ): Promise<InterviewsListResponse> {
-  // Parse query parameters
-  const { page, limit, status } = parseQueryParams(request.url);
-
-  // Validate status if provided
-  const validStatuses = ['pending', 'in_progress', 'completed'];
-  if (status && !validStatuses.includes(status)) {
-    throw new ValidationError(
-      'status',
-      `Invalid status. Must be one of: ${validStatuses.join(', ')}`
-    );
-  }
+  // Parse query parameters using centralized pagination utility
+  const { page, limit, filters } = parsePaginationWithFilters(request.url, parseInterviewFilters);
+  const { status } = filters;
 
   // Build where clause
-  const where: { userId: string; status?: string } = { userId };
+  const where: { userId: string; status?: InterviewStatus } = { userId };
   if (status) {
     where.status = status;
   }
+
+  // Get Prisma pagination options
+  const paginationOptions = toPrismaOptions({ page, limit });
 
   // Fetch total count and paginated interviews
   const [total, interviews] = await Promise.all([
@@ -97,8 +86,7 @@ async function handleGetInterviews(
         updatedAt: true,
       },
       orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
+      ...paginationOptions,
     }),
   ]);
 

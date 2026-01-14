@@ -6,19 +6,11 @@
 
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
+import type { RecentInterview } from '@/lib/types/user';
 
 // ============================================================
 // Response Types
 // ============================================================
-
-interface RecentInterview {
-  id: string;
-  scenario: string;
-  status: string;
-  score: number | null;
-  duration: number | null;
-  createdAt: string;
-}
 
 interface UserStatsResponse {
   totalInterviews: number;
@@ -33,39 +25,41 @@ interface UserStatsResponse {
 // ============================================================
 
 async function handleGetStats(request: Request, userId: string): Promise<UserStatsResponse> {
-  // Fetch all user interviews
-  const interviews = await prisma.interview.findMany({
-    where: { userId },
-    select: {
-      id: true,
-      scenario: true,
-      status: true,
-      score: true,
-      duration: true,
-      createdAt: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  // Use Prisma aggregation for efficient database queries
+  const [aggregates, completedCount, recentInterviews] = await Promise.all([
+    prisma.interview.aggregate({
+      where: { userId },
+      _count: { id: true },
+      _sum: { duration: true },
+      _avg: { score: true },
+    }),
+    prisma.interview.count({
+      where: { userId, status: 'completed' },
+    }),
+    prisma.interview.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        scenario: true,
+        status: true,
+        score: true,
+        duration: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    }),
+  ]);
 
-  // Calculate statistics
-  const totalInterviews = interviews.length;
-  const completedInterviews = interviews.filter((i) => i.status === 'completed').length;
+  // Extract aggregated values
+  const totalInterviews = aggregates._count.id;
+  const completedInterviews = completedCount;
+  const averageScore = aggregates._avg.score !== null ? Math.round(aggregates._avg.score) : null;
+  const totalPracticeMinutes =
+    aggregates._sum.duration !== null ? Math.round(aggregates._sum.duration / 60) : 0;
 
-  // Calculate average score (only from completed interviews with scores)
-  const scoresArray = interviews.filter((i) => i.score !== null).map((i) => i.score as number);
-  const averageScore =
-    scoresArray.length > 0
-      ? Math.round(scoresArray.reduce((sum, score) => sum + score, 0) / scoresArray.length)
-      : null;
-
-  // Calculate total practice minutes (sum of all durations in seconds, convert to minutes)
-  const totalDurationSeconds = interviews
-    .filter((i) => i.duration !== null)
-    .reduce((sum, i) => sum + (i.duration as number), 0);
-  const totalPracticeMinutes = Math.round(totalDurationSeconds / 60);
-
-  // Get recent interviews (top 5)
-  const recentInterviews: RecentInterview[] = interviews.slice(0, 5).map((i) => ({
+  // Transform recent interviews to response format
+  const recentInterviewsList: RecentInterview[] = recentInterviews.map((i) => ({
     id: i.id,
     scenario: i.scenario,
     status: i.status,
@@ -79,7 +73,7 @@ async function handleGetStats(request: Request, userId: string): Promise<UserSta
     completedInterviews,
     averageScore,
     totalPracticeMinutes,
-    recentInterviews,
+    recentInterviews: recentInterviewsList,
   };
 }
 

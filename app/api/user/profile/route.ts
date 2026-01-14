@@ -6,8 +6,10 @@
 
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
-import { InternalServerError, ValidationError } from '@/lib/utils/errors';
+import { InternalServerError } from '@/lib/utils/errors';
 import { parseJsonBody } from '@/lib/utils/resource-helpers';
+import { validators, validate, ValidationSchema } from '@/lib/utils/validation';
+import { FIELD_CONSTRAINTS } from '@/lib/constants/enums';
 
 // ============================================================
 // Types
@@ -26,6 +28,14 @@ interface UserProfileResponse {
 interface UpdateProfileInput {
   name?: string;
 }
+
+// ============================================================
+// Validation Schema
+// ============================================================
+
+const updateProfileSchema: ValidationSchema<{ name: string | undefined }> = {
+  name: validators.optional(validators.maxLength('name', FIELD_CONSTRAINTS.name.maxLength)),
+};
 
 // ============================================================
 // GET Handler - Get User Profile
@@ -70,20 +80,18 @@ async function handleUpdateProfile(request: Request, userId: string): Promise<Us
   // Parse request body with error handling
   const body = await parseJsonBody<UpdateProfileInput>(request);
 
-  // Validate name if provided
-  if (body.name !== undefined) {
-    if (typeof body.name !== 'string') {
-      throw new ValidationError('name', 'Name must be a string');
-    }
-    if (body.name.length > 100) {
-      throw new ValidationError('name', 'Name must be 100 characters or less');
-    }
+  // Validate using schema
+  const validationResult = validate(body, updateProfileSchema);
+  if (!validationResult.ok) {
+    throw validationResult.error;
   }
+
+  const validated = validationResult.value;
 
   // Build update data
   const updateData: { name?: string | null } = {};
-  if (body.name !== undefined) {
-    updateData.name = body.name.trim() || null;
+  if (validated.name !== undefined) {
+    updateData.name = validated.name.trim() || null;
   }
 
   // Update user profile

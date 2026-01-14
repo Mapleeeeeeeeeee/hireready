@@ -6,8 +6,7 @@
 
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
-import { BadRequestError } from '@/lib/utils/errors';
-import { verifyOwnership } from '@/lib/utils/resource-helpers';
+import { verifyOwnership, extractResourceId } from '@/lib/utils/resource-helpers';
 
 // ============================================================
 // Types
@@ -33,25 +32,6 @@ interface DeleteInterviewResponse {
 }
 
 // ============================================================
-// Helper Functions
-// ============================================================
-
-/**
- * Extract interview ID from URL path
- * URL format: /api/interviews/[id]
- */
-function extractInterviewId(url: string): string {
-  const urlObj = new URL(url);
-  const pathSegments = urlObj.pathname.split('/').filter(Boolean);
-  // Path: api/interviews/[id]
-  const id = pathSegments[2];
-  if (!id) {
-    throw new BadRequestError('Interview ID is required');
-  }
-  return id;
-}
-
-// ============================================================
 // GET Handler - Get Interview Details
 // ============================================================
 
@@ -59,7 +39,7 @@ async function handleGetInterview(
   request: Request,
   userId: string
 ): Promise<InterviewDetailResponse> {
-  const id = extractInterviewId(request.url);
+  const id = extractResourceId(request.url, 'Interview');
 
   // Fetch interview
   const rawInterview = await prisma.interview.findUnique({
@@ -106,7 +86,7 @@ async function handleDeleteInterview(
   request: Request,
   userId: string
 ): Promise<DeleteInterviewResponse> {
-  const id = extractInterviewId(request.url);
+  const id = extractResourceId(request.url, 'Interview');
 
   // Fetch interview to verify ownership
   const rawInterview = await prisma.interview.findUnique({
