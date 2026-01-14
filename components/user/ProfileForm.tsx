@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Card, CardBody, CardHeader, Button, Input, Divider } from '@heroui/react';
 import { User, Mail, Calendar, Pencil, Check, X } from 'lucide-react';
 import { useUserStore } from '@/lib/stores/user-store';
+import { useSession, updateUser } from '@/lib/auth/auth-client';
 import { formatDateLong } from '@/lib/utils/date-format';
 
 // ============================================================
@@ -48,9 +49,11 @@ function InfoRow({
 
 export function ProfileForm({ onUpdate }: ProfileFormProps) {
   const t = useTranslations('profile');
-  const { profile, isLoadingProfile, updateProfile } = useUserStore();
+  const { profile, fetchProfile } = useUserStore();
+  const { refetch: refetchSession } = useSession();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [name, setName] = useState(profile?.name || '');
 
   const handleEdit = useCallback(() => {
@@ -66,10 +69,24 @@ export function ProfileForm({ onUpdate }: ProfileFormProps) {
   const handleSave = useCallback(async () => {
     if (!name.trim()) return;
 
-    await updateProfile({ name: name.trim() });
-    setIsEditing(false);
-    onUpdate?.();
-  }, [name, updateProfile, onUpdate]);
+    setIsSaving(true);
+    try {
+      // Use better-auth's updateUser to update user data
+      // This automatically updates the session and triggers UI refresh
+      const { error } = await updateUser({ name: name.trim() });
+
+      if (!error) {
+        // Refetch session to ensure Navbar updates immediately
+        await refetchSession();
+        // Also refresh our local profile store
+        await fetchProfile();
+        setIsEditing(false);
+        onUpdate?.();
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }, [name, refetchSession, fetchProfile, onUpdate]);
 
   if (!profile) {
     return null;
@@ -133,10 +150,10 @@ export function ProfileForm({ onUpdate }: ProfileFormProps) {
             <Button
               color="primary"
               variant="solid"
-              isLoading={isLoadingProfile}
+              isLoading={isSaving}
               isDisabled={!name.trim() || name.trim() === profile.name}
               onPress={handleSave}
-              startContent={!isLoadingProfile && <Check className="h-4 w-4" />}
+              startContent={!isSaving && <Check className="h-4 w-4" />}
               className="bg-terracotta hover:bg-terracotta/90 text-white"
             >
               {t('saveChanges')}
@@ -144,7 +161,7 @@ export function ProfileForm({ onUpdate }: ProfileFormProps) {
             <Button
               variant="light"
               onPress={handleCancel}
-              isDisabled={isLoadingProfile}
+              isDisabled={isSaving}
               startContent={<X className="h-4 w-4" />}
               className="text-charcoal/60 hover:text-charcoal"
             >

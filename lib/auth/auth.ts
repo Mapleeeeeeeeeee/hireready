@@ -16,29 +16,19 @@ const hasGoogleCreds =
   serverEnv.googleClientId.length > 0 &&
   serverEnv.googleClientSecret.length > 0;
 
-const socialProviders = hasGoogleCreds
-  ? {
-      google: {
-        clientId: serverEnv.googleClientId,
-        clientSecret: serverEnv.googleClientSecret,
-      },
-    }
-  : {};
-
 // Debug log
 if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
   console.log('[Auth Init] Google OAuth configured:', hasGoogleCreds);
 }
 
-export const auth = betterAuth({
+// Build auth config conditionally
+const authConfig: Parameters<typeof betterAuth>[0] = {
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
 
   baseURL: serverEnv.betterAuthUrl,
   secret: serverEnv.betterAuthSecret,
-
-  socialProviders,
 
   session: {
     cookieCache: {
@@ -50,7 +40,25 @@ export const auth = betterAuth({
   },
 
   trustedOrigins: [serverEnv.betterAuthUrl, 'http://localhost:5555'],
-});
+
+  // Note: Session data like user.id, session.token etc. are returned to the client.
+  // This is acceptable because:
+  // - user.id is the user's own ID, not a security issue
+  // - session.token is already stored in the cookie
+  // - ipAddress/userAgent are the user's own data
+};
+
+// Only add socialProviders if Google credentials are configured
+if (hasGoogleCreds) {
+  authConfig.socialProviders = {
+    google: {
+      clientId: serverEnv.googleClientId,
+      clientSecret: serverEnv.googleClientSecret,
+    },
+  };
+}
+
+export const auth = betterAuth(authConfig);
 
 export type Session = typeof auth.$Infer.Session;
 export type User = Session['user'];
