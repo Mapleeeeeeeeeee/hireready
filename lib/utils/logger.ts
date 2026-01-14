@@ -67,7 +67,31 @@ function formatLogEntry(entry: LogEntry): string {
     const prefix = `[${level.toUpperCase()}]`;
     const moduleInfo = context ? ` [${context.module}:${context.action}]` : '';
     const errorInfo = error ? ` | Error: ${error.message}` : '';
-    return `${prefix}${moduleInfo} ${message}${errorInfo}`;
+
+    // Extract additional context fields (exclude module and action)
+    let extraInfo = '';
+    if (context) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { module, action, ...extra } = context;
+      if (Object.keys(extra).length > 0) {
+        // Format extra fields as key=value pairs
+        extraInfo =
+          ' | ' +
+          Object.entries(extra)
+            .map(([k, v]) => {
+              // Truncate long values (like prompt content)
+              // Handle undefined/null values safely
+              if (v === undefined) return `${k}=undefined`;
+              if (v === null) return `${k}=null`;
+              const strVal = typeof v === 'string' ? v : JSON.stringify(v);
+              const displayVal = strVal.length > 200 ? strVal.slice(0, 200) + '...' : strVal;
+              return `${k}=${displayVal}`;
+            })
+            .join(', ');
+      }
+    }
+
+    return `${prefix}${moduleInfo} ${message}${extraInfo}${errorInfo}`;
   }
   // JSON format for production (easier to parse in log aggregators)
   return JSON.stringify(entry);

@@ -172,6 +172,54 @@ export const validators = {
     },
 
   /**
+   * Validate string minimum length
+   */
+  minLength:
+    (field: string, min: number): Validator<string> =>
+    (value) => {
+      const strResult = validators.string(field)(value);
+      if (!strResult.ok) return strResult;
+
+      if (strResult.value.length < min) {
+        return Err(new ValidationError(field, `${field} must be at least ${min} characters`));
+      }
+      return Ok(strResult.value);
+    },
+
+  /**
+   * Validate string maximum length
+   */
+  maxLength:
+    (field: string, max: number): Validator<string> =>
+    (value) => {
+      const strResult = validators.string(field)(value);
+      if (!strResult.ok) return strResult;
+
+      if (strResult.value.length > max) {
+        return Err(new ValidationError(field, `${field} must be ${max} characters or less`));
+      }
+      return Ok(strResult.value);
+    },
+
+  /**
+   * Validate string length within range
+   */
+  lengthRange:
+    (field: string, min: number, max: number): Validator<string> =>
+    (value) => {
+      const strResult = validators.string(field)(value);
+      if (!strResult.ok) return strResult;
+
+      const len = strResult.value.length;
+      if (len < min || len > max) {
+        return Err(
+          new ValidationError(field, `${field} must be between ${min} and ${max} characters`)
+        );
+      }
+      return Ok(strResult.value);
+    },
+
+  /**
    * Make a validator optional (allows undefined/null)
    */
   optional:

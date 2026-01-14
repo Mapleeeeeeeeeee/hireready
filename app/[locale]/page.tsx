@@ -40,7 +40,7 @@ export default function HomePage() {
 
           <Button
             as={Link}
-            href="/interview"
+            href="/interview/setup"
             size="lg"
             className="group bg-terracotta shadow-terracotta/20 hover:shadow-terracotta/30 relative rounded-xl px-10 py-7 text-lg font-medium text-white shadow-md transition-all hover:shadow-lg"
           >

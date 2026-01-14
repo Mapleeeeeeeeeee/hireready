@@ -129,6 +129,10 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          BETTER_AUTH_URL: http://localhost:5555
+          BETTER_AUTH_SECRET: ci-build-placeholder-secret
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
 
   test:
     name: Unit Tests

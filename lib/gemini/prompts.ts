@@ -3,6 +3,10 @@
  * Defines the AI's personality and behavior
  */
 
+import type { JobDescription } from '@/lib/jd/types';
+import { hasJobDescriptionContent } from '@/lib/jd/types';
+import { logger } from '@/lib/utils/logger';
+
 export type SupportedLanguage = 'en' | 'zh-TW';
 
 /**
@@ -126,4 +130,159 @@ export const openingMessages: Record<SupportedLanguage, string> = {
  */
 export function getOpeningMessage(language: SupportedLanguage): string {
   return openingMessages[language];
+}
+
+/**
+ * Instructions to trigger AI to start the interview
+ * These are sent as the first user message to prompt the AI
+ */
+export const interviewStartInstructions: Record<SupportedLanguage, string> = {
+  'zh-TW': '請開始面試，先簡短自我介紹並說明面試流程',
+  en: 'Please start the interview by introducing yourself briefly and explaining the interview process',
+};
+
+/**
+ * Get the interview start instruction for a specific language
+ */
+export function getInterviewStartInstruction(language: SupportedLanguage): string {
+  return interviewStartInstructions[language];
+}
+
+// ============================================================
+// JD Context Integration
+// ============================================================
+
+/**
+ * JD context prompt templates by language
+ */
+const jdContextTemplates: Record<SupportedLanguage, string> = {
+  'zh-TW': `## 目標職缺資訊
+
+你正在面試以下職位的候選人：
+
+{jobInfo}
+
+### 工作內容
+{description}
+
+### 職位要求
+{requirements}
+
+請根據以上職缺資訊，調整你的面試問題：
+1. 詢問與該職位相關的技術經驗
+2. 詢問與工作內容相關的行為問題
+3. 評估候選人是否符合職位要求`,
+
+  en: `## Target Position Information
+
+You are interviewing a candidate for the following position:
+
+{jobInfo}
+
+### Job Responsibilities
+{description}
+
+### Requirements
+{requirements}
+
+Please adjust your interview questions based on the above job information:
+1. Ask about technical experience relevant to this position
+2. Ask behavioral questions related to the job responsibilities
+3. Evaluate whether the candidate meets the position requirements`,
+};
+
+/**
+ * Format job basic info (title, company, location, salary)
+ */
+function formatJobInfo(jd: JobDescription, language: SupportedLanguage): string {
+  const lines: string[] = [];
+
+  if (jd.title) {
+    lines.push(language === 'zh-TW' ? `**職位**: ${jd.title}` : `**Position**: ${jd.title}`);
+  }
+  if (jd.company) {
+    lines.push(language === 'zh-TW' ? `**公司**: ${jd.company}` : `**Company**: ${jd.company}`);
+  }
+  if (jd.location) {
+    lines.push(language === 'zh-TW' ? `**地點**: ${jd.location}` : `**Location**: ${jd.location}`);
+  }
+  if (jd.salary) {
+    lines.push(language === 'zh-TW' ? `**薪資**: ${jd.salary}` : `**Salary**: ${jd.salary}`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Format requirements array as a bullet list
+ */
+function formatRequirements(
+  requirements: string[] | undefined,
+  language: SupportedLanguage
+): string {
+  if (!requirements || requirements.length === 0) {
+    return language === 'zh-TW' ? '未提供' : 'Not provided';
+  }
+  return requirements.map((req) => `- ${req}`).join('\n');
+}
+
+/**
+ * Generate JD context prompt based on job description
+ */
+export function generateJdContextPrompt(jd: JobDescription, language: SupportedLanguage): string {
+  const template = jdContextTemplates[language];
+  const notProvided = language === 'zh-TW' ? '未提供' : 'Not provided';
+
+  const jobInfo = formatJobInfo(jd, language) || notProvided;
+  const description = jd.description || notProvided;
+  const requirements = formatRequirements(jd.requirements, language);
+
+  return template
+    .replace('{jobInfo}', jobInfo)
+    .replace('{description}', description)
+    .replace('{requirements}', requirements);
+}
+
+/**
+ * Get the complete interviewer prompt with optional JD context
+ * If no JD is provided, returns the base prompt
+ */
+export function getInterviewerPromptWithJd(
+  language: SupportedLanguage,
+  jobDescription?: JobDescription | null
+): string {
+  const basePrompt = interviewerPrompts[language];
+
+  if (!hasJobDescriptionContent(jobDescription)) {
+    logger.debug('Building interviewer prompt without JD context', {
+      module: 'prompts',
+      action: 'getInterviewerPromptWithJd',
+      language,
+      hasJd: false,
+    });
+    return basePrompt;
+  }
+
+  const jdContext = generateJdContextPrompt(jobDescription!, language);
+  const fullPrompt = `${basePrompt}\n\n${jdContext}`;
+
+  logger.debug('Building interviewer prompt with JD context', {
+    module: 'prompts',
+    action: 'getInterviewerPromptWithJd',
+    language,
+    hasJd: true,
+    jdTitle: jobDescription!.title,
+    jdCompany: jobDescription!.company,
+    jdContextLength: jdContext.length,
+    fullPromptLength: fullPrompt.length,
+  });
+
+  // Log full prompt content in development
+  logger.debug('Full system prompt content', {
+    module: 'prompts',
+    action: 'getInterviewerPromptWithJd',
+    promptContent: fullPrompt,
+  });
+
+  return fullPrompt;
 }

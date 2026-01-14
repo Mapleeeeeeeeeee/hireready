@@ -262,13 +262,6 @@ export class GeminiProxyClient {
    * Handle Gemini server messages (forwarded from proxy)
    */
   private handleGeminiMessage(data: unknown): void {
-    // Debug: log received message structure
-    logger.debug('Received Gemini message', {
-      module: 'gemini-proxy-client',
-      action: 'handleGeminiMessage',
-      keys: Object.keys(data as object),
-    });
-
     const message = data as {
       setupComplete?: boolean;
       toolCall?: { functionCalls?: { name: string }[] };
@@ -297,24 +290,11 @@ export class GeminiProxyClient {
           // Handle audio response
           if (part.inlineData?.data) {
             const base64Data = part.inlineData.data;
-            logger.info('Received audio data', {
-              module: 'gemini-proxy-client',
-              action: 'handleGeminiMessage',
-              base64Length: base64Data.length,
-            });
-
             const binaryString = atob(base64Data);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
               bytes[i] = binaryString.charCodeAt(i);
             }
-
-            logger.info('Emitting audio', {
-              module: 'gemini-proxy-client',
-              action: 'handleGeminiMessage',
-              byteLength: bytes.buffer.byteLength,
-            });
-
             this.emit('audio', bytes.buffer);
           }
 

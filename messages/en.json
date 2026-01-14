@@ -3,13 +3,21 @@
     "appName": "HireReady",
     "loading": "Loading...",
     "error": "An error occurred",
-    "retry": "Retry"
+    "retry": "Retry",
+    "startInterview": "Start Interview"
   },
   "nav": {
     "home": "Home",
     "interview": "Start Interview",
+    "dashboard": "Dashboard",
+    "history": "Interview History",
+    "profile": "Profile",
+    "settings": "Settings",
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "userMenu": "User menu"
   },
   "home": {
     "title": "AI Interview Practice Platform",
@@ -43,6 +51,58 @@
     "endInterview": "End Interview",
     "permissionRequired": "Microphone and camera permission required",
     "grantPermission": "Grant Permission",
+    "setup": {
+      "title": "Interview Setup",
+      "subtitle": "Configure your interview settings before starting",
+      "languageTitle": "Interview Language",
+      "languageDescription": "Choose the language for your interview session",
+      "languages": {
+        "zhTW": "Chinese (Traditional)",
+        "en": "English"
+      },
+      "jdTitle": "Job Description",
+      "jdDescription": "Add a job description to get more relevant interview questions tailored to the position",
+      "optional": "optional",
+      "startButton": "Start Interview",
+      "startHint": "You can start the interview even without adding a job description",
+      "jd": {
+        "inputMode": "Input Mode",
+        "urlTab": "URL",
+        "textTab": "Manual Input",
+        "urlDescription": "Paste a job listing URL from 104 or 1111 to automatically parse the job description",
+        "urlPlaceholder": "https://www.104.com.tw/job/xxxxx",
+        "parse": "Parse",
+        "parsing": "Parsing...",
+        "supportedSites": "Supported sites",
+        "textDescription": "Manually enter the job information you want to practice for",
+        "jobTitle": "Job Title",
+        "jobTitlePlaceholder": "e.g., Frontend Engineer",
+        "company": "Company",
+        "companyPlaceholder": "e.g., ABC Tech",
+        "description": "Job Description",
+        "descriptionPlaceholder": "Paste or type the job description and requirements here...",
+        "confirm": "Confirm",
+        "unknownCompany": "Unknown Company",
+        "viewOriginal": "View original",
+        "clear": "Clear",
+        "location": "Location",
+        "salary": "Salary",
+        "descriptionLabel": "Job Description",
+        "requirementsLabel": "Requirements",
+        "moreRequirements": "more requirements",
+        "jdReady": "Job description ready for interview",
+        "sources": {
+          "manual": "Manual"
+        },
+        "errors": {
+          "urlRequired": "Please enter a job listing URL",
+          "unsupportedUrl": "Only 104.com.tw and 1111.com.tw URLs are supported",
+          "parseFailed": "Failed to parse the job listing. Please try again or use manual input.",
+          "titleRequired": "Job title is required",
+          "descriptionRequired": "Job description is required"
+        }
+      }
+    },
     "room": {
       "liveSession": "LIVE SESSION",
       "connected": "Connected",
@@ -63,12 +123,95 @@
         "speaking": "Speaking",
         "processing": "Processing",
         "error": "Error"
-      }
+      },
+      "video": {
+        "cameraOff": "Camera Off",
+        "cameraOffHint": "Click button below to turn on camera",
+        "loadingCamera": "Loading camera...",
+        "you": "You",
+        "live": "LIVE"
+      },
+      "ai": {
+        "name": "Alex (Interviewer)",
+        "speaking": "Speaking...",
+        "thinking": "Thinking...",
+        "listening": "Listening...",
+        "ready": "Ready"
+      },
+      "caption": "AI Captions"
     }
   },
   "auth": {
     "loginWithGoogle": "Login with Google",
-    "welcomeBack": "Welcome back"
+    "welcomeBack": "Welcome back",
+    "loginRequired": "Login Required",
+    "loginToAccess": "Please login to access this page"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "recentInterviews": "Recent Interviews",
+    "noInterviews": "No interviews yet",
+    "startFirst": "Start your first interview practice",
+    "totalInterviews": "Total Interviews",
+    "averageScore": "Average Score",
+    "improvement": "Improvement",
+    "lastWeek": "Last Week",
+    "viewAll": "View All"
+  },
+  "history": {
+    "title": "Interview History",
+    "subtitle": "View your past interview records and feedback",
+    "empty": "No interview records",
+    "emptyDescription": "Your interview records will appear here after completing your first interview",
+    "viewDetails": "View Details",
+    "date": "Date",
+    "scenario": "Scenario",
+    "duration": "Duration",
+    "score": "Score",
+    "status": "Status",
+    "backToHistory": "Back to History",
+    "notFound": "Interview not found",
+    "interviewCount": "{count} interviews",
+    "statuses": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed"
+    },
+    "transcript": {
+      "title": "Transcript",
+      "messages": "messages",
+      "emptyTranscript": "No transcript available"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your account information",
+    "name": "Name",
+    "email": "Email",
+    "memberSince": "Member Since",
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Customize your experience",
+    "language": "Language",
+    "languageDescription": "Choose your preferred interface language",
+    "theme": "Theme",
+    "themeDescription": "Choose your preferred appearance",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System Default"
+    },
+    "notifications": "Notifications",
+    "notificationsDescription": "Manage your notification preferences",
+    "emailNotifications": "Email Notifications",
+    "pushNotifications": "Push Notifications",
+    "save": "Save Settings",
+    "saved": "Settings Saved"
   },
   "errors": {
     "UNKNOWN_ERROR": "An unknown error occurred, please try again later",

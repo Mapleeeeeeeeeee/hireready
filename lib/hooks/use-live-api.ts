@@ -14,7 +14,11 @@ import {
 import { GeminiProxyClient } from '@/lib/gemini/gemini-proxy-client';
 import { AudioRecorder, isAudioRecordingSupported } from '@/lib/gemini/audio-recorder';
 import { AudioStreamer, isAudioPlaybackSupported } from '@/lib/gemini/audio-streamer';
-import { getInterviewerPrompt, type SupportedLanguage } from '@/lib/gemini/prompts';
+import {
+  getInterviewerPromptWithJd,
+  getInterviewStartInstruction,
+  type SupportedLanguage,
+} from '@/lib/gemini/prompts';
 import { createTranscriptEntry, type SessionState } from '@/lib/gemini/types';
 import { logger } from '@/lib/utils/logger';
 import { BadRequestError } from '@/lib/utils/errors';
@@ -124,7 +128,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       // Trigger AI to start the interview (interviewer introduces themselves first)
       // Small delay to ensure audio streamer is ready
       setTimeout(() => {
-        client.sendText('請開始面試，先簡短自我介紹並說明面試流程');
+        client.sendText(getInterviewStartInstruction(language));
       }, 500);
     });
 
@@ -167,7 +171,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
     client.on('interrupted', () => {
       streamerRef.current?.fadeOut();
     });
-  }, [store, startTimer, stopTimer]);
+  }, [language, store, startTimer, stopTimer]);
 
   /**
    * Setup event listeners for the audio recorder
@@ -223,16 +227,24 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       return;
     }
 
+    // Get current job description from store (before reset)
+    const { jobDescription } = useInterviewStore.getState();
+
     logger.info('Starting interview session via proxy', {
       module: 'use-live-api',
       action: 'connect',
       language,
+      hasJobDescription: jobDescription !== null,
     });
 
-    // Reset store
+    // Reset store (preserves nothing - clean slate for new session)
     store.reset();
     store.setLanguage(language);
     store.setSessionState('connecting');
+    // Restore job description after reset (JD should persist across sessions)
+    if (jobDescription) {
+      store.setJobDescription(jobDescription);
+    }
 
     try {
       // Initialize audio streamer first (needs to be ready before receiving audio)
@@ -245,8 +257,20 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       setupClientEvents();
 
       // Connect to Gemini via our secure proxy
+      // Use JD-enhanced prompt if job description is available
+      const systemInstruction = getInterviewerPromptWithJd(language, jobDescription);
+
+      logger.debug('Connecting to Gemini with system instruction', {
+        module: 'use-live-api',
+        action: 'connect',
+        language,
+        hasJobDescription: jobDescription !== null,
+        jobDescriptionTitle: jobDescription?.title,
+        systemInstructionLength: systemInstruction.length,
+      });
+
       const connectResult = await clientRef.current.connect({
-        systemInstruction: getInterviewerPrompt(language),
+        systemInstruction,
         responseModalities: ['AUDIO'],
         inputAudioTranscription: true,
         outputAudioTranscription: true,
@@ -303,6 +327,19 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
   }, [isSupported, language, store, setupClientEvents, setupRecorderEvents, setupStreamerEvents]);
 
   /**
+   * Clean up all resources (shared between disconnect and unmount)
+   */
+  const cleanup = useCallback(() => {
+    stopTimer();
+    recorderRef.current?.dispose();
+    recorderRef.current = null;
+    streamerRef.current?.dispose();
+    streamerRef.current = null;
+    clientRef.current?.dispose();
+    clientRef.current = null;
+  }, [stopTimer]);
+
+  /**
    * Disconnect and clean up
    */
   const disconnect = useCallback(() => {
@@ -310,30 +347,17 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       module: 'use-live-api',
       action: 'disconnect',
     });
-
-    stopTimer();
-
-    // Stop recorder
-    recorderRef.current?.dispose();
-    recorderRef.current = null;
-
-    // Stop streamer
-    streamerRef.current?.dispose();
-    streamerRef.current = null;
-
-    // Disconnect client
-    clientRef.current?.dispose();
-    clientRef.current = null;
-
+    cleanup();
     store.setSessionState('idle');
-  }, [store, stopTimer]);
+  }, [store, cleanup]);
 
   /**
    * Toggle microphone
+   * Note: We toggle store first, then sync recorder via the useEffect below
    */
   const toggleMic = useCallback(() => {
     store.toggleMic();
-    recorderRef.current?.setMuted(!store.isMicOn);
+    // Recorder sync is handled by the useEffect that watches store.isMicOn
   }, [store]);
 
   /**
@@ -351,31 +375,11 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
   }, [autoConnect, connect]);
 
   // Cleanup on unmount
-  // Note: Using refs to avoid stale closure issues with cleanup
-
   useEffect(() => {
-    const mountedRef = { current: true };
-
     return () => {
-      if (!mountedRef.current) return;
-      mountedRef.current = false;
-
-      // Inline cleanup to avoid dependency on disconnect
-      stopTimer();
-
-      // Stop recorder
-      recorderRef.current?.dispose();
-      recorderRef.current = null;
-
-      // Stop streamer
-      streamerRef.current?.dispose();
-      streamerRef.current = null;
-
-      // Disconnect client
-      clientRef.current?.dispose();
-      clientRef.current = null;
+      cleanup();
     };
-  }, [stopTimer]);
+  }, [cleanup]);
 
   // Sync mic state with recorder
   useEffect(() => {

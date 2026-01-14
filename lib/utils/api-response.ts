@@ -8,6 +8,7 @@ import { serverEnv } from '@/lib/config/server';
 import { AppError, isAppError, toAppError, ErrorCode } from './errors';
 import { logger, LogContext } from './logger';
 import { Result } from './result';
+import { requireAuth } from '@/lib/auth/require-auth';
 
 // ============================================================
 // Envelope Response Types
@@ -324,3 +325,23 @@ export const CommonResponses = {
   },
 };
 /* eslint-enable @typescript-eslint/no-require-imports */
+
+// ============================================================
+// Authenticated API Handler Wrapper (HOF)
+// ============================================================
+
+type AuthenticatedHandler<T> = (request: Request, userId: string) => Promise<T>;
+
+/**
+ * HOF: Wrap authenticated API route handler with unified auth, error handling and logging
+ * Automatically extracts userId from session and passes it to the handler
+ */
+export function withAuthHandler<T>(
+  handler: AuthenticatedHandler<T>,
+  options: ApiHandlerOptions
+): NextHandler<NextResponse<ApiResponse<T>>> {
+  return withApiHandler(async (request: Request) => {
+    const userId = await requireAuth(request);
+    return handler(request, userId);
+  }, options);
+}

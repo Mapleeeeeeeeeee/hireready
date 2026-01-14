@@ -1,0 +1,242 @@
+# HireReady 用戶系統開發進度
+
+## 概覽
+
+| Phase             | 狀態    | 完成日期   |
+| ----------------- | ------- | ---------- |
+| Phase 1: 基礎建設 | ✅ 完成 | 2026-01-14 |
+| Phase 2: API 開發 | ✅ 完成 | 2026-01-14 |
+| Phase 3: 狀態管理 | ✅ 完成 | 2026-01-14 |
+| Phase 4: 組件開發 | ✅ 完成 | 2026-01-14 |
+| Phase 5: 頁面開發 | ✅ 完成 | 2026-01-14 |
+| Phase 6: 導航整合 | ✅ 完成 | 2026-01-14 |
+
+---
+
+## Phase 1: 基礎建設 ✅
+
+### 完成項目
+
+1. **Prisma Schema 更新**
+   - 新增 `UserSettings` 模型
+   - `Interview` 模型新增 `score`, `strengths`, `improvements` 欄位
+   - 新增資料庫索引（Session, Account, Interview, Verification）
+   - Token 欄位改用 `@db.Text` 支援長字串
+
+2. **AuthGuard 組件**
+   - 文件：`components/auth/AuthGuard.tsx`
+   - 功能：保護需要認證的頁面
+   - 支援 i18n 和自訂 fallback UI
+
+3. **useGoogleLogin Hook**
+   - 文件：`lib/auth/hooks.ts`
+   - 功能：統一 Google OAuth 登入邏輯
+   - 解決 AuthGuard 和 Navbar 中的 DRY 問題
+
+4. **i18n 翻譯**
+   - 新增 `nav.dashboard`, `nav.history`, `nav.profile`, `nav.settings`
+   - 新增 `dashboard.*`, `history.*`, `profile.*`, `settings.*`
+   - 新增 `auth.loginRequired`, `auth.loginToAccess`
+
+### Review 結果
+
+#### 安全性審查
+
+- ✅ 資料庫索引已新增（效能優化）
+- ✅ Token 欄位使用 `@db.Text`
+- ✅ `providerId + accountId` 唯一約束已新增
+- ✅ callbackURL 驗證已實現
+
+#### 簡潔性審查
+
+- ✅ DRY 問題已修復（`useGoogleLogin` hook）
+- ✅ 程式碼風格一致
+
+---
+
+## Phase 2: API 開發 ✅
+
+### 完成項目
+
+| 路由                   | 方法    | 說明             | 狀態 |
+| ---------------------- | ------- | ---------------- | ---- |
+| `/api/user/stats`      | GET     | 儀表板統計       | ✅   |
+| `/api/interviews`      | GET     | 面試列表（分頁） | ✅   |
+| `/api/interviews/[id]` | GET     | 面試詳情         | ✅   |
+| `/api/interviews/[id]` | DELETE  | 刪除面試         | ✅   |
+| `/api/user/profile`    | GET/PUT | 用戶資料         | ✅   |
+| `/api/user/settings`   | GET/PUT | 用戶設置         | ✅   |
+
+### 新增的共用 Helper
+
+1. **`lib/auth/require-auth.ts`**
+   - `requireAuth(request)` - 統一認證邏輯，返回 userId
+
+2. **`lib/utils/resource-helpers.ts`**
+   - `verifyOwnership()` - 驗證資源所有權
+   - `parseJsonBody()` - 安全解析 JSON body
+
+### Review 結果
+
+#### 安全性審查
+
+- ✅ 所有 API 使用 `withApiHandler` HOF
+- ✅ 認證檢查完整
+- ✅ 資源所有權驗證
+- ✅ JSON 解析錯誤處理
+
+#### 簡潔性審查
+
+- ✅ 認證邏輯抽取為 `requireAuth()`
+- ✅ 資源驗證抽取為 `verifyOwnership()`
+- ✅ 舊 API (`/api/interview/save`) 已重構使用 HOF
+
+### 修改的文件
+
+| 文件                               | 修改內容     |
+| ---------------------------------- | ------------ |
+| `app/api/user/stats/route.ts`      | 新建         |
+| `app/api/interviews/route.ts`      | 新建         |
+| `app/api/interviews/[id]/route.ts` | 新建         |
+| `app/api/user/profile/route.ts`    | 新建         |
+| `app/api/user/settings/route.ts`   | 新建         |
+| `app/api/interview/save/route.ts`  | 重構使用 HOF |
+| `lib/auth/require-auth.ts`         | 新建         |
+| `lib/utils/resource-helpers.ts`    | 新建         |
+
+---
+
+## Phase 3: 狀態管理 ✅
+
+### 完成項目
+
+1. **User Store (`lib/stores/user-store.ts`)**
+   - 用戶 profile、settings、stats 狀態管理
+   - 面試歷史列表與詳情
+   - 完整的 loading/error 狀態
+   - 分頁支援與 selectors
+
+2. **共用工具新增**
+   - `lib/utils/pagination.ts` - 分頁解析與 Prisma 整合
+   - `lib/constants/enums.ts` - 集中管理常數（語言、主題、狀態）
+   - `lib/types/user.ts` - 共用類型定義
+   - `validators.minLength/maxLength/lengthRange` - 新增驗證器
+
+3. **API 優化**
+   - `/api/user/stats` 改用 Prisma aggregation（效能優化）
+   - 所有 API 使用集中化常數和類型
+
+### Code Review 結果
+
+| Review       | 🔴 Must Fix | 🟡 Should Fix | 🟢 Pass |
+| ------------ | ----------- | ------------- | ------- |
+| Security     | 0           | 3             | 10      |
+| Simplicity   | 0           | 0             | 7       |
+| Reusability  | 0           | 0             | 6       |
+| Coding Style | 0           | 0             | 9       |
+
+**已修復項目：**
+
+- ✅ 刪除未使用的 `extractPathParams()` 死代碼
+- ✅ Stats API 改用 Prisma aggregation
+- ✅ Store auth 錯誤處理抽取為 `handleAuthError()` helper
+- ✅ 類型定義集中化到 `lib/types/user.ts`
+- ✅ 使用 `PAGINATION_DEFAULTS` 取代魔法數字
+
+---
+
+## Phase 4: 組件開發 ✅
+
+### 完成項目
+
+1. **面試歷史組件**
+   - `components/history/InterviewCard.tsx` - 面試卡片
+   - `components/history/TranscriptViewer.tsx` - 對話記錄檢視器
+
+2. **用戶組件**
+   - `components/user/StatsCard.tsx` - 統計卡片
+   - `components/user/ProfileForm.tsx` - 個人資料表單
+   - `components/user/SettingsForm.tsx` - 設定表單
+
+3. **共用工具**
+   - `lib/utils/date-format.ts` - 日期/時間格式化工具
+
+4. **測試 (55 個新測試)**
+   - StatsCard.test.tsx, InterviewCard.test.tsx, TranscriptViewer.test.tsx
+   - ProfileForm.test.tsx, SettingsForm.test.tsx
+
+---
+
+## Phase 5: 頁面開發 ✅
+
+### 完成項目
+
+1. **用戶頁面**
+   - `app/[locale]/dashboard/page.tsx` - 儀表板
+   - `app/[locale]/history/page.tsx` - 面試歷史列表
+   - `app/[locale]/history/[id]/page.tsx` - 面試詳情
+   - `app/[locale]/profile/page.tsx` - 個人資料
+   - `app/[locale]/settings/page.tsx` - 設定
+
+2. **共用組件抽取**
+   - `components/common/StatusChip.tsx` - 狀態標籤
+   - `components/common/PageLoadingState.tsx` - 頁面載入狀態
+   - `components/common/PageErrorState.tsx` - 頁面錯誤狀態
+
+### Code Review 修復
+
+- ✅ 硬編碼 i18n 字串修復
+- ✅ 重複 StatusChip 抽取為共用組件
+- ✅ 重複 Loading/Error pattern 抽取為共用組件
+
+---
+
+## Phase 6: 導航整合 ✅
+
+### 完成項目
+
+1. **Navbar 用戶選單更新**
+   - 桌面版：Dropdown 選單包含用戶資訊、導航連結、登出
+   - 行動版：滑出選單包含相同功能
+   - 當前頁面高亮顯示
+
+2. **導航連結**
+   - Dashboard（儀表板）→ `/dashboard`
+   - History（面試歷史）→ `/history`
+   - Profile（個人資料）→ `/profile`
+   - Settings（設定）→ `/settings`
+
+### Code Review 修復
+
+- ✅ 修復 aria-label 硬編碼字串（openMenu, closeMenu, userMenu）
+
+---
+
+## 整合問題修復 ✅
+
+### 修復項目
+
+1. **Google OAuth 條件配置**
+   - 文件：`lib/auth/auth.ts`
+   - 問題：當 Google OAuth 憑證未設定時會拋出 `CLIENT_ID_AND_SECRET_REQUIRED` 錯誤
+   - 修復：只在憑證存在時才配置 Google provider
+
+2. **Navbar 導航修復**
+   - 文件：`components/layout/Navbar.tsx`
+   - 問題：使用 HeroUI Link 導致 locale 路由不正確
+   - 修復：改用 Next.js Link 以支援正確的 locale 處理
+   - 移除不支援的 `size` 屬性，`onPress` 改為 `onClick`
+
+---
+
+## 🎉 用戶系統開發完成！
+
+所有 6 個 Phase 已全部完成：
+
+- ✅ Phase 1: 基礎建設（Prisma Schema、AuthGuard、Hooks）
+- ✅ Phase 2: API 開發（6 個 API routes）
+- ✅ Phase 3: 狀態管理（Zustand user-store）
+- ✅ Phase 4: 組件開發（5 個組件 + 55 個測試）
+- ✅ Phase 5: 頁面開發（5 個頁面 + 3 個共用組件）
+- ✅ Phase 6: 導航整合（Navbar 用戶選單）
+- ✅ 整合問題修復（OAuth 條件配置、導航修復）

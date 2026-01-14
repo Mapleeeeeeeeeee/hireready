@@ -8,6 +8,7 @@ import { devtools } from 'zustand/middleware';
 import { logger } from '@/lib/utils/logger';
 import type { SessionState, TranscriptEntry } from '@/lib/gemini/types';
 import type { AppError } from '@/lib/utils/errors';
+import type { JobDescription } from '@/lib/jd/types';
 
 // ============================================================
 // Types
@@ -28,9 +29,15 @@ export interface InterviewStoreState {
   interimUserTranscript: string;
   interimAiTranscript: string;
 
+  // Caption settings (AI captions only)
+  isCaptionOn: boolean;
+
   // Interview metadata
   language: 'en' | 'zh-TW';
   elapsedSeconds: number;
+
+  // Job description (optional)
+  jobDescription: JobDescription | null;
 
   // Error state
   lastError: AppError | null;
@@ -53,9 +60,13 @@ export interface InterviewStoreActions {
   setInterimAiTranscript: (text: string) => void;
   clearInterimTranscripts: () => void;
 
+  // Caption actions
+  toggleCaption: () => void;
+
   // Interview metadata actions
   setLanguage: (language: 'en' | 'zh-TW') => void;
   incrementTimer: () => void;
+  setJobDescription: (jd: JobDescription | null) => void;
 
   // Error actions
   setError: (error: AppError | null) => void;
@@ -79,8 +90,10 @@ const initialState: InterviewStoreState = {
   transcripts: [],
   interimUserTranscript: '',
   interimAiTranscript: '',
+  isCaptionOn: false,
   language: 'zh-TW',
   elapsedSeconds: 0,
+  jobDescription: null,
   lastError: null,
 };
 
@@ -164,6 +177,16 @@ export const useInterviewStore = create<InterviewStore>()(
         set({ interimUserTranscript: '', interimAiTranscript: '' });
       },
 
+      // Caption actions
+      toggleCaption: () => {
+        const newState = !get().isCaptionOn;
+        logger.info(`Captions ${newState ? 'enabled' : 'disabled'}`, {
+          module: 'interview-store',
+          action: 'toggleCaption',
+        });
+        set({ isCaptionOn: newState });
+      },
+
       // Interview metadata actions
       setLanguage: (language) => {
         logger.info(`Language set to ${language}`, {
@@ -175,6 +198,16 @@ export const useInterviewStore = create<InterviewStore>()(
 
       incrementTimer: () => {
         set((state) => ({ elapsedSeconds: state.elapsedSeconds + 1 }));
+      },
+
+      setJobDescription: (jd) => {
+        logger.info('Job description updated', {
+          module: 'interview-store',
+          action: 'setJobDescription',
+          hasJd: jd !== null,
+          title: jd?.title,
+        });
+        set({ jobDescription: jd });
       },
 
       // Error actions
