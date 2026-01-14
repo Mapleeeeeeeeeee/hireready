@@ -19,11 +19,19 @@ function createPrismaClient(): PrismaClient {
   return new PrismaClient({ adapter });
 }
 
-// In development, reuse the client to avoid connection pool exhaustion
-export const prisma = globalThis.prisma ?? createPrismaClient();
-
-if (serverEnv.nodeEnv !== 'production') {
-  globalThis.prisma = prisma;
+// Lazy initialization - only create client when accessed
+function getPrismaClient(): PrismaClient {
+  if (!globalThis.prisma) {
+    globalThis.prisma = createPrismaClient();
+  }
+  return globalThis.prisma;
 }
+
+// Export as a getter to ensure lazy initialization
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_, prop) {
+    return getPrismaClient()[prop as keyof PrismaClient];
+  },
+});
 
 export type { PrismaClient };

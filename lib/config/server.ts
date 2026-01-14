@@ -6,32 +6,47 @@
  * import { serverEnv } from '@/lib/config/server';
  */
 
-function getEnvVar(key: string, required: boolean = true): string {
+function getEnvVar(key: string, defaultValue?: string): string {
   const value = process.env[key];
-  if (required && !value) {
+  if (value) return value;
+  if (defaultValue !== undefined) return defaultValue;
+
+  // Only throw error at runtime when actually accessed
+  return '';
+}
+
+function getRequiredEnvVar(key: string): string {
+  const value = process.env[key];
+  if (!value) {
     throw new Error(`Missing required environment variable: ${key}`);
   }
-  return value ?? '';
+  return value;
 }
 
 export const serverEnv = {
   // App
-  nodeEnv: getEnvVar('NODE_ENV', false) || 'development',
-  port: parseInt(getEnvVar('PORT', false) || '5555', 10),
+  nodeEnv: getEnvVar('NODE_ENV', 'development'),
+  port: parseInt(getEnvVar('PORT', '5555'), 10),
 
-  // Better Auth
-  betterAuthUrl: getEnvVar('BETTER_AUTH_URL'),
-  betterAuthSecret: getEnvVar('BETTER_AUTH_SECRET'),
+  // Better Auth (lazy evaluation - will throw at runtime if not set)
+  get betterAuthUrl() {
+    return getRequiredEnvVar('BETTER_AUTH_URL');
+  },
+  get betterAuthSecret() {
+    return getRequiredEnvVar('BETTER_AUTH_SECRET');
+  },
 
   // Google OAuth (optional - set up later)
-  googleClientId: getEnvVar('GOOGLE_CLIENT_ID', false),
-  googleClientSecret: getEnvVar('GOOGLE_CLIENT_SECRET', false),
+  googleClientId: getEnvVar('GOOGLE_CLIENT_ID', ''),
+  googleClientSecret: getEnvVar('GOOGLE_CLIENT_SECRET', ''),
 
   // Gemini API (optional)
-  geminiApiKey: getEnvVar('GEMINI_API_KEY', false),
+  geminiApiKey: getEnvVar('GEMINI_API_KEY', ''),
 
-  // Database
-  databaseUrl: getEnvVar('DATABASE_URL'),
+  // Database (lazy evaluation - will throw at runtime if not set)
+  get databaseUrl() {
+    return getRequiredEnvVar('DATABASE_URL');
+  },
 } as const;
 
 // Type for serverEnv
