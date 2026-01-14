@@ -6,6 +6,65 @@
     "retry": "Retry",
     "startInterview": "Start Interview"
   },
+  "marketing": {
+    "hero": {
+      "badge": "AI Video Intelligence v2.0",
+      "titlePart1": "Master the",
+      "titlePart2": "Video Interview",
+      "subtitle": "REAL AI analysis of your voice, expression, and improved answers. It's not just a chat—it's a simulation.",
+      "cta": "Start Analysis",
+      "demo": "Hear a Demo"
+    },
+    "interface": {
+      "rec": "REC",
+      "hd": "HD 1080p",
+      "analysisActive": "Analysis Active",
+      "monitoring": "Monitoring tone & pace",
+      "eyeContact": "Eye Contact",
+      "pace": "Pace",
+      "paceValue": "140 wpm (Optimal)",
+      "you": "You",
+      "cameraOff": "Camera Off",
+      "cameraOffHint": "Click button below to turn on camera"
+    },
+    "analysis": {
+      "titlePart1": "More than just words.",
+      "titlePart2": "Full sensory analysis.",
+      "subtitle": "Your interviewer is an AI, but the feedback feels human. We analyze your delivery, not just your transcript.",
+      "cards": {
+        "nonVerbal": {
+          "title": "Non-Verbal Cues",
+          "description": "We track eye contact, posture, and facial reliability using privacy-friendly face mesh technology."
+        },
+        "tone": {
+          "title": "Verbal Delivery",
+          "description": "Analysis of your confidence variations and filler words (um, uh) to ensure clear communication."
+        },
+        "context": {
+          "title": "Contextual Intelligence",
+          "description": "Answers are graded against the specific Job Description (JD) and role requirements.",
+          "matchLabel": "Match: {percent}%"
+        }
+      }
+    },
+    "footer": {
+      "title": "Ready to fast-track your career?",
+      "subtitle": "Join thousands of candidates who are crushing their interviews with HireReady.",
+      "cta": "Start Practicing Now"
+    },
+    "ticker": {
+      "roles": [
+        "Frontend Engineer",
+        "Product Manager",
+        "UI/UX Designer",
+        "Data Scientist",
+        "Marketing Specialist",
+        "Sales Representative",
+        "DevOps Engineer",
+        "Backend Developer"
+      ]
+    }
+  },
   "nav": {
     "home": "Home",
     "interview": "Start Interview",
