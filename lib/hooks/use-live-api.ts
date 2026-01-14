@@ -157,11 +157,15 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
 
     client.on('outputTranscript', (text, isFinal) => {
       if (isFinal) {
-        store.addTranscript(createTranscriptEntry('ai', text, true));
-        store.setInterimAiTranscript('');
-      } else {
+        // Show the complete sentence as caption before adding to transcript
         store.setInterimAiTranscript(text);
+        // Add a small delay to show the complete sentence
+        setTimeout(() => {
+          store.addTranscript(createTranscriptEntry('ai', text, true));
+          store.setInterimAiTranscript('');
+        }, 1500); // Show complete sentence for 1.5 seconds
       }
+      // Ignore partial transcripts to avoid word-by-word display
     });
 
     client.on('turnComplete', () => {
