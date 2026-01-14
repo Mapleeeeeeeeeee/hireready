@@ -11,6 +11,11 @@ import {
   Button,
   Avatar,
   Link,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  DropdownSection,
 } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
@@ -48,6 +53,13 @@ export function Navbar() {
     { key: 'interview', label: t('nav.interview'), href: '/interview' },
   ];
 
+  const userMenuItems = [
+    { key: 'dashboard', label: t('nav.dashboard'), href: '/dashboard' },
+    { key: 'history', label: t('nav.history'), href: '/history' },
+    { key: 'profile', label: t('nav.profile'), href: '/profile' },
+    { key: 'settings', label: t('nav.settings'), href: '/settings' },
+  ];
+
   return (
     <HeroNavbar
       isMenuOpen={isMenuOpen}
@@ -58,9 +70,9 @@ export function Navbar() {
       {/* Brand and mobile toggle */}
       <NavbarContent>
         <NavbarMenuToggle
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-label={isMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
           className="text-charcoal/70 md:hidden"
-          srOnlyText={isMenuOpen ? 'Close menu' : 'Open menu'}
+          srOnlyText={isMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
         />
         <NavbarBrand>
           <Link href="/" className="text-charcoal transition-opacity hover:opacity-80">
@@ -96,31 +108,60 @@ export function Navbar() {
             </Button>
           </NavbarItem>
         ) : session?.user ? (
-          <>
-            <NavbarItem className="hidden md:flex">
-              <span className="text-charcoal/60 pr-3 font-serif text-sm font-medium italic">
-                {session.user.name?.split(' ')[0]}
-              </span>
-            </NavbarItem>
-            <NavbarItem>
-              <Avatar
-                size="sm"
-                src={session.user.image || undefined}
-                name={session.user.name || undefined}
-                className="ring-warm-gray/20 h-8 w-8 ring-1"
-              />
-            </NavbarItem>
-            <NavbarItem>
-              <Button
-                size="sm"
-                variant="light"
-                onPress={handleLogout}
-                className="text-terracotta/80 hover:text-terracotta min-w-16 px-2 font-medium"
-              >
-                {t('nav.logout')}
-              </Button>
-            </NavbarItem>
-          </>
+          <NavbarItem>
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <button
+                  type="button"
+                  className="flex cursor-pointer items-center gap-2 transition-opacity outline-none hover:opacity-80"
+                >
+                  <span className="text-charcoal/60 hidden font-serif text-sm font-medium italic md:inline">
+                    {session.user.name?.split(' ')[0]}
+                  </span>
+                  <Avatar
+                    size="sm"
+                    src={session.user.image || undefined}
+                    name={session.user.name || undefined}
+                    className="ring-warm-gray/20 h-8 w-8 ring-1"
+                  />
+                </button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label={t('nav.userMenu')} variant="flat" className="w-56">
+                <DropdownSection showDivider>
+                  <DropdownItem
+                    key="user-info"
+                    isReadOnly
+                    className="h-14 gap-2 opacity-100"
+                    textValue={session.user.email || session.user.name || 'User'}
+                  >
+                    <p className="text-charcoal font-medium">{session.user.name}</p>
+                    <p className="text-charcoal/60 text-xs">{session.user.email}</p>
+                  </DropdownItem>
+                </DropdownSection>
+                <DropdownSection showDivider>
+                  {userMenuItems.map((item) => (
+                    <DropdownItem
+                      key={item.key}
+                      href={item.href}
+                      className={pathname === item.href ? 'text-terracotta' : 'text-charcoal'}
+                    >
+                      {item.label}
+                    </DropdownItem>
+                  ))}
+                </DropdownSection>
+                <DropdownSection>
+                  <DropdownItem
+                    key="logout"
+                    className="text-terracotta"
+                    color="danger"
+                    onPress={handleLogout}
+                  >
+                    {t('nav.logout')}
+                  </DropdownItem>
+                </DropdownSection>
+              </DropdownMenu>
+            </Dropdown>
+          </NavbarItem>
         ) : (
           <NavbarItem>
             <Button
@@ -152,22 +193,45 @@ export function Navbar() {
         ))}
 
         {session?.user && (
-          <NavbarMenuItem>
-            <div className="border-warm-gray/10 mt-6 flex items-center gap-3 border-t py-6">
-              <Avatar
-                size="sm"
-                src={session.user.image || undefined}
-                name={session.user.name || undefined}
-              />
-              <span className="text-charcoal text-lg font-medium">{session.user.name}</span>
-            </div>
-            <Button
-              className="border-terracotta/20 text-terracotta mt-2 w-full border bg-transparent text-lg"
-              onPress={handleLogout}
-            >
-              {t('nav.logout')}
-            </Button>
-          </NavbarMenuItem>
+          <>
+            <NavbarMenuItem>
+              <div className="border-warm-gray/10 mt-6 flex items-center gap-3 border-t py-6">
+                <Avatar
+                  size="sm"
+                  src={session.user.image || undefined}
+                  name={session.user.name || undefined}
+                />
+                <div className="flex flex-col">
+                  <span className="text-charcoal text-lg font-medium">{session.user.name}</span>
+                  <span className="text-charcoal/60 text-sm">{session.user.email}</span>
+                </div>
+              </div>
+            </NavbarMenuItem>
+
+            {userMenuItems.map((item) => (
+              <NavbarMenuItem key={item.key}>
+                <Link
+                  className={`w-full py-3 font-serif text-xl ${
+                    pathname === item.href ? 'text-terracotta' : 'text-charcoal'
+                  }`}
+                  href={item.href}
+                  size="lg"
+                  onPress={() => setIsMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              </NavbarMenuItem>
+            ))}
+
+            <NavbarMenuItem>
+              <Button
+                className="border-terracotta/20 text-terracotta mt-4 w-full border bg-transparent text-lg"
+                onPress={handleLogout}
+              >
+                {t('nav.logout')}
+              </Button>
+            </NavbarMenuItem>
+          </>
         )}
       </NavbarMenu>
     </HeroNavbar>

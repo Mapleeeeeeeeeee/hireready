@@ -14,7 +14,10 @@
     "profile": "Profile",
     "settings": "Settings",
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "userMenu": "User menu"
   },
   "home": {
     "title": "AI Interview Practice Platform",
