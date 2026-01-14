@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.1](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.2.0...v1.2.1) (2026-01-14)
+
+
+### Bug Fixes
+
+* **auth:** ensure environment variables are loaded correctly for Google OAuth ([f460b53](https://github.com/Mapleeeeeeeeeee/hireready/commit/f460b53f28bf57ee22acc2b350f16f21242b351e))
+* **auth:** remove Proxy wrapper causing auth initialization failure ([b6a7c6d](https://github.com/Mapleeeeeeeeeee/hireready/commit/b6a7c6d9083f5bee426a1fe6bb669c7777fd34ac))
+* auto-fix lint and type errors ([cbf18b2](https://github.com/Mapleeeeeeeeeee/hireready/commit/cbf18b2e95e48f444d1fde50bcdea3165783bdf8))
+* **interview:** improve AI caption display to show complete sentences ([4f99d55](https://github.com/Mapleeeeeeeeeee/hireready/commit/4f99d555acd5ef9fb42afad80cf8fc34d37a267a))
+
 ## [1.2.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.1.0...v1.2.0) (2026-01-14)
 
 
