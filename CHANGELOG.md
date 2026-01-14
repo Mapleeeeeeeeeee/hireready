@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.1.0...v1.2.0) (2026-01-14)
+
+
+### Features
+
+* **marketing:** add landing page with video hero and trust ticker ([#6](https://github.com/Mapleeeeeeeeeee/hireready/issues/6)) ([84df191](https://github.com/Mapleeeeeeeeeee/hireready/commit/84df19149eab29f2b590a82f08cfb1a152d8b926))
+
 ## [1.1.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.0.0...v1.1.0) (2026-01-14)
 
 ### Features
