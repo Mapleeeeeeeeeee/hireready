@@ -5,7 +5,7 @@
 
 import type { Result } from '@/lib/utils/result';
 import { Ok, Err, withErrorHandling } from '@/lib/utils/result';
-import { BadRequestError, NotFoundError } from '@/lib/utils/errors';
+import { BadRequestError } from '@/lib/utils/errors';
 import { logger } from '@/lib/utils/logger';
 import type { JobDescription, ManualJobInput } from './types';
 import {

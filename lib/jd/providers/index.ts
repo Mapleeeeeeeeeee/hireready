@@ -5,15 +5,15 @@
 
 import { logger } from '@/lib/utils/logger';
 import type { JDProvider, ProviderConfig } from './types';
-import { Provider104, create104Provider } from './provider-104';
-import { Provider1111, create1111Provider } from './provider-1111';
-import { ManualProvider, createManualProvider, manualProvider } from './provider-manual';
+import { Provider104 } from './provider-104';
+import { Provider1111 } from './provider-1111';
+import { ManualProvider } from './provider-manual';
 
 // Re-export types and classes
 export type { JDProvider, ProviderConfig } from './types';
 export { DEFAULT_PROVIDER_CONFIG } from './types';
-export { Provider104, create104Provider } from './provider-104';
-export { Provider1111, create1111Provider } from './provider-1111';
+export { Provider104 } from './provider-104';
+export { Provider1111 } from './provider-1111';
 export { ManualProvider, createManualProvider, manualProvider } from './provider-manual';
 export { BaseJDProvider } from './base-provider';
 

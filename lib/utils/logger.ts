@@ -71,7 +71,8 @@ function formatLogEntry(entry: LogEntry): string {
     // Extract additional context fields (exclude module and action)
     let extraInfo = '';
     if (context) {
-      const { module: _m, action: _a, ...extra } = context;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { module, action, ...extra } = context;
       if (Object.keys(extra).length > 0) {
         // Format extra fields as key=value pairs
         extraInfo =

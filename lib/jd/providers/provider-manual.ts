@@ -7,7 +7,7 @@ import type { Result } from '@/lib/utils/result';
 import { Ok } from '@/lib/utils/result';
 import { logger } from '@/lib/utils/logger';
 import type { JobDescription, ManualJobInput } from '../types';
-import type { JDProvider, ProviderConfig } from './types';
+import type { JDProvider } from './types';
 
 /**
  * Provider for manual job description input
@@ -20,7 +20,7 @@ export class ManualProvider implements JDProvider {
   /**
    * Manual provider cannot handle URLs
    */
-  canHandle(_url: string): boolean {
+  canHandle(): boolean {
     return false;
   }
 
@@ -28,7 +28,7 @@ export class ManualProvider implements JDProvider {
    * Parse is not applicable for manual provider
    * Use createJobDescription instead
    */
-  async parse(_url: string): Promise<Result<JobDescription>> {
+  async parse(): Promise<Result<JobDescription>> {
     // This method is required by the interface but not used for manual input
     // Users should call createJobDescription directly
     return Ok(this.createJobDescription({ title: '', company: '', description: '' }));
@@ -121,7 +121,7 @@ export class ManualProvider implements JDProvider {
 /**
  * Create a new manual provider instance
  */
-export function createManualProvider(_config?: ProviderConfig): ManualProvider {
+export function createManualProvider(): ManualProvider {
   return new ManualProvider();
 }
 

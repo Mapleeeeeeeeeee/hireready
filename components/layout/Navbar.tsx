@@ -10,7 +10,6 @@ import {
   NavbarMenuToggle,
   Button,
   Avatar,
-  Link as HeroLink,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
