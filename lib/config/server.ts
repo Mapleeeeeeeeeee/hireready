@@ -37,11 +37,17 @@ export const serverEnv = {
   },
 
   // Google OAuth (optional - set up later)
-  googleClientId: getEnvVar('GOOGLE_CLIENT_ID', ''),
-  googleClientSecret: getEnvVar('GOOGLE_CLIENT_SECRET', ''),
+  get googleClientId() {
+    return getEnvVar('GOOGLE_CLIENT_ID', '');
+  },
+  get googleClientSecret() {
+    return getEnvVar('GOOGLE_CLIENT_SECRET', '');
+  },
 
   // Gemini API (optional)
-  geminiApiKey: getEnvVar('GEMINI_API_KEY', ''),
+  get geminiApiKey() {
+    return getEnvVar('GEMINI_API_KEY', '');
+  },
 
   // Database (lazy evaluation - will throw at runtime if not set)
   get databaseUrl() {

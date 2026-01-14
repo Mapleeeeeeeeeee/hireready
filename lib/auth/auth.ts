@@ -10,15 +10,25 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 // Only configure Google provider if credentials are set
-const socialProviders =
-  serverEnv.googleClientId && serverEnv.googleClientSecret
-    ? {
-        google: {
-          clientId: serverEnv.googleClientId,
-          clientSecret: serverEnv.googleClientSecret,
-        },
-      }
-    : {};
+const hasGoogleCreds =
+  serverEnv.googleClientId &&
+  serverEnv.googleClientSecret &&
+  serverEnv.googleClientId.length > 0 &&
+  serverEnv.googleClientSecret.length > 0;
+
+const socialProviders = hasGoogleCreds
+  ? {
+      google: {
+        clientId: serverEnv.googleClientId,
+        clientSecret: serverEnv.googleClientSecret,
+      },
+    }
+  : {};
+
+// Debug log
+if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+  console.log('[Auth Init] Google OAuth configured:', hasGoogleCreds);
+}
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
