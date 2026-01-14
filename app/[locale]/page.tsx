@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
+  const x = 1; // Intentional lint error for testing auto-fix
   const t = useTranslations();
 
   return (

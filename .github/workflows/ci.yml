@@ -145,3 +145,45 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test run
+
+  auto-fix:
+    name: Auto Fix by Claude
+    runs-on: ubuntu-latest
+    needs: [lint-and-type-check]
+    if: failure()
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure git
+        run: |
+          git config user.name "Claude Code"
+          git config user.email "claude-code@demo.com"
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run Claude Code to fix errors
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "The CI checks failed. Please fix all lint and TypeScript errors by running 'pnpm run lint' and 'pnpm run build', then commit the fixes with message 'fix: auto-fix lint and type errors' and push to origin" \
+            --allowedTools "Read" "Edit" "Bash(pnpm:*)" "Bash(git:*)"
