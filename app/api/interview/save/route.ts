@@ -4,14 +4,12 @@
  * Saves interview transcript and metadata to database
  */
 
-import { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db';
-import { jsonSuccess, jsonError } from '@/lib/utils/api-response';
+import { withAuthHandler } from '@/lib/utils/api-response';
 import { validators } from '@/lib/utils/validation';
 import { Ok, Err, Result } from '@/lib/utils/result';
-import { UnauthorizedError, ValidationError, BadRequestError } from '@/lib/utils/errors';
-import { logger } from '@/lib/utils/logger';
+import { ValidationError, BadRequestError } from '@/lib/utils/errors';
+import { parseJsonBody } from '@/lib/utils/resource-helpers';
 import type { SaveInterviewResponse, TranscriptEntry } from '@/lib/gemini/types';
 
 // ============================================================
@@ -62,73 +60,41 @@ function validateSaveInterviewInput(
 // Route Handler
 // ============================================================
 
-export async function POST(request: NextRequest) {
-  const startTime = Date.now();
-  const requestId = crypto.randomUUID();
+async function handleSaveInterview(
+  request: Request,
+  userId: string
+): Promise<SaveInterviewResponse> {
+  // Parse and validate request body
+  const body = await parseJsonBody<unknown>(request);
+  const validationResult = validateSaveInterviewInput(body);
 
-  logger.info('Interview save request started', {
-    module: 'api-interview',
-    action: 'save',
-    requestId,
+  if (!validationResult.ok) {
+    throw validationResult.error;
+  }
+
+  const { transcripts, duration, feedback } = validationResult.value;
+
+  // Save to database
+  const interview = await prisma.interview.create({
+    data: {
+      userId,
+      scenario: 'behavioral',
+      status: 'completed',
+      duration,
+      feedback,
+      transcript: transcripts as unknown as Parameters<
+        typeof prisma.interview.create
+      >[0]['data']['transcript'],
+    },
   });
 
-  try {
-    // Validate authentication
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session?.user?.id) {
-      logger.warn('Unauthorized interview save attempt', {
-        module: 'api-interview',
-        action: 'save',
-        requestId,
-      });
-      return jsonError(new UnauthorizedError('Please login to save interview'));
-    }
-
-    // Parse and validate request body
-    const body = await request.json();
-    const validationResult = validateSaveInterviewInput(body);
-
-    if (!validationResult.ok) {
-      return jsonError(validationResult.error);
-    }
-
-    const { transcripts, duration, feedback } = validationResult.value;
-
-    // Save to database
-    const interview = await prisma.interview.create({
-      data: {
-        userId: session.user.id,
-        scenario: 'behavioral',
-        status: 'completed',
-        duration,
-        feedback,
-        transcript: transcripts as unknown as Parameters<
-          typeof prisma.interview.create
-        >[0]['data']['transcript'],
-      },
-    });
-
-    const durationMs = Date.now() - startTime;
-    logger.info('Interview saved successfully', {
-      module: 'api-interview',
-      action: 'save',
-      requestId,
-      interviewId: interview.id,
-      durationMs,
-    });
-
-    return jsonSuccess<SaveInterviewResponse>({
-      id: interview.id,
-      createdAt: interview.createdAt.toISOString(),
-    });
-  } catch (error) {
-    const durationMs = Date.now() - startTime;
-    logger.error('Interview save failed', error as Error, {
-      module: 'api-interview',
-      action: 'save',
-      requestId,
-      durationMs,
-    });
-    return jsonError(error);
-  }
+  return {
+    id: interview.id,
+    createdAt: interview.createdAt.toISOString(),
+  };
 }
+
+export const POST = withAuthHandler(handleSaveInterview, {
+  module: 'api-interview',
+  action: 'save',
+});

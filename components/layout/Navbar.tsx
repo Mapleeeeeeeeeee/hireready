@@ -15,8 +15,9 @@ import {
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useSession, signIn, signOut } from '@/lib/auth/auth-client';
-import { saveRedirectUrl, getRedirectUrl, clearRedirectUrl } from '@/lib/auth/utils';
+import { useSession, signOut } from '@/lib/auth/auth-client';
+import { useGoogleLogin } from '@/lib/auth/hooks';
+import { getRedirectUrl, clearRedirectUrl } from '@/lib/auth/utils';
 
 export function Navbar() {
   const t = useTranslations();
@@ -24,14 +25,7 @@ export function Navbar() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleLogin = async () => {
-    saveRedirectUrl(pathname);
-    await signIn.social({
-      provider: 'google',
-      callbackURL: pathname,
-    });
-  };
+  const handleLogin = useGoogleLogin();
 
   const handleLogout = async () => {
     await signOut();

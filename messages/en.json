@@ -8,6 +8,10 @@
   "nav": {
     "home": "Home",
     "interview": "Start Interview",
+    "dashboard": "Dashboard",
+    "history": "Interview History",
+    "profile": "Profile",
+    "settings": "Settings",
     "login": "Login",
     "logout": "Logout"
   },
@@ -135,7 +139,71 @@
   },
   "auth": {
     "loginWithGoogle": "Login with Google",
-    "welcomeBack": "Welcome back"
+    "welcomeBack": "Welcome back",
+    "loginRequired": "Login Required",
+    "loginToAccess": "Please login to access this page"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "recentInterviews": "Recent Interviews",
+    "noInterviews": "No interviews yet",
+    "startFirst": "Start your first interview practice",
+    "totalInterviews": "Total Interviews",
+    "averageScore": "Average Score",
+    "improvement": "Improvement",
+    "lastWeek": "Last Week"
+  },
+  "history": {
+    "title": "Interview History",
+    "subtitle": "View your past interview records and feedback",
+    "empty": "No interview records",
+    "emptyDescription": "Your interview records will appear here after completing your first interview",
+    "viewDetails": "View Details",
+    "date": "Date",
+    "scenario": "Scenario",
+    "duration": "Duration",
+    "score": "Score",
+    "status": "Status",
+    "statuses": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed"
+    },
+    "transcript": {
+      "title": "Transcript",
+      "messages": "messages",
+      "emptyTranscript": "No transcript available"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your account information",
+    "name": "Name",
+    "email": "Email",
+    "memberSince": "Member Since",
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Customize your experience",
+    "language": "Language",
+    "languageDescription": "Choose your preferred interface language",
+    "theme": "Theme",
+    "themeDescription": "Choose your preferred appearance",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System Default"
+    },
+    "notifications": "Notifications",
+    "notificationsDescription": "Manage your notification preferences",
+    "emailNotifications": "Email Notifications",
+    "pushNotifications": "Push Notifications",
+    "save": "Save Settings",
+    "saved": "Settings Saved"
   },
   "errors": {
     "UNKNOWN_ERROR": "An unknown error occurred, please try again later",
