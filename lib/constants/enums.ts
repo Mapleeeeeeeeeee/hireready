@@ -13,18 +13,6 @@
 export const INTERVIEW_STATUSES = ['pending', 'in_progress', 'completed'] as const;
 export type InterviewStatus = (typeof INTERVIEW_STATUSES)[number];
 
-/**
- * Interview scenarios/types
- */
-export const INTERVIEW_SCENARIOS = [
-  'behavioral',
-  'technical',
-  'system_design',
-  'coding',
-  'general',
-] as const;
-export type InterviewScenario = (typeof INTERVIEW_SCENARIOS)[number];
-
 // ============================================================
 // User Settings Related
 // ============================================================

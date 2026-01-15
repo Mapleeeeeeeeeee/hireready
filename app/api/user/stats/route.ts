@@ -40,7 +40,6 @@ async function handleGetStats(request: Request, userId: string): Promise<UserSta
       where: { userId },
       select: {
         id: true,
-        scenario: true,
         status: true,
         score: true,
         duration: true,
@@ -61,7 +60,6 @@ async function handleGetStats(request: Request, userId: string): Promise<UserSta
   // Transform recent interviews to response format
   const recentInterviewsList: RecentInterview[] = recentInterviews.map((i) => ({
     id: i.id,
-    scenario: i.scenario,
     status: i.status,
     score: i.score,
     duration: i.duration,

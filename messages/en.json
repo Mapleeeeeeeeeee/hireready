@@ -93,15 +93,6 @@
   },
   "interview": {
     "title": "Interview Practice",
-    "selectScenario": "Select Interview Scenario",
-    "scenarios": {
-      "behavioral": "Behavioral Interview",
-      "selfIntro": "Self Introduction",
-      "whyLeave": "Reason for Leaving",
-      "teamwork": "Teamwork Experience",
-      "challenge": "Overcoming Challenges",
-      "strength": "Strengths and Weaknesses"
-    },
     "selectLanguage": "Select Interview Language",
     "languages": {
       "zh": "Chinese",
@@ -244,7 +235,6 @@
     "emptyDescription": "Your interview records will appear here after completing your first interview",
     "viewDetails": "View Details",
     "date": "Date",
-    "scenario": "Scenario",
     "duration": "Duration",
     "score": "Score",
     "status": "Status",

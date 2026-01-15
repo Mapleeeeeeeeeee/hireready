@@ -75,7 +75,6 @@ async function handleGetInterviews(
       where,
       select: {
         id: true,
-        scenario: true,
         status: true,
         score: true,
         duration: true,
@@ -95,7 +94,6 @@ async function handleGetInterviews(
   // Transform to response format
   const interviewsList: InterviewListItem[] = interviews.map((i) => ({
     id: i.id,
-    scenario: i.scenario,
     status: i.status,
     score: i.score,
     duration: i.duration,

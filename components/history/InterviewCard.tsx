@@ -14,8 +14,6 @@ import type { InterviewStatus } from '@/lib/constants/enums';
 export interface InterviewCardProps {
   /** Unique interview ID */
   id: string;
-  /** Interview scenario type (deprecated, now nullable) */
-  scenario: string | null;
   /** Current status of the interview */
   status: InterviewStatus;
   /** Score (0-100) if available */

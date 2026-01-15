@@ -93,15 +93,6 @@
   },
   "interview": {
     "title": "面試練習",
-    "selectScenario": "選擇面試情境",
-    "scenarios": {
-      "behavioral": "行為面試",
-      "selfIntro": "自我介紹",
-      "whyLeave": "離職原因",
-      "teamwork": "團隊合作經驗",
-      "challenge": "克服困難的經歷",
-      "strength": "個人優缺點"
-    },
     "selectLanguage": "選擇面試語言",
     "languages": {
       "zh": "中文",
@@ -244,7 +235,6 @@
     "emptyDescription": "完成您的第一場面試後，記錄將會顯示在這裡",
     "viewDetails": "查看詳情",
     "date": "日期",
-    "scenario": "情境",
     "duration": "時長",
     "score": "分數",
     "status": "狀態",

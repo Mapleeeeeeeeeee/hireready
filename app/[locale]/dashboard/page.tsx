@@ -123,7 +123,6 @@ function DashboardContent({ userName }: DashboardContentProps) {
               <InterviewCard
                 key={interview.id}
                 id={interview.id}
-                scenario={interview.scenario}
                 status={interview.status as InterviewStatus}
                 score={interview.score}
                 duration={interview.duration}

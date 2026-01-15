@@ -206,8 +206,6 @@ export interface AudioStreamerEvents {
 export interface InterviewData {
   /** User ID */
   userId: string;
-  /** Interview scenario */
-  scenario: string;
   /** Interview status */
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   /** Duration in seconds */

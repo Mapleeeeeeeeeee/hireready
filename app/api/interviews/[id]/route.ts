@@ -17,7 +17,6 @@ import { logger } from '@/lib/utils/logger';
 
 interface InterviewDetailResponse {
   id: string;
-  scenario: string | null;
   status: string;
   score: number | null;
   duration: number | null;
@@ -52,7 +51,6 @@ async function handleGetInterview(
     select: {
       id: true,
       userId: true,
-      scenario: true,
       status: true,
       score: true,
       duration: true,
@@ -72,7 +70,6 @@ async function handleGetInterview(
 
   return {
     id: interview.id,
-    scenario: interview.scenario,
     status: interview.status,
     score: interview.score,
     duration: interview.duration,

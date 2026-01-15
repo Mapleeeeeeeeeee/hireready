@@ -10,10 +10,6 @@ import type { InterviewStatus } from '@/lib/constants/enums';
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => {
     const translations: Record<string, string> = {
-      // Interview scenarios (deprecated)
-      general: 'General Interview',
-      technical: 'Technical Interview',
-      behavioral: 'Behavioral Interview',
       // Statuses
       pending: 'Pending',
       in_progress: 'In Progress',
@@ -44,7 +40,6 @@ vi.mock('@/lib/utils/date-format', () => ({
 describe('InterviewCard', () => {
   const defaultProps = {
     id: 'interview-1',
-    scenario: 'general',
     status: 'completed' as InterviewStatus,
     score: 85,
     duration: 1800, // 30 minutes
