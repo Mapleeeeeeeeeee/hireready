@@ -56,6 +56,8 @@ export function SaveConfirmDialog({
         header: 'border-b border-warm-gray/20',
         body: 'py-6',
         footer: 'border-t border-warm-gray/20',
+        wrapper: 'z-[9999]',
+        backdrop: 'z-[9998]',
       }}
     >
       <ModalContent>
