@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.2.2...v2.0.0) (2026-01-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* Removed scenario field from database and all related code
+
+### Features
+
+* add resume upload and interview history improvements ([#11](https://github.com/Mapleeeeeeeeeee/hireready/issues/11)) ([e8c5405](https://github.com/Mapleeeeeeeeeee/hireready/commit/e8c5405a1f037a5d413ae68820ef8641fc768b03))
+
+
+### Bug Fixes
+
+* auto-fix lint and type errors ([6d7f1e3](https://github.com/Mapleeeeeeeeeee/hireready/commit/6d7f1e32b7e5076dcdf0ec20cd8dce26b6865508))
+* auto-fix lint and type errors ([6b681df](https://github.com/Mapleeeeeeeeeee/hireready/commit/6b681dfd6c7188934df9d9eb39c754b1e97b31fa))
+
 ## [1.2.2](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.2.1...v1.2.2) (2026-01-15)
 
 ### Bug Fixes
