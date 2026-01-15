@@ -11,3 +11,4 @@ export const authClient = createAuthClient({
 export const { useSession } = authClient;
 export const signIn = authClient.signIn;
 export const signOut = authClient.signOut;
+export const updateUser = authClient.updateUser;
