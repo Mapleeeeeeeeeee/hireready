@@ -23,6 +23,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Resume fields
+  resumeUrl       String?   // 履歷檔案路徑
+  resumeFileName  String?   // 原始檔名（用於顯示）
+  resumeContent   String?   @db.Text  // Gemini 解析的結構化內容 (JSON string)
+  resumeUpdatedAt DateTime? // 履歷更新時間
+
   sessions      Session[]
   accounts      Account[]
   interviews    Interview[]

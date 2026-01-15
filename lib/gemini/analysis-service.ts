@@ -10,6 +10,8 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { serverEnv } from '@/lib/config/server';
 import { geminiConfig } from '@/lib/config';
+import { LIVE_API_VOICES } from './types';
+import { parseGeminiJSONResponse } from './utils';
 import { logger } from '@/lib/utils/logger';
 import type { TranscriptEntry } from '@/lib/gemini/types';
 import type { ModelAnswer } from '@/lib/types/interview';
@@ -114,39 +116,6 @@ CRITICAL: Respond ONLY with the JSON object. No markdown code blocks, no explana
 }
 
 // ============================================================
-// JSON Parsing
-// ============================================================
-
-/**
- * Parse JSON from Gemini response, handling markdown code blocks
- */
-function parseGeminiJSON(responseText: string): GeminiAnalysisResponse {
-  try {
-    // Try to extract JSON from markdown code blocks first
-    const markdownMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
-    if (markdownMatch?.[1]) {
-      return JSON.parse(markdownMatch[1]);
-    }
-
-    // Try to extract raw JSON object
-    const jsonMatch = responseText.match(/{[\s\S]*}/);
-    if (jsonMatch?.[0]) {
-      return JSON.parse(jsonMatch[0]);
-    }
-
-    // Fallback: try parsing the whole text
-    return JSON.parse(responseText);
-  } catch (error) {
-    logger.error('Failed to parse Gemini JSON response', error as Error, {
-      module: 'analysis-service',
-      action: 'parseGeminiJSON',
-      responsePreview: responseText.slice(0, 200),
-    });
-    throw new Error('Invalid JSON response from Gemini API');
-  }
-}
-
-// ============================================================
 // TTS Generation
 // ============================================================
 
@@ -183,7 +152,7 @@ async function generateTTS(
     }
 
     // Select voice based on language
-    const voiceName = geminiConfig.voices[language];
+    const voiceName = LIVE_API_VOICES[language];
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), geminiConfig.timeouts.tts);
@@ -390,7 +359,10 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
     });
 
     // Step 2: Parse JSON response
-    const analysisData = parseGeminiJSON(responseText);
+    const analysisData = parseGeminiJSONResponse<GeminiAnalysisResponse>(responseText, {
+      module: 'analysis-service',
+      action: 'analyzeInterview',
+    });
 
     // Validate required fields
     if (

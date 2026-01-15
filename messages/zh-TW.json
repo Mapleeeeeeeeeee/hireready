@@ -116,6 +116,9 @@
       "optional": "選填",
       "startButton": "開始面試",
       "startHint": "即使沒有新增職缺描述也可以開始面試",
+      "resumeTitle": "履歷",
+      "resumeDescription": "上傳您的履歷以獲得更個人化的面試問題",
+      "useDefaultTemplate": "使用預設模板",
       "jd": {
         "inputMode": "輸入方式",
         "urlTab": "網址",
@@ -305,6 +308,50 @@
     "pushNotifications": "推播通知",
     "save": "儲存設定",
     "saved": "設定已儲存"
+  },
+  "resume": {
+    "title": "履歷",
+    "subtitle": "上傳您的履歷以獲得個人化的面試問題",
+    "dropzone": {
+      "title": "將履歷拖放至此處",
+      "subtitle": "或點擊以選擇檔案",
+      "formats": "支援格式：{formats}（最大 {maxSize}）"
+    },
+    "uploading": "上傳中...",
+    "upload": "上傳",
+    "clear": "清除",
+    "uploadSuccess": "履歷上傳成功",
+    "card": {
+      "updatedAt": "更新於 {date}",
+      "preview": "預覽",
+      "replace": "更換",
+      "delete": "刪除",
+      "deleting": "刪除中..."
+    },
+    "preview": {
+      "close": "關閉",
+      "openInNewTab": "在新分頁開啟"
+    },
+    "errors": {
+      "invalidType": "檔案類型無效。請上傳 PDF、JPG 或 PNG 檔案。",
+      "fileTooLarge": "檔案過大。最大允許大小為 {maxSize}。",
+      "uploadFailed": "履歷上傳失敗，請重試。"
+    },
+    "templates": {
+      "title": "預設模板",
+      "softwareEngineer": {
+        "name": "軟體工程師",
+        "description": "全端開發者履歷"
+      },
+      "productManager": {
+        "name": "產品經理",
+        "description": "B2B SaaS 產品經理"
+      },
+      "general": {
+        "name": "通用",
+        "description": "基礎履歷模板"
+      }
+    }
   },
   "errors": {
     "UNKNOWN_ERROR": "發生未知錯誤，請稍後再試",

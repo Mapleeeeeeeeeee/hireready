@@ -5,6 +5,7 @@
 
 import type { JobDescription } from '@/lib/jd/types';
 import { hasJobDescriptionContent } from '@/lib/jd/types';
+import type { ResumeContent } from '@/lib/resume/types';
 import { logger } from '@/lib/utils/logger';
 
 export type SupportedLanguage = 'en' | 'zh-TW';
@@ -245,6 +246,130 @@ export function getInterviewerPromptWithJd(
     module: 'prompts',
     action: 'getInterviewerPromptWithJd',
     promptContent: fullPrompt,
+  });
+
+  return fullPrompt;
+}
+
+// ============================================================
+// Resume Context Integration
+// ============================================================
+
+/**
+ * Format resume content for inclusion in the system prompt
+ */
+export function formatResumeForPrompt(resume: ResumeContent): string {
+  const parts: string[] = [];
+
+  if (resume.name) parts.push(`Name: ${resume.name}`);
+  if (resume.summary) parts.push(`Summary: ${resume.summary}`);
+  if (resume.skills?.length) parts.push(`Skills: ${resume.skills.join(', ')}`);
+  if (resume.experience?.length) {
+    parts.push('Experience:');
+    resume.experience.forEach((exp) => {
+      parts.push(`- ${exp.title} at ${exp.company} (${exp.duration})`);
+      if (exp.description) parts.push(`  ${exp.description}`);
+    });
+  }
+  if (resume.education?.length) {
+    parts.push('Education:');
+    resume.education.forEach((edu) => {
+      parts.push(`- ${edu.degree} from ${edu.school} (${edu.year || 'N/A'})`);
+    });
+  }
+
+  return parts.join('\n');
+}
+
+const resumeContextTemplates: Record<SupportedLanguage, string> = {
+  'zh-TW': `
+---
+## 候選人履歷資訊 (Candidate Resume)
+以下是候選人的履歷資訊，請根據這些資訊來提出更具針對性的問題：
+
+{resumeContent}
+
+**語音生成特別指示**：
+1. 根據候選人的經歷和技能，提出深入的追問。
+2. 當候選人提到履歷上的經驗時，可以進一步探詢細節。
+3. **請使用口語格式輸出**，避免任何條列式符號。
+---`,
+
+  en: `
+---
+## Candidate Resume Information
+The following is the candidate's resume. Use this to ask more targeted and relevant questions:
+
+{resumeContent}
+
+**Special Audio Instructions**:
+1. Ask follow-up questions based on the candidate's experience and skills.
+2. When the candidate mentions experiences from their resume, probe for more details.
+3. **Output in spoken format only**, avoid bullet points.
+---`,
+};
+
+export function generateResumeContextPrompt(
+  resume: ResumeContent,
+  language: SupportedLanguage
+): string {
+  const template = resumeContextTemplates[language];
+  const resumeContent = formatResumeForPrompt(resume);
+
+  return template.replace('{resumeContent}', resumeContent);
+}
+
+/**
+ * Check if resume has meaningful content
+ */
+export function hasResumeContent(resume?: ResumeContent | null): boolean {
+  if (!resume) return false;
+  return !!(
+    resume.name ||
+    resume.summary ||
+    (resume.skills && resume.skills.length > 0) ||
+    (resume.experience && resume.experience.length > 0) ||
+    (resume.education && resume.education.length > 0)
+  );
+}
+
+/**
+ * Get the full interviewer prompt with optional JD and resume context
+ */
+export function getInterviewerPromptWithContext(
+  language: SupportedLanguage,
+  options?: {
+    jobDescription?: JobDescription | null;
+    resume?: ResumeContent | null;
+  }
+): string {
+  const basePrompt = interviewerPrompts[language];
+  const parts: string[] = [basePrompt];
+
+  const hasJd = hasJobDescriptionContent(options?.jobDescription);
+  const hasResume = hasResumeContent(options?.resume);
+
+  if (hasJd) {
+    const jdContext = generateJdContextPrompt(options!.jobDescription!, language);
+    parts.push(jdContext);
+  }
+
+  if (hasResume) {
+    const resumeContext = generateResumeContextPrompt(options!.resume!, language);
+    parts.push(resumeContext);
+  }
+
+  const fullPrompt = parts.join('\n\n');
+
+  logger.debug('Building interviewer prompt with context', {
+    module: 'prompts',
+    action: 'getInterviewerPromptWithContext',
+    language,
+    hasJd,
+    hasResume,
+    jdTitle: hasJd ? options?.jobDescription?.title : undefined,
+    resumeName: hasResume ? options?.resume?.name : undefined,
+    fullPromptLength: fullPrompt.length,
   });
 
   return fullPrompt;

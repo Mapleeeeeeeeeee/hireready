@@ -13,6 +13,7 @@ import { Ok, Err, Result } from '@/lib/utils/result';
 import { ValidationError, BadRequestError } from '@/lib/utils/errors';
 import { parseJsonBody } from '@/lib/utils/resource-helpers';
 import { logger } from '@/lib/utils/logger';
+import { isPathWithinDirectory } from '@/lib/utils/security';
 import { analyzeInterview } from '@/lib/gemini/analysis-service';
 import { isValidUrl } from '@/lib/jd/validators';
 import type { SaveInterviewResponse, TranscriptEntry } from '@/lib/gemini/types';
@@ -175,7 +176,10 @@ async function handleSaveInterview(
       const newPath = path.resolve(modelAnswersDir, `${interview.id}.mp3`);
 
       // Verify resolved paths are within model-answers directory
-      if (!oldPath.startsWith(modelAnswersDir) || !newPath.startsWith(modelAnswersDir)) {
+      if (
+        !isPathWithinDirectory(oldPath, modelAnswersDir) ||
+        !isPathWithinDirectory(newPath, modelAnswersDir)
+      ) {
         logger.error('Invalid file path detected', undefined, {
           module: 'api-interview-save',
           action: 'rename-audio',

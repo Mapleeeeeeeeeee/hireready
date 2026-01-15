@@ -116,6 +116,9 @@
       "optional": "optional",
       "startButton": "Start Interview",
       "startHint": "You can start the interview even without adding a job description",
+      "resumeTitle": "Resume",
+      "resumeDescription": "Upload your resume to get more personalized interview questions",
+      "useDefaultTemplate": "Use default template",
       "jd": {
         "inputMode": "Input Mode",
         "urlTab": "URL",
@@ -305,6 +308,50 @@
     "pushNotifications": "Push Notifications",
     "save": "Save Settings",
     "saved": "Settings Saved"
+  },
+  "resume": {
+    "title": "Resume",
+    "subtitle": "Upload your resume to get personalized interview questions",
+    "dropzone": {
+      "title": "Drop your resume here",
+      "subtitle": "or click to browse files",
+      "formats": "Supported formats: {formats} (Max {maxSize})"
+    },
+    "uploading": "Uploading...",
+    "upload": "Upload",
+    "clear": "Clear",
+    "uploadSuccess": "Resume uploaded successfully",
+    "card": {
+      "updatedAt": "Updated {date}",
+      "preview": "Preview",
+      "replace": "Replace",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    },
+    "preview": {
+      "close": "Close",
+      "openInNewTab": "Open in new tab"
+    },
+    "errors": {
+      "invalidType": "Invalid file type. Please upload a PDF, JPG, or PNG file.",
+      "fileTooLarge": "File is too large. Maximum size is {maxSize}.",
+      "uploadFailed": "Failed to upload resume. Please try again."
+    },
+    "templates": {
+      "title": "Default Templates",
+      "softwareEngineer": {
+        "name": "Software Engineer",
+        "description": "Full-stack developer profile"
+      },
+      "productManager": {
+        "name": "Product Manager",
+        "description": "B2B SaaS product manager"
+      },
+      "general": {
+        "name": "General",
+        "description": "Basic resume template"
+      }
+    }
   },
   "errors": {
     "UNKNOWN_ERROR": "An unknown error occurred, please try again later",

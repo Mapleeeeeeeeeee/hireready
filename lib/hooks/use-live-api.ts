@@ -15,7 +15,7 @@ import { GeminiProxyClient } from '@/lib/gemini/gemini-proxy-client';
 import { AudioRecorder, isAudioRecordingSupported } from '@/lib/gemini/audio-recorder';
 import { AudioStreamer, isAudioPlaybackSupported } from '@/lib/gemini/audio-streamer';
 import {
-  getInterviewerPromptWithJd,
+  getInterviewerPromptWithContext,
   getInterviewStartInstruction,
   type SupportedLanguage,
 } from '@/lib/gemini/prompts';
@@ -248,8 +248,8 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       return;
     }
 
-    // Get current job description from store (before reset)
-    const { jobDescription } = useInterviewStore.getState();
+    // Get current job description and resume from store (before reset)
+    const { jobDescription, resumeContent } = useInterviewStore.getState();
 
     logger.info('Starting interview session via proxy', {
       module: 'use-live-api',
@@ -266,6 +266,10 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
     if (jobDescription) {
       store.setJobDescription(jobDescription);
     }
+    // Restore resume content after reset (Resume should persist across sessions)
+    if (resumeContent) {
+      store.setResumeContent(resumeContent);
+    }
 
     try {
       // Initialize audio streamer first (needs to be ready before receiving audio)
@@ -278,8 +282,11 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       setupClientEvents();
 
       // Connect to Gemini via our secure proxy
-      // Use JD-enhanced prompt if job description is available
-      const systemInstruction = getInterviewerPromptWithJd(language, jobDescription);
+      // Use context-enhanced prompt with job description and resume if available
+      const systemInstruction = getInterviewerPromptWithContext(language, {
+        jobDescription,
+        resume: resumeContent,
+      });
 
       logger.debug('Connecting to Gemini with system instruction', {
         module: 'use-live-api',
