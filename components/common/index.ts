@@ -2,3 +2,4 @@
 export { StatusChip, type StatusChipProps } from './StatusChip';
 export { PageLoadingState } from './PageLoadingState';
 export { PageErrorState, type PageErrorStateProps } from './PageErrorState';
+export { EmptyState, type EmptyStateProps } from './EmptyState';

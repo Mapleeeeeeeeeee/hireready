@@ -31,7 +31,7 @@ function ProfileContent() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 p-6">
+    <div className="mx-auto max-w-3xl space-y-8 p-6">
       {/* Header Section */}
       <div className="space-y-2">
         <h1 className="text-charcoal font-serif text-3xl font-semibold">{t('title')}</h1>

@@ -175,7 +175,7 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
                 color="primary"
                 onPress={handleParseUrl}
                 isDisabled={!url.trim() || isLoading}
-                className="bg-terracotta hover:bg-terracotta/90 h-12 min-w-[120px] text-white shadow-md transition-transform active:scale-[0.98]"
+                className="disabled:bg-terracotta/50 bg-terracotta hover:bg-terracotta/90 enabled:hover:bg-terracotta/90 h-12 min-w-[120px] text-white shadow-md transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 startContent={
                   isLoading ? <Spinner size="sm" color="current" /> : <Search className="h-5 w-5" />
                 }
@@ -207,56 +207,64 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
             </div>
           }
         >
-          <div className="mt-4 space-y-4">
+          <div className="mt-6 space-y-6">
             <p className="text-charcoal/60 text-sm">{t('textDescription')}</p>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Input
-                label={t('jobTitle')}
-                placeholder={t('jobTitlePlaceholder')}
-                value={jobTitle}
-                onValueChange={setJobTitle}
+            <div className="grid grid-cols-1 gap-x-6 gap-y-6 md:grid-cols-2">
+              {/* Job Title */}
+              <div className="flex flex-col gap-2">
+                <label className="text-charcoal/80 text-sm font-medium">
+                  {t('jobTitle')} <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  placeholder={t('jobTitlePlaceholder')}
+                  value={jobTitle}
+                  onValueChange={setJobTitle}
+                  isDisabled={isLoading}
+                  classNames={{
+                    input: 'text-charcoal',
+                    inputWrapper: 'border-warm-gray/30 bg-white/80 h-11',
+                  }}
+                />
+              </div>
+              {/* Company */}
+              <div className="flex flex-col gap-2">
+                <label className="text-charcoal/80 text-sm font-medium">{t('company')}</label>
+                <Input
+                  placeholder={t('companyPlaceholder')}
+                  value={company}
+                  onValueChange={setCompany}
+                  isDisabled={isLoading}
+                  classNames={{
+                    input: 'text-charcoal',
+                    inputWrapper: 'border-warm-gray/30 bg-white/80 h-11',
+                  }}
+                />
+              </div>
+            </div>
+            {/* Job Description */}
+            <div className="flex flex-col gap-2">
+              <label className="text-charcoal/80 text-sm font-medium">
+                {t('description')} <span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                placeholder={t('descriptionPlaceholder')}
+                value={description}
+                onValueChange={setDescription}
                 isDisabled={isLoading}
-                isRequired
+                minRows={4}
+                maxRows={8}
                 classNames={{
                   input: 'text-charcoal',
-                  inputWrapper: 'border-warm-gray/30 bg-white/80',
-                  label: 'text-charcoal/70',
-                }}
-              />
-              <Input
-                label={t('company')}
-                placeholder={t('companyPlaceholder')}
-                value={company}
-                onValueChange={setCompany}
-                isDisabled={isLoading}
-                classNames={{
-                  input: 'text-charcoal',
-                  inputWrapper: 'border-warm-gray/30 bg-white/80',
-                  label: 'text-charcoal/70',
+                  inputWrapper: 'border-warm-gray/30 bg-white/80 h-auto py-3',
                 }}
               />
             </div>
-            <Textarea
-              label={t('description')}
-              placeholder={t('descriptionPlaceholder')}
-              value={description}
-              onValueChange={setDescription}
-              isDisabled={isLoading}
-              isRequired
-              minRows={4}
-              maxRows={8}
-              classNames={{
-                input: 'text-charcoal',
-                inputWrapper: 'border-warm-gray/30 bg-white/80',
-                label: 'text-charcoal/70',
-              }}
-            />
-            <div className="flex justify-end">
+            <div className="mt-6 flex justify-end">
               <Button
                 color="primary"
                 onPress={handleManualSubmit}
                 isDisabled={!jobTitle.trim() || !description.trim() || isLoading}
-                className="bg-terracotta hover:bg-terracotta/90 text-white"
+                className="disabled:bg-terracotta/50 bg-terracotta hover:bg-terracotta/90 enabled:hover:bg-terracotta/90 text-white transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t('confirm')}
               </Button>

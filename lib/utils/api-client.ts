@@ -191,6 +191,38 @@ export async function apiDelete<T>(url: string, options?: ApiClientOptions): Pro
   return apiRequest<T>('DELETE', url, options);
 }
 
+/**
+ * POST request with FormData (for file uploads)
+ * Note: Does not set Content-Type header - browser will set it with proper boundary
+ */
+export async function apiPostFormData<T>(
+  url: string,
+  formData: FormData,
+  options?: ApiClientOptions
+): Promise<T> {
+  const fetchFn = options?.fetchFn ?? fetch;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? 30000);
+
+  try {
+    const response = await fetchFn(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { ...options?.headers },
+      body: formData,
+      signal: controller.signal,
+    });
+    return await handleResponse<T>(response);
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new ServiceUnavailableError('Request timeout');
+    }
+    throw toAppError(error);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 // ============================================================
 // Default Export (Optional)
 // ============================================================
@@ -200,4 +232,5 @@ export const apiClient = {
   post: apiPost,
   put: apiPut,
   delete: apiDelete,
+  postFormData: apiPostFormData,
 };

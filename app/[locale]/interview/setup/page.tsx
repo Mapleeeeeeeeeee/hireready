@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import {
@@ -13,7 +13,7 @@ import {
   RadioProps,
   Spinner,
 } from '@heroui/react';
-import { ArrowRight, Languages, FileText, Sparkles, FileUser } from 'lucide-react';
+import { ArrowRight, Languages, FileText, Sparkles, FileUser, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { JdInput } from '@/components/interview/JdInput';
 import { JdPreview } from '@/components/interview/JdPreview';
@@ -21,9 +21,9 @@ import { ResumeUpload } from '@/components/resume/ResumeUpload';
 import { ResumeCard } from '@/components/resume/ResumeCard';
 import { ResumePreview } from '@/components/resume/ResumePreview';
 import { useInterviewStore } from '@/lib/stores/interview-store';
+import { useResumeManager } from '@/lib/hooks/use-resume-manager';
+import { useSession } from '@/lib/auth/auth-client';
 import type { JobDescription } from '@/lib/jd/types';
-import type { ResumeData } from '@/lib/resume/types';
-import type { ApiResponse } from '@/lib/utils/api-response';
 
 // ============================================================
 // Custom Components
@@ -64,7 +64,12 @@ const CustomRadio = (props: RadioProps) => {
 export default function InterviewSetupPage() {
   const router = useRouter();
   const t = useTranslations('interview.setup');
+  const tNav = useTranslations('nav');
   const locale = useLocale();
+
+  // Auth state
+  const { data: session } = useSession();
+  const isAuthenticated = !!session?.user;
 
   // Store state and actions
   const language = useInterviewStore((state) => state.language);
@@ -73,34 +78,22 @@ export default function InterviewSetupPage() {
   const setJobDescription = useInterviewStore((state) => state.setJobDescription);
   const setResumeContent = useInterviewStore((state) => state.setResumeContent);
 
-  // Resume state
-  const [resume, setResume] = useState<ResumeData | null>(null);
-  const [isLoadingResume, setIsLoadingResume] = useState(true);
-  const [isDeletingResume, setIsDeletingResume] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isReplacing, setIsReplacing] = useState(false);
-
-  // Fetch user's resume on mount
-  useEffect(() => {
-    async function fetchResume() {
-      try {
-        const response = await fetch('/api/resume', { credentials: 'include' });
-        const json: ApiResponse<ResumeData | null> = await response.json();
-
-        if (json.success && json.data) {
-          setResume(json.data);
-          // Also update store with resume content for interview
-          setResumeContent(json.data.content);
-        }
-      } catch {
-        // User might not have a resume, which is fine
-      } finally {
-        setIsLoadingResume(false);
-      }
-    }
-
-    fetchResume();
-  }, [setResumeContent]);
+  // Use the resume manager hook with content sync
+  const {
+    resume,
+    isLoadingResume,
+    isDeletingResume,
+    isPreviewOpen,
+    isReplacing,
+    handleResumeUploadSuccess,
+    handleResumePreview,
+    handleResumeReplace,
+    handleResumeDelete,
+    handleCancelReplace,
+    handleClosePreview,
+  } = useResumeManager({
+    onContentChange: setResumeContent,
+  });
 
   // Handle JD parsed
   const handleJdParsed = useCallback(
@@ -122,52 +115,6 @@ export default function InterviewSetupPage() {
     },
     [setLanguage]
   );
-
-  // Handle resume upload success
-  const handleResumeUploadSuccess = useCallback(
-    (data: ResumeData) => {
-      setResume(data);
-      setResumeContent(data.content);
-      setIsReplacing(false);
-    },
-    [setResumeContent]
-  );
-
-  // Handle resume preview
-  const handleResumePreview = useCallback(() => {
-    setIsPreviewOpen(true);
-  }, []);
-
-  // Handle resume replace
-  const handleResumeReplace = useCallback(() => {
-    setIsReplacing(true);
-  }, []);
-
-  // Handle resume delete
-  const handleResumeDelete = useCallback(async () => {
-    setIsDeletingResume(true);
-    try {
-      const response = await fetch('/api/resume', {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      const json: ApiResponse<{ deleted: boolean }> = await response.json();
-
-      if (json.success) {
-        setResume(null);
-        setResumeContent(null);
-      }
-    } catch {
-      // Handle error silently
-    } finally {
-      setIsDeletingResume(false);
-    }
-  }, [setResumeContent]);
-
-  // Handle cancel replace
-  const handleCancelReplace = useCallback(() => {
-    setIsReplacing(false);
-  }, []);
 
   // Handle start interview
   const handleStartInterview = useCallback(() => {
@@ -248,6 +195,22 @@ export default function InterviewSetupPage() {
                   <div className="flex items-center justify-center py-10">
                     <Spinner size="lg" color="primary" className="text-terracotta" />
                   </div>
+                ) : !isAuthenticated ? (
+                  // Unauthenticated: Show login prompt
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <div className="text-charcoal/30 mb-4">
+                      <Upload className="h-10 w-10" />
+                    </div>
+                    <p className="text-charcoal/60 mb-4 text-sm">{t('resumeLoginRequired')}</p>
+                    <Button
+                      size="sm"
+                      variant="bordered"
+                      onPress={() => router.push(`/${locale}/login`)}
+                      className="border-terracotta text-terracotta hover:bg-terracotta/10"
+                    >
+                      {tNav('login')}
+                    </Button>
+                  </div>
                 ) : resume && !isReplacing ? (
                   <>
                     <ResumeCard
@@ -261,7 +224,7 @@ export default function InterviewSetupPage() {
                       url={resume.url}
                       fileName={resume.fileName}
                       isOpen={isPreviewOpen}
-                      onClose={() => setIsPreviewOpen(false)}
+                      onClose={handleClosePreview}
                     />
                   </>
                 ) : (

@@ -22,6 +22,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from '@/lib/auth/auth-client';
 import { getRedirectUrl, clearRedirectUrl } from '@/lib/auth/utils';
+import { LanguageToggle } from './LanguageToggle';
 
 export function Navbar() {
   const t = useTranslations();
@@ -48,14 +49,13 @@ export function Navbar() {
 
   const menuItems = [
     { key: 'home', label: t('nav.home'), href: '/' },
-    { key: 'interview', label: t('nav.interview'), href: '/interview' },
+    { key: 'interview', label: t('nav.interview'), href: '/interview/setup' },
   ];
 
   const userMenuItems = [
     { key: 'dashboard', label: t('nav.dashboard'), href: '/dashboard' },
     { key: 'history', label: t('nav.history'), href: '/history' },
     { key: 'profile', label: t('nav.profile'), href: '/profile' },
-    { key: 'settings', label: t('nav.settings'), href: '/settings' },
   ];
 
   return (
@@ -81,24 +81,41 @@ export function Navbar() {
         </NavbarBrand>
       </NavbarContent>
 
-      {/* Desktop menu - Centered */}
-      <NavbarContent className="hidden gap-8 md:flex" justify="center">
-        {menuItems.map((item) => (
-          <NavbarItem key={item.key} isActive={pathname === item.href}>
+      {/* Desktop menu - Absolutely centered */}
+      <div className="absolute left-1/2 hidden -translate-x-1/2 gap-8 md:flex">
+        {menuItems.map((item) => {
+          const isInterview = item.key === 'interview';
+          const isActive = pathname === item.href;
+
+          return isInterview ? (
             <Link
+              key={item.key}
+              href={item.href}
+              className="text-terracotta hover:text-terracotta/80 text-sm font-medium tracking-wide transition-colors"
+            >
+              {item.label}
+            </Link>
+          ) : (
+            <Link
+              key={item.key}
               href={item.href}
               className={`text-sm font-medium tracking-wide transition-colors ${
-                pathname === item.href ? 'text-terracotta' : 'text-charcoal/60 hover:text-charcoal'
+                isActive ? 'text-terracotta' : 'text-charcoal/60 hover:text-terracotta'
               }`}
             >
               {item.label}
             </Link>
-          </NavbarItem>
-        ))}
-      </NavbarContent>
+          );
+        })}
+      </div>
 
-      {/* Auth section - Minimalist */}
-      <NavbarContent justify="end">
+      {/* Auth section with Language toggle - Right aligned */}
+      <NavbarContent justify="end" className="gap-4">
+        {/* Language toggle - Desktop */}
+        <NavbarItem className="hidden md:flex">
+          <LanguageToggle />
+        </NavbarItem>
+
         {isPending ? (
           <NavbarItem>
             <Button isLoading size="sm" variant="light" className="text-charcoal/50">
@@ -124,7 +141,11 @@ export function Navbar() {
                   />
                 </button>
               </DropdownTrigger>
-              <DropdownMenu aria-label={t('nav.userMenu')} variant="flat" className="w-56">
+              <DropdownMenu
+                aria-label={t('nav.userMenu')}
+                variant="flat"
+                className="bg-warm-paper border-warm-gray/15 w-56 rounded-lg border shadow-md"
+              >
                 <DropdownSection showDivider>
                   <DropdownItem
                     key="user-info"
@@ -163,15 +184,12 @@ export function Navbar() {
           </NavbarItem>
         ) : (
           <NavbarItem>
-            <Button
-              as={Link}
+            <Link
               href="/login"
-              size="md"
-              variant="light"
-              className="text-charcoal/80 hover:text-charcoal hover:bg-warm-gray/10 rounded-lg px-5 font-medium transition-all"
+              className="text-terracotta hover:text-terracotta/80 text-sm font-medium tracking-wide transition-colors"
             >
               {t('nav.login')}
-            </Button>
+            </Link>
           </NavbarItem>
         )}
       </NavbarContent>
@@ -190,6 +208,13 @@ export function Navbar() {
             </Link>
           </NavbarMenuItem>
         ))}
+
+        {/* Language toggle - Mobile */}
+        <NavbarMenuItem>
+          <div className="border-warm-gray/10 mt-4 border-t py-4">
+            <LanguageToggle />
+          </div>
+        </NavbarMenuItem>
 
         {session?.user && (
           <>

@@ -9,10 +9,10 @@
   "marketing": {
     "hero": {
       "badge": "AI 視訊智能分析 v2.0",
-      "titlePart1": "掌握您的",
-      "titlePart2": "視訊面試",
-      "subtitle": "針對語音、表情與回答內容的真實 AI 分析。這不僅僅是聊天，而是一場全真模擬。",
-      "cta": "開始分析",
+      "titlePart1": "練就完美的",
+      "titlePart2": "面試表現",
+      "subtitle": "即時語音的面試對談，不再花時間輸入文字。",
+      "cta": "現在就開始練習",
       "demo": "試聽演示"
     },
     "interface": {
@@ -49,7 +49,7 @@
     },
     "footer": {
       "title": "準備好加速您的職涯發展了嗎？",
-      "subtitle": "加入數千位求職者，使用 HireReady 征服面試。",
+      "subtitle": "使用 HireReady 征服面試。",
       "cta": "立即開始練習"
     },
     "ticker": {
@@ -71,7 +71,6 @@
     "dashboard": "儀表板",
     "history": "面試歷史",
     "profile": "個人資料",
-    "settings": "設定",
     "login": "登入",
     "logout": "登出",
     "openMenu": "開啟選單",
@@ -118,6 +117,7 @@
       "startHint": "即使沒有新增職缺描述也可以開始面試",
       "resumeTitle": "履歷",
       "resumeDescription": "上傳您的履歷以獲得更個人化的面試問題",
+      "resumeLoginRequired": "登入後即可上傳履歷",
       "useDefaultTemplate": "使用預設模板",
       "jd": {
         "inputMode": "輸入方式",
@@ -288,26 +288,8 @@
     "memberSince": "加入日期",
     "editProfile": "編輯資料",
     "saveChanges": "儲存變更",
-    "cancel": "取消"
-  },
-  "settings": {
-    "title": "設定",
-    "subtitle": "自訂您的使用體驗",
-    "language": "語言",
-    "languageDescription": "選擇您偏好的介面語言",
-    "theme": "主題",
-    "themeDescription": "選擇您偏好的外觀主題",
-    "themes": {
-      "light": "淺色",
-      "dark": "深色",
-      "system": "系統預設"
-    },
-    "notifications": "通知",
-    "notificationsDescription": "管理您的通知偏好設定",
-    "emailNotifications": "電子郵件通知",
-    "pushNotifications": "推播通知",
-    "save": "儲存設定",
-    "saved": "設定已儲存"
+    "cancel": "取消",
+    "resume": "履歷"
   },
   "resume": {
     "title": "履歷",

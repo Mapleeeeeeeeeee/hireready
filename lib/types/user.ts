@@ -71,4 +71,6 @@ export interface RecentInterview {
   score: number | null;
   duration: number | null;
   createdAt: string;
+  jobDescriptionUrl: string | null;
+  jobDescription: JobDescriptionData | null;
 }

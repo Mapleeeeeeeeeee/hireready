@@ -31,7 +31,7 @@ export const VideoHero = () => {
             <span className="text-terracotta italic">{t('titlePart2')}</span>
           </h1>
 
-          <p className="text-charcoal/60 mx-auto mt-6 max-w-2xl text-xl leading-relaxed font-light">
+          <p className="text-charcoal/60 mx-auto mt-6 max-w-2xl text-center text-xl leading-relaxed font-light">
             {t('subtitle')}
           </p>
 
