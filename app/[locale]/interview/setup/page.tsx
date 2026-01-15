@@ -13,7 +13,7 @@ import {
   RadioProps,
   Spinner,
 } from '@heroui/react';
-import { ArrowRight, Languages, FileText, Sparkles, FileUser } from 'lucide-react';
+import { ArrowRight, Languages, FileText, Sparkles, FileUser, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { JdInput } from '@/components/interview/JdInput';
 import { JdPreview } from '@/components/interview/JdPreview';
@@ -22,6 +22,7 @@ import { ResumeCard } from '@/components/resume/ResumeCard';
 import { ResumePreview } from '@/components/resume/ResumePreview';
 import { useInterviewStore } from '@/lib/stores/interview-store';
 import { useResumeManager } from '@/lib/hooks/use-resume-manager';
+import { useSession } from '@/lib/auth/auth-client';
 import type { JobDescription } from '@/lib/jd/types';
 
 // ============================================================
@@ -63,7 +64,12 @@ const CustomRadio = (props: RadioProps) => {
 export default function InterviewSetupPage() {
   const router = useRouter();
   const t = useTranslations('interview.setup');
+  const tNav = useTranslations('nav');
   const locale = useLocale();
+
+  // Auth state
+  const { data: session } = useSession();
+  const isAuthenticated = !!session?.user;
 
   // Store state and actions
   const language = useInterviewStore((state) => state.language);
@@ -188,6 +194,22 @@ export default function InterviewSetupPage() {
                 {isLoadingResume ? (
                   <div className="flex items-center justify-center py-10">
                     <Spinner size="lg" color="primary" className="text-terracotta" />
+                  </div>
+                ) : !isAuthenticated ? (
+                  // Unauthenticated: Show login prompt
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <div className="text-charcoal/30 mb-4">
+                      <Upload className="h-10 w-10" />
+                    </div>
+                    <p className="text-charcoal/60 mb-4 text-sm">{t('resumeLoginRequired')}</p>
+                    <Button
+                      size="sm"
+                      variant="bordered"
+                      onPress={() => router.push(`/${locale}/login`)}
+                      className="border-terracotta text-terracotta hover:bg-terracotta/10"
+                    >
+                      {tNav('login')}
+                    </Button>
                   </div>
                 ) : resume && !isReplacing ? (
                   <>

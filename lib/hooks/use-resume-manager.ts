@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { ResumeData, ResumeContent } from '@/lib/resume/types';
-import type { ApiResponse } from '@/lib/utils/api-response';
+import { apiClient } from '@/lib/utils/api-client';
 
 // ============================================================
 // Types
@@ -86,16 +86,15 @@ export function useResumeManager(options?: UseResumeManagerOptions): UseResumeMa
   useEffect(() => {
     async function fetchResume() {
       try {
-        const response = await fetch('/api/resume', { credentials: 'include' });
-        const json: ApiResponse<ResumeData | null> = await response.json();
-
-        if (json.success && json.data) {
-          setResume(json.data);
+        // apiClient handles response unwrapping and error conversion
+        const data = await apiClient.get<ResumeData | null>('/api/resume');
+        if (data) {
+          setResume(data);
           // Notify parent if callback is provided
-          onContentChange?.(json.data.content);
+          onContentChange?.(data.content);
         }
       } catch {
-        // User might not have a resume, which is fine
+        // User might not have a resume or not logged in, which is fine
       } finally {
         setIsLoadingResume(false);
       }
@@ -137,19 +136,13 @@ export function useResumeManager(options?: UseResumeManagerOptions): UseResumeMa
   const handleResumeDelete = useCallback(async () => {
     setIsDeletingResume(true);
     try {
-      const response = await fetch('/api/resume', {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      const json: ApiResponse<{ deleted: boolean }> = await response.json();
-
-      if (json.success) {
-        setResume(null);
-        // Notify parent if callback is provided
-        onContentChange?.(null);
-      }
+      // apiClient handles response unwrapping
+      await apiClient.delete('/api/resume');
+      setResume(null);
+      // Notify parent if callback is provided
+      onContentChange?.(null);
     } catch {
-      // Handle error silently
+      // Handle error silently (could add toast notification here in future)
     } finally {
       setIsDeletingResume(false);
     }

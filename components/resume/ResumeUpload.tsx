@@ -6,7 +6,8 @@ import { Button, Spinner } from '@heroui/react';
 import { Upload, FileText, Image as ImageIcon, AlertCircle, CheckCircle } from 'lucide-react';
 import { RESUME_CONSTRAINTS, isAllowedResumeType } from '@/lib/resume/types';
 import type { ResumeData } from '@/lib/resume/types';
-import type { ApiResponse } from '@/lib/utils/api-response';
+import { apiPostFormData } from '@/lib/utils/api-client';
+import { toAppError } from '@/lib/utils/errors';
 
 // ============================================================
 // Types
@@ -42,6 +43,7 @@ function getFileIcon(mimeType: string) {
 
 export function ResumeUpload({ onUploadSuccess, onUploadError }: ResumeUploadProps) {
   const t = useTranslations('resume');
+  const tErrors = useTranslations('errors');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // State
@@ -151,31 +153,23 @@ export function ResumeUpload({ onUploadSuccess, onUploadError }: ResumeUploadPro
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      // Upload file using native fetch (apiPost doesn't support FormData)
-      const response = await fetch('/api/resume/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-        // Don't set Content-Type header - browser will set it with boundary for FormData
-      });
-
-      const json: ApiResponse<ResumeData> = await response.json();
-
-      if (!json.success) {
-        throw new Error(json.error?.message || t('errors.uploadFailed'));
-      }
+      // Upload file using apiPostFormData for consistent error handling
+      const data = await apiPostFormData<ResumeData>('/api/resume/upload', formData);
 
       setUploadSuccess(true);
       setSelectedFile(null);
-      onUploadSuccess(json.data);
+      onUploadSuccess(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : t('errors.uploadFailed');
+      // Convert to AppError for consistent error code access
+      const appError = toAppError(err);
+      // Use i18n error message based on error code, fallback to generic message
+      const errorMessage = tErrors(appError.code) || t('errors.uploadFailed');
       setError(errorMessage);
-      onUploadError?.(err instanceof Error ? err : new Error(errorMessage));
+      onUploadError?.(appError);
     } finally {
       setIsLoading(false);
     }
-  }, [selectedFile, onUploadSuccess, onUploadError, t]);
+  }, [selectedFile, onUploadSuccess, onUploadError, t, tErrors]);
 
   // Clear selected file
   const handleClear = useCallback(() => {

@@ -117,6 +117,7 @@
       "startHint": "You can start the interview even without adding a job description",
       "resumeTitle": "Resume",
       "resumeDescription": "Upload your resume to get more personalized interview questions",
+      "resumeLoginRequired": "Log in to upload your resume",
       "useDefaultTemplate": "Use default template",
       "jd": {
         "inputMode": "Input Mode",

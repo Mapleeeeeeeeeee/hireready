@@ -47,6 +47,11 @@ function initAuth() {
 
     trustedOrigins: [serverEnv.betterAuthUrl, 'http://localhost:5555'],
 
+    // Redirect to login page on OAuth errors (e.g., user cancels login)
+    onAPIError: {
+      errorURL: '/login',
+    },
+
     // Note: Session data like user.id, session.token etc. are returned to the client.
     // This is acceptable because:
     // - user.id is the user's own ID, not a security issue

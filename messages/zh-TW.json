@@ -117,6 +117,7 @@
       "startHint": "即使沒有新增職缺描述也可以開始面試",
       "resumeTitle": "履歷",
       "resumeDescription": "上傳您的履歷以獲得更個人化的面試問題",
+      "resumeLoginRequired": "登入後即可上傳履歷",
       "useDefaultTemplate": "使用預設模板",
       "jd": {
         "inputMode": "輸入方式",
