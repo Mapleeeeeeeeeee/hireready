@@ -9,7 +9,9 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, PageErrorState } from '@/components/common';
 import { InterviewCard } from '@/components/history/InterviewCard';
 import { useUserStore, selectTotalPages } from '@/lib/stores/user-store';
+import { useInterviewStore } from '@/lib/stores/interview-store';
 import type { InterviewStatus } from '@/lib/constants/enums';
+import type { JobDescriptionData } from '@/lib/types/user';
 
 // ============================================================
 // History Content Component
@@ -29,6 +31,8 @@ function HistoryContent() {
     fetchInterviews,
   } = useUserStore();
 
+  const setJobDescription = useInterviewStore((state) => state.setJobDescription);
+
   const totalPages = useUserStore(selectTotalPages);
 
   useEffect(() => {
@@ -47,6 +51,25 @@ function HistoryContent() {
       router.push(`/history/${id}`);
     },
     [router]
+  );
+
+  const handleRetryInterview = useCallback(
+    (jobDescription: JobDescriptionData) => {
+      // Convert JobDescriptionData to JobDescription format expected by store
+      setJobDescription({
+        source: (jobDescription.source as 'manual' | '104' | '1111') || 'manual',
+        url: jobDescription.url,
+        title: jobDescription.title || '',
+        company: jobDescription.company || '',
+        location: jobDescription.location,
+        salary: jobDescription.salary,
+        description: jobDescription.description || '',
+        requirements: jobDescription.requirements,
+        fetchedAt: new Date(),
+      });
+      router.push('/interview/setup');
+    },
+    [setJobDescription, router]
   );
 
   // Loading state
@@ -99,6 +122,11 @@ function HistoryContent() {
                 jobDescriptionUrl={interview.jobDescriptionUrl}
                 jobDescription={interview.jobDescription}
                 onClick={() => handleViewInterview(interview.id)}
+                onRetry={
+                  interview.jobDescription
+                    ? () => handleRetryInterview(interview.jobDescription!)
+                    : undefined
+                }
               />
             ))}
           </div>

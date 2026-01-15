@@ -1,11 +1,12 @@
 'use client';
 
-import { Card, CardBody } from '@heroui/react';
+import { Card, CardBody, Button } from '@heroui/react';
 import { useTranslations } from 'next-intl';
-import { Calendar, Clock, Award, ChevronRight, Briefcase } from 'lucide-react';
+import { Calendar, Clock, Award, ChevronRight, RefreshCw, Briefcase } from 'lucide-react';
 import { StatusChip } from '@/components/common/StatusChip';
 import { formatDate, formatDuration } from '@/lib/utils/date-format';
 import type { InterviewStatus } from '@/lib/constants/enums';
+import type { JobDescriptionData } from '@/lib/types/user';
 
 // ============================================================
 // Types
@@ -25,9 +26,11 @@ export interface InterviewCardProps {
   /** Job description URL if available */
   jobDescriptionUrl?: string | null;
   /** Full job description object if available */
-  jobDescription?: unknown;
+  jobDescription?: JobDescriptionData | null;
   /** Click handler for viewing details */
   onClick?: () => void;
+  /** Click handler for retrying interview with same job description */
+  onRetry?: () => void;
 }
 
 // ============================================================
@@ -55,21 +58,22 @@ export function InterviewCard({
   jobDescriptionUrl,
   jobDescription,
   onClick,
+  onRetry,
 }: InterviewCardProps) {
   const tHistory = useTranslations('history');
 
-  // Parse job description
-  const jd = jobDescription as {
-    title?: string;
-    company?: string;
-    location?: string;
-    url?: string;
-  } | null;
-
-  // Use a default title since scenario is deprecated
-  const cardTitle = tHistory('title');
   const formattedDate = formatDate(createdAt);
   const formattedDuration = duration ? formatDuration(duration) : '-';
+
+  // Build card title: prioritize "Company - Position", fallback to "面試歷史"
+  const hasJobInfo = jobDescription?.title || jobDescription?.company;
+  const cardTitle = hasJobInfo
+    ? [jobDescription?.company, jobDescription?.title].filter(Boolean).join(' • ')
+    : tHistory('title');
+
+  const handleRetryClick = () => {
+    onRetry?.();
+  };
 
   return (
     <Card
@@ -79,10 +83,22 @@ export function InterviewCard({
     >
       <CardBody className="flex flex-row items-center justify-between gap-4 p-4">
         {/* Left section: Title and status */}
-        <div className="flex flex-1 flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h3 className="text-charcoal text-base font-semibold">{cardTitle}</h3>
-            <StatusChip status={status} />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          {/* Title row with icon */}
+          <div className="flex items-start gap-3">
+            {hasJobInfo && <Briefcase className="text-terracotta mt-0.5 h-5 w-5 flex-shrink-0" />}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-3">
+                <h3 className="text-charcoal truncate text-base font-semibold">{cardTitle}</h3>
+                <StatusChip status={status} />
+              </div>
+              {/* Show location if available */}
+              {jobDescription?.location && (
+                <p className="text-charcoal/50 mt-0.5 truncate text-xs">
+                  {jobDescription.location}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Meta info row */}
@@ -92,43 +108,45 @@ export function InterviewCard({
             {score !== null && <InfoItem icon={Award} value={`${tHistory('score')}: ${score}`} />}
           </div>
 
-          {/* Job Description Info */}
-          {jd && (
-            <div className="border-warm-gray/10 mt-3 border-t pt-3">
-              <div className="flex items-start gap-2">
-                <Briefcase className="text-terracotta mt-0.5 h-4 w-4 flex-shrink-0" />
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-charcoal truncate text-sm font-medium">
-                    {jd.title || tHistory('jobPosition')}
-                  </p>
-                  {jd.company && <p className="text-charcoal/60 truncate text-xs">{jd.company}</p>}
-                  {jd.location && (
-                    <p className="text-charcoal/60 truncate text-xs">{jd.location}</p>
-                  )}
-                  {(jd.url || jobDescriptionUrl) && (
-                    <a
-                      href={jd.url || jobDescriptionUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-terracotta hover:text-terracotta/80 block truncate text-xs underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {tHistory('viewOriginalJob')}
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
+          {/* View original job link */}
+          {(jobDescription?.url || jobDescriptionUrl) && (
+            <a
+              href={jobDescription?.url || jobDescriptionUrl || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-terracotta hover:text-terracotta/80 block truncate text-xs underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {tHistory('viewOriginalJob')}
+            </a>
           )}
         </div>
 
-        {/* Right section: Score highlight and chevron */}
+        {/* Right section: Score, retry button, and chevron */}
         <div className="flex items-center gap-3">
+          {/* Retry button */}
+          {onRetry && hasJobInfo && (
+            <Button
+              isIconOnly
+              size="sm"
+              variant="flat"
+              color="primary"
+              onPress={handleRetryClick}
+              className="bg-terracotta/10 text-terracotta hover:bg-terracotta/20"
+              aria-label={tHistory('retryInterview')}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
+
+          {/* Score badge */}
           {score !== null && (
             <div className="bg-terracotta/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl">
               <span className="text-terracotta text-lg font-bold">{score}</span>
             </div>
           )}
+
+          {/* Chevron */}
           {onClick && (
             <ChevronRight className="text-charcoal/30 group-hover:text-terracotta h-5 w-5 transition-colors" />
           )}

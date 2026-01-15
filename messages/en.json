@@ -258,6 +258,7 @@
     "transcriptTabs": "Transcript Tabs",
     "strengths": "Strengths",
     "improvements": "Improvements",
+    "retryInterview": "Retry with same job",
     "audio": {
       "play": "Play",
       "pause": "Pause",
