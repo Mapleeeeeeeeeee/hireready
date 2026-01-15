@@ -49,7 +49,7 @@ export function Navbar() {
 
   const menuItems = [
     { key: 'home', label: t('nav.home'), href: '/' },
-    { key: 'interview', label: t('nav.interview'), href: '/interview' },
+    { key: 'interview', label: t('nav.interview'), href: '/interview/setup' },
   ];
 
   const userMenuItems = [

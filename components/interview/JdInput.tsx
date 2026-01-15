@@ -207,57 +207,59 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
             </div>
           }
         >
-          <div className="mt-4 space-y-6">
+          <div className="mt-6 space-y-6">
             <p className="text-charcoal/60 text-sm">{t('textDescription')}</p>
-            <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2">
-              <Input
-                label={t('jobTitle')}
-                placeholder={t('jobTitlePlaceholder')}
-                value={jobTitle}
-                onValueChange={setJobTitle}
+            <div className="grid grid-cols-1 gap-x-6 gap-y-6 md:grid-cols-2">
+              {/* Job Title */}
+              <div className="flex flex-col gap-2">
+                <label className="text-charcoal/80 text-sm font-medium">
+                  {t('jobTitle')} <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  placeholder={t('jobTitlePlaceholder')}
+                  value={jobTitle}
+                  onValueChange={setJobTitle}
+                  isDisabled={isLoading}
+                  classNames={{
+                    input: 'text-charcoal',
+                    inputWrapper: 'border-warm-gray/30 bg-white/80 h-11',
+                  }}
+                />
+              </div>
+              {/* Company */}
+              <div className="flex flex-col gap-2">
+                <label className="text-charcoal/80 text-sm font-medium">{t('company')}</label>
+                <Input
+                  placeholder={t('companyPlaceholder')}
+                  value={company}
+                  onValueChange={setCompany}
+                  isDisabled={isLoading}
+                  classNames={{
+                    input: 'text-charcoal',
+                    inputWrapper: 'border-warm-gray/30 bg-white/80 h-11',
+                  }}
+                />
+              </div>
+            </div>
+            {/* Job Description */}
+            <div className="flex flex-col gap-2">
+              <label className="text-charcoal/80 text-sm font-medium">
+                {t('description')} <span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                placeholder={t('descriptionPlaceholder')}
+                value={description}
+                onValueChange={setDescription}
                 isDisabled={isLoading}
-                isRequired
-                labelPlacement="outside"
+                minRows={4}
+                maxRows={8}
                 classNames={{
-                  mainWrapper: 'pt-4',
                   input: 'text-charcoal',
-                  inputWrapper: 'border-warm-gray/30 bg-white/80',
-                  label: 'text-charcoal/70 pb-1',
-                }}
-              />
-              <Input
-                label={t('company')}
-                placeholder={t('companyPlaceholder')}
-                value={company}
-                onValueChange={setCompany}
-                isDisabled={isLoading}
-                labelPlacement="outside"
-                classNames={{
-                  mainWrapper: 'pt-4',
-                  input: 'text-charcoal',
-                  inputWrapper: 'border-warm-gray/30 bg-white/80',
-                  label: 'text-charcoal/70 pb-1',
+                  inputWrapper: 'border-warm-gray/30 bg-white/80 h-auto py-3',
                 }}
               />
             </div>
-            <Textarea
-              label={t('description')}
-              placeholder={t('descriptionPlaceholder')}
-              value={description}
-              onValueChange={setDescription}
-              isDisabled={isLoading}
-              isRequired
-              labelPlacement="outside"
-              minRows={4}
-              maxRows={8}
-              classNames={{
-                base: 'pt-2',
-                input: 'text-charcoal',
-                inputWrapper: 'border-warm-gray/30 bg-white/80',
-                label: 'text-charcoal/70 pb-1',
-              }}
-            />
-            <div className="flex justify-end pt-2">
+            <div className="mt-6 flex justify-end">
               <Button
                 color="primary"
                 onPress={handleManualSubmit}
