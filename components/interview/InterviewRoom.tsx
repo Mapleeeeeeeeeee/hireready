@@ -14,7 +14,7 @@ import { useInterviewStore } from '@/lib/stores/interview-store';
 import { apiClient } from '@/lib/utils/api-client';
 import { toAppError } from '@/lib/utils/errors';
 import { logger } from '@/lib/utils/logger';
-import { formatDuration } from '@/lib/utils/format';
+import { formatTimeDisplay } from '@/lib/utils/format';
 import { showErrorToast } from '@/lib/utils/toast';
 import type { SupportedLanguage } from '@/lib/gemini/prompts';
 
@@ -219,7 +219,7 @@ export function InterviewRoom() {
           <div
             className={`h-2 w-2 rounded-full ${isConnected ? 'bg-terracotta animate-pulse' : 'bg-gray-400'}`}
           />
-          {t('liveSession')} • {formatDuration(elapsedSeconds)}
+          {t('liveSession')} • {formatTimeDisplay(elapsedSeconds)}
         </div>
         <div className="border-warm-gray/20 flex items-center gap-2 rounded-full border bg-white/50 px-3 py-1 backdrop-blur-sm">
           {getConnectionStatus()}

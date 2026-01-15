@@ -11,7 +11,7 @@ import {
 } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { Clock, MessageSquare, Briefcase, AlertCircle } from 'lucide-react';
-import { formatDuration } from '@/lib/utils/format';
+import { formatTimeDisplay } from '@/lib/utils/format';
 
 // ============================================================
 // Types
@@ -73,7 +73,7 @@ export function SaveConfirmDialog({
                 </div>
                 <div className="flex-1">
                   <p className="text-charcoal/60 text-sm">{t('duration')}</p>
-                  <p className="text-charcoal font-medium">{formatDuration(duration)}</p>
+                  <p className="text-charcoal font-medium">{formatTimeDisplay(duration)}</p>
                 </div>
               </div>
 
