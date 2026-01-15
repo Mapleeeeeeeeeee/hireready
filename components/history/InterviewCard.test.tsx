@@ -10,7 +10,7 @@ import type { InterviewStatus } from '@/lib/constants/enums';
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => {
     const translations: Record<string, string> = {
-      // Interview scenarios
+      // Interview scenarios (deprecated)
       general: 'General Interview',
       technical: 'Technical Interview',
       behavioral: 'Behavioral Interview',
@@ -19,6 +19,7 @@ vi.mock('next-intl', () => ({
       in_progress: 'In Progress',
       completed: 'Completed',
       // History
+      title: 'Interview Practice',
       score: 'Score',
     };
     return translations[key] || key;
@@ -55,10 +56,10 @@ describe('InterviewCard', () => {
   });
 
   describe('basic rendering', () => {
-    it('should render interview scenario correctly', () => {
+    it('should render interview title correctly', () => {
       render(<InterviewCard {...defaultProps} />);
 
-      expect(screen.getByText('General Interview')).toBeInTheDocument();
+      expect(screen.getByText('Interview Practice')).toBeInTheDocument();
     });
 
     it('should render formatted date correctly', () => {
@@ -120,9 +121,9 @@ describe('InterviewCard', () => {
 
       render(<InterviewCard {...defaultProps} onClick={handleClick} />);
 
-      // Find and click the card by its scenario title
-      const scenarioTitle = screen.getByText('General Interview');
-      await user.click(scenarioTitle);
+      // Find and click the card by its title
+      const title = screen.getByText('Interview Practice');
+      await user.click(title);
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
 

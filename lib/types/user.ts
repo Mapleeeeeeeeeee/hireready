@@ -33,7 +33,7 @@ export interface NotificationSettingsJson extends NotificationSettings {
  */
 export interface InterviewListItem {
   id: string;
-  scenario: string;
+  scenario: string | null;
   status: string;
   score: number | null;
   duration: number | null;
@@ -51,7 +51,7 @@ export interface InterviewListItem {
  */
 export interface RecentInterview {
   id: string;
-  scenario: string;
+  scenario: string | null;
   status: string;
   score: number | null;
   duration: number | null;

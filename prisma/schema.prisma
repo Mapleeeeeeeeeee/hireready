@@ -88,7 +88,7 @@ model Verification {
 model Interview {
   id                String   @id @default(cuid())
   userId            String
-  scenario          String   // e.g. "behavioral", "technical"
+  scenario          String?  // e.g. "behavioral", "technical" - now optional
   status            String   @default("pending") // pending, in_progress, completed
   duration          Int?     // in seconds
   feedback          String?  // AI generated feedback

@@ -14,8 +14,8 @@ import type { InterviewStatus } from '@/lib/constants/enums';
 export interface InterviewCardProps {
   /** Unique interview ID */
   id: string;
-  /** Interview scenario type */
-  scenario: string;
+  /** Interview scenario type (deprecated, now nullable) */
+  scenario: string | null;
   /** Current status of the interview */
   status: InterviewStatus;
   /** Score (0-100) if available */
@@ -45,18 +45,11 @@ function InfoItem({ icon: Icon, value }: { icon: React.ElementType; value: strin
 // Component
 // ============================================================
 
-export function InterviewCard({
-  scenario,
-  status,
-  score,
-  duration,
-  createdAt,
-  onClick,
-}: InterviewCardProps) {
-  const t = useTranslations('interview.scenarios');
+export function InterviewCard({ status, score, duration, createdAt, onClick }: InterviewCardProps) {
   const tHistory = useTranslations('history');
 
-  const scenarioLabel = t(scenario as Parameters<typeof t>[0]) || scenario;
+  // Use a default title since scenario is deprecated
+  const cardTitle = tHistory('title');
   const formattedDate = formatDate(createdAt);
   const formattedDuration = duration ? formatDuration(duration) : '-';
 
@@ -67,10 +60,10 @@ export function InterviewCard({
       className="border-warm-gray/10 hover:border-terracotta/30 group border bg-white/50 shadow-none transition-all hover:shadow-sm"
     >
       <CardBody className="flex flex-row items-center justify-between gap-4 p-4">
-        {/* Left section: Scenario and status */}
+        {/* Left section: Title and status */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <h3 className="text-charcoal text-base font-semibold">{scenarioLabel}</h3>
+            <h3 className="text-charcoal text-base font-semibold">{cardTitle}</h3>
             <StatusChip status={status} />
           </div>
 

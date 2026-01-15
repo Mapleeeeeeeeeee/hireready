@@ -50,11 +50,11 @@ export function SaveConfirmDialog({
       onClose={isSaving ? undefined : onDiscard}
       isDismissable={!isSaving}
       hideCloseButton={isSaving}
-      size="lg"
+      size="md"
       classNames={{
         base: 'bg-warm-paper',
         header: 'border-b border-warm-gray/20',
-        body: 'py-6',
+        body: 'py-4',
         footer: 'border-t border-warm-gray/20',
         wrapper: 'z-[9999]',
         backdrop: 'z-[9998]',
@@ -65,13 +65,13 @@ export function SaveConfirmDialog({
           <h2 className="text-charcoal text-xl font-semibold">{t('title')}</h2>
         </ModalHeader>
         <ModalBody>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Interview Summary */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {/* Duration */}
               <div className="flex items-center gap-3">
-                <div className="bg-terracotta/10 flex h-10 w-10 items-center justify-center rounded-full">
-                  <Clock className="text-terracotta h-5 w-5" />
+                <div className="bg-terracotta/10 flex h-8 w-8 items-center justify-center rounded-full">
+                  <Clock className="text-terracotta h-4 w-4" />
                 </div>
                 <div className="flex-1">
                   <p className="text-charcoal/60 text-sm">{t('duration')}</p>
@@ -81,8 +81,8 @@ export function SaveConfirmDialog({
 
               {/* Transcript Count */}
               <div className="flex items-center gap-3">
-                <div className="bg-terracotta/10 flex h-10 w-10 items-center justify-center rounded-full">
-                  <MessageSquare className="text-terracotta h-5 w-5" />
+                <div className="bg-terracotta/10 flex h-8 w-8 items-center justify-center rounded-full">
+                  <MessageSquare className="text-terracotta h-4 w-4" />
                 </div>
                 <div className="flex-1">
                   <p className="text-charcoal/60 text-sm">{t('transcriptCount')}</p>
@@ -93,8 +93,8 @@ export function SaveConfirmDialog({
               {/* Job Description URL (if provided) */}
               {jobDescriptionUrl && (
                 <div className="flex items-center gap-3">
-                  <div className="bg-terracotta/10 flex h-10 w-10 items-center justify-center rounded-full">
-                    <Briefcase className="text-terracotta h-5 w-5" />
+                  <div className="bg-terracotta/10 flex h-8 w-8 items-center justify-center rounded-full">
+                    <Briefcase className="text-terracotta h-4 w-4" />
                   </div>
                   <div className="flex-1">
                     <p className="text-charcoal/60 text-sm">{t('jobDescription')}</p>
@@ -129,7 +129,7 @@ export function SaveConfirmDialog({
 
             {/* Notice about AI analysis */}
             <div className="bg-soft-clay/30 rounded-lg p-4">
-              <p className="text-charcoal/80 text-sm leading-relaxed">
+              <p className="text-charcoal/80 text-xs leading-relaxed">
                 {isSaving ? t('savingNotice') : t('analysisNotice')}
               </p>
             </div>

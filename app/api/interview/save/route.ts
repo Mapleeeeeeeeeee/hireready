@@ -98,7 +98,6 @@ async function handleSaveInterview(
   const interview = await prisma.interview.create({
     data: {
       userId,
-      scenario: 'behavioral',
       status: 'completed',
       duration,
       feedback,

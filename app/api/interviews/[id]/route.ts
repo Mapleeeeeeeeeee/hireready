@@ -17,7 +17,7 @@ import { logger } from '@/lib/utils/logger';
 
 interface InterviewDetailResponse {
   id: string;
-  scenario: string;
+  scenario: string | null;
   status: string;
   score: number | null;
   duration: number | null;

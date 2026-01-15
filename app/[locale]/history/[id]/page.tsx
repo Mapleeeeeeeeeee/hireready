@@ -49,7 +49,6 @@ function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
 function HistoryDetailContent() {
   const t = useTranslations('history');
   const tCommon = useTranslations('common');
-  const tScenarios = useTranslations('interview.scenarios');
   const params = useParams();
   const router = useRouter();
 
@@ -95,8 +94,6 @@ function HistoryDetailContent() {
   }
 
   const interview = selectedInterview;
-  const scenarioLabel =
-    tScenarios(interview.scenario as Parameters<typeof tScenarios>[0]) || interview.scenario;
   const formattedDate = formatDateLong(interview.createdAt);
   const formattedDuration = interview.duration ? formatDuration(interview.duration) : '-';
 
@@ -128,18 +125,16 @@ function HistoryDetailContent() {
           {/* Title and Status */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
-              <h1 className="text-charcoal font-serif text-2xl font-semibold">{scenarioLabel}</h1>
-              <p className="text-charcoal/60 text-sm">{t('title')}</p>
+              <h1 className="text-charcoal font-serif text-2xl font-semibold">{t('title')}</h1>
             </div>
             <StatusChip status={interview.status as InterviewStatus} size="md" />
           </div>
 
           {/* Info Grid */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoItem icon={Calendar} label={t('date')} value={formattedDate} />
             <InfoItem icon={Clock} label={t('duration')} value={formattedDuration} />
             <InfoItem icon={Award} label={t('score')} value={interview.score ?? '-'} />
-            <InfoItem icon={Briefcase} label={t('scenario')} value={scenarioLabel} />
           </div>
 
           {/* Score Highlight */}
