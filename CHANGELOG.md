@@ -2,10 +2,9 @@
 
 ## [1.2.2](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.2.1...v1.2.2) (2026-01-15)
 
-
 ### Bug Fixes
 
-* **auth:** use better-auth updateUser for immediate navbar sync ([#9](https://github.com/Mapleeeeeeeeeee/hireready/issues/9)) ([79a15a8](https://github.com/Mapleeeeeeeeeee/hireready/commit/79a15a8f293b4db0b6d2cc2ea2afb47e739123a0))
+- **auth:** use better-auth updateUser for immediate navbar sync ([#9](https://github.com/Mapleeeeeeeeeee/hireready/issues/9)) ([79a15a8](https://github.com/Mapleeeeeeeeeee/hireready/commit/79a15a8f293b4db0b6d2cc2ea2afb47e739123a0))
 
 ## [1.2.1](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.2.0...v1.2.1) (2026-01-14)
 
