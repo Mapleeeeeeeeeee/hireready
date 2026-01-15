@@ -2,7 +2,7 @@
 
 import { Chip } from '@heroui/react';
 import { useTranslations } from 'next-intl';
-import type { InterviewStatus } from '@/lib/constants/enums';
+import { STATUS_COLORS, type InterviewStatus } from '@/lib/constants/enums';
 
 // ============================================================
 // Types
@@ -26,16 +26,8 @@ export interface StatusChipProps {
 export function StatusChip({ status, size = 'sm' }: StatusChipProps) {
   const t = useTranslations('history.statuses');
 
-  const statusConfig: Record<InterviewStatus, { color: 'warning' | 'primary' | 'success' }> = {
-    pending: { color: 'warning' },
-    in_progress: { color: 'primary' },
-    completed: { color: 'success' },
-  };
-
-  const config = statusConfig[status];
-
   return (
-    <Chip size={size} color={config.color} variant="flat">
+    <Chip size={size} color={STATUS_COLORS[status]} variant="flat">
       {t(status)}
     </Chip>
   );

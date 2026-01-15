@@ -79,6 +79,17 @@ export interface GeminiLiveConfig {
  */
 export const LIVE_API_MODEL = 'gemini-2.5-flash-native-audio-preview-12-2025';
 
+/**
+ * Voice names for Live API by language
+ * @see https://ai.google.dev/gemini-api/docs/live#voices
+ */
+export const LIVE_API_VOICES = {
+  'zh-TW': 'Puck',
+  en: 'Aoede',
+} as const;
+
+export type LiveApiVoice = (typeof LIVE_API_VOICES)[keyof typeof LIVE_API_VOICES];
+
 export const DEFAULT_GEMINI_CONFIG: Partial<GeminiLiveConfig> = {
   model: LIVE_API_MODEL,
   responseModalities: ['AUDIO'],
@@ -206,8 +217,6 @@ export interface AudioStreamerEvents {
 export interface InterviewData {
   /** User ID */
   userId: string;
-  /** Interview scenario */
-  scenario: string;
   /** Interview status */
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   /** Duration in seconds */

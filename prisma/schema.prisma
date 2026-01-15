@@ -23,6 +23,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Resume fields
+  resumeUrl       String?   // 履歷檔案路徑
+  resumeFileName  String?   // 原始檔名（用於顯示）
+  resumeContent   String?   @db.Text  // Gemini 解析的結構化內容 (JSON string)
+  resumeUpdatedAt DateTime? // 履歷更新時間
+
   sessions      Session[]
   accounts      Account[]
   interviews    Interview[]
@@ -86,18 +92,20 @@ model Verification {
 // =============================================
 
 model Interview {
-  id           String   @id @default(cuid())
-  userId       String
-  scenario     String   // e.g. "behavioral", "technical"
-  status       String   @default("pending") // pending, in_progress, completed
-  duration     Int?     // in seconds
-  feedback     String?  // AI generated feedback
-  transcript   Json?    // conversation transcript
-  score        Int?     // overall score 0-100
-  strengths    String[] // strengths
-  improvements String[] // improvement suggestions
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String   @id @default(cuid())
+  userId            String
+  status            String   @default("pending") // pending, in_progress, completed
+  duration          Int?     // in seconds
+  feedback          String?  // AI generated feedback
+  transcript        Json?    // conversation transcript
+  score             Int?     // overall score 0-100
+  strengths         String[] // strengths
+  improvements      String[] // improvement suggestions
+  jobDescriptionUrl String?  @db.Text  // Job description URL
+  jobDescription    Json?               // Full job description object
+  modelAnswer       Json?               // { transcript: TranscriptEntry[], audioUrl?: string }
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -106,6 +114,7 @@ model Interview {
   @@index([createdAt])
   @@map("interviews")
 }
+
 
 // =============================================
 // User Settings

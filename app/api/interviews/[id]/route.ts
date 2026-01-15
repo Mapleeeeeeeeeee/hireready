@@ -4,9 +4,12 @@
  * DELETE /api/interviews/[id] - Delete interview
  */
 
+import { promises as fs } from 'fs';
+import path from 'path';
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
 import { verifyOwnership, extractResourceId } from '@/lib/utils/resource-helpers';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================
 // Types
@@ -14,7 +17,6 @@ import { verifyOwnership, extractResourceId } from '@/lib/utils/resource-helpers
 
 interface InterviewDetailResponse {
   id: string;
-  scenario: string;
   status: string;
   score: number | null;
   duration: number | null;
@@ -22,6 +24,9 @@ interface InterviewDetailResponse {
   transcript: unknown;
   strengths: string[];
   improvements: string[];
+  jobDescriptionUrl: string | null;
+  jobDescription: unknown;
+  modelAnswer: unknown;
   createdAt: string;
   updatedAt: string;
 }
@@ -47,7 +52,6 @@ async function handleGetInterview(
     select: {
       id: true,
       userId: true,
-      scenario: true,
       status: true,
       score: true,
       duration: true,
@@ -55,6 +59,9 @@ async function handleGetInterview(
       transcript: true,
       strengths: true,
       improvements: true,
+      jobDescriptionUrl: true,
+      jobDescription: true,
+      modelAnswer: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -65,7 +72,6 @@ async function handleGetInterview(
 
   return {
     id: interview.id,
-    scenario: interview.scenario,
     status: interview.status,
     score: interview.score,
     duration: interview.duration,
@@ -73,6 +79,9 @@ async function handleGetInterview(
     transcript: interview.transcript,
     strengths: interview.strengths,
     improvements: interview.improvements,
+    jobDescriptionUrl: interview.jobDescriptionUrl,
+    jobDescription: interview.jobDescription,
+    modelAnswer: interview.modelAnswer,
     createdAt: interview.createdAt.toISOString(),
     updatedAt: interview.updatedAt.toISOString(),
   };
@@ -88,16 +97,41 @@ async function handleDeleteInterview(
 ): Promise<DeleteInterviewResponse> {
   const id = extractResourceId(request.url, 'Interview');
 
-  // Fetch interview to verify ownership
+  // Fetch interview to verify ownership AND get modelAnswer path
   const rawInterview = await prisma.interview.findUnique({
     where: { id },
-    select: { id: true, userId: true },
+    select: {
+      id: true,
+      userId: true,
+      modelAnswer: true, // Need this to get audio path
+    },
   });
 
-  // Verify existence and ownership
-  verifyOwnership(rawInterview, userId, 'Interview');
+  const interview = verifyOwnership(rawInterview, userId, 'Interview');
 
-  // Delete the interview
+  // Delete associated audio file if exists
+  const modelAnswer = interview.modelAnswer as { audioUrl?: string } | null;
+  if (modelAnswer?.audioUrl) {
+    const audioPath = path.join(process.cwd(), 'public', modelAnswer.audioUrl);
+    try {
+      await fs.unlink(audioPath);
+      logger.info('Deleted audio file', {
+        module: 'api-interviews',
+        action: 'delete',
+        audioPath: modelAnswer.audioUrl,
+      });
+    } catch (error) {
+      // Log but don't fail the deletion
+      logger.warn('Failed to delete audio file', {
+        module: 'api-interviews',
+        action: 'delete',
+        audioPath: modelAnswer.audioUrl,
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  // Delete the interview record
   await prisma.interview.delete({
     where: { id },
   });

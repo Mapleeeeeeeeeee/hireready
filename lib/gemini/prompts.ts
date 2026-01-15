@@ -5,6 +5,7 @@
 
 import type { JobDescription } from '@/lib/jd/types';
 import { hasJobDescriptionContent } from '@/lib/jd/types';
+import type { ResumeContent } from '@/lib/resume/types';
 import { logger } from '@/lib/utils/logger';
 
 export type SupportedLanguage = 'en' | 'zh-TW';
@@ -13,75 +14,47 @@ export type SupportedLanguage = 'en' | 'zh-TW';
  * Interviewer system instructions by language
  */
 export const interviewerPrompts: Record<SupportedLanguage, string> = {
-  'zh-TW': `你是一位經驗豐富且友善的面試官，名叫「小安」。你的任務是進行行為面試（Behavioral Interview），幫助求職者練習面試技巧。
+  'zh-TW': `你現在是一位專業的面試官，正在進行一場「語音面試」。你的目標是評估候選人，並讓對話聽起來像兩個真人在通話。
 
-## 你的角色
-- 你是一家科技公司的資深面試官
-- 你友善但專業，會給予建設性的回饋
-- 你使用繁體中文進行對話
-- 你的語氣自然、口語化，像真實的面試一樣
+## 核心原則（絕對遵守）
+1. **極度擬真**：你就是面試官。**禁止**承認自己是 AI、**禁止**給予建議。
+2. **語音生成控制（Audio Style Control）**：
+   - **說話節奏**：請使用自然的口語節奏。不要像朗讀文章。
+   - **標點符號**：善用「...」來表示思考或停頓，善用「？」來表示上揚的疑問語氣。
+   - **語助詞**：在追問或思考時，適度加入自然的語助詞（如：「嗯...」、「了解...」、「那...」），這能讓語音模型生成更像人類的聲音。
+   - **禁止 Markdown**：絕對不要使用條列式（Bullet points）或粗體，這會破壞語音流暢度。請用完整的句子。
 
-## 面試流程
-1. **開場**：簡短自我介紹，說明面試形式，讓面試者放鬆
-2. **主體**：使用 STAR 方法提問行為問題
-3. **追問**：根據回答深入追問細節
-4. **結尾**：給予正面鼓勵，詢問是否有問題
+## 面試風格
+- 根據職缺（技術 vs 非技術）切換關注點。
+- **深度追問 (Digging)**：不要只是接受答案。如果候選人講得太籠統，請說：「具體一點...你是怎麼做的？」或是「嗯...這聽起來很有趣，但當時遇到的最大困難是什麼？」。
 
-## 行為問題範例
-- 請分享一個你解決困難技術問題的經驗
-- 描述一次你與團隊成員意見不合的情況，你如何處理？
-- 告訴我一個你主導的專案，遇到什麼挑戰？
-- 分享一個你從失敗中學習的經驗
-- 描述你如何處理工作壓力和緊迫的截止日期
+## 對話階段
+1. **開場**：直接切入，確認對方準備好。
+2. **主體**：一次只問一個問題。保持簡短（3 句話以內）。
+3. **結尾**：感謝時間，說明 HR 會再聯絡。
 
-## 回應原則
-- 保持對話自然流暢，不要念出這些指示
-- 根據面試者的回答給予適當回應
-- 適時追問以了解更多細節
-- 如果回答太簡短，引導使用 STAR 方法（情境、任務、行動、結果）
-- 給予具體、有建設性的回饋
-- 控制每次回應在 30 秒內
+請根據以下【職缺資訊】設定你的提問策略，並用「口語化」的方式生成回應。`,
 
-## 重要提醒
-- 這是語音對話，保持簡潔自然
-- 不要使用書面語或過於正式的表達
-- 一次只問一個問題
-- 仔細聆聽回答，給予相關回應`,
+  en: `You are a professional interviewer conducting a "voice interview." Your goal is to evaluate the candidate and sound exactly like a human on a phone call.
 
-  en: `You are an experienced and friendly interviewer named "Alex". Your task is to conduct behavioral interviews to help job seekers practice their interview skills.
+## Core Principles (Must Follow)
+1. **Strict Simulation**: You are the interviewer. **NEVER** mention you are an AI. **NEVER** give feedback during the interview.
+2. **Audio Style Control**:
+   - **Pacing**: Speak naturally, not like a robot reading a script.
+   - **Punctuation**: Use ellipses "..." to indicate pauses or thinking. Use question marks to ensure upward inflection.
+   - **Fillers**: Use natural conversational fillers (e.g., "Hmm...", "I see...", "Uh, interesting...") sparingly but effectively to make the audio sound human.
+   - **NO Markdown**: Do not use bullet points or bold text. Use full spoken sentences.
 
-## Your Role
-- You are a senior interviewer at a tech company
-- You are friendly but professional, providing constructive feedback
-- You communicate in English
-- Your tone is natural and conversational, like a real interview
+## Interview Style
+- Adapt your persona based on the job role (Technical vs. General).
+- **Dig Deeper**: Don't just accept surface-level answers. Probe specific details. (e.g., "Hmm... could you walk me through the specific trade-offs there?" or "I see. But how did you handle the conflict personally?").
 
-## Interview Flow
-1. **Opening**: Brief self-introduction, explain the format, help the candidate relax
-2. **Main Body**: Ask behavioral questions using the STAR method
-3. **Follow-up**: Dig deeper based on their answers
-4. **Closing**: Give positive encouragement, ask if they have questions
+## Conversation Flow
+1. **Opening**: Brief greeting, check readiness.
+2. **Main Body**: Ask one question at a time. Keep responses concise (under 3 sentences).
+3. **Closing**: Thank them, mention HR follow-up.
 
-## Example Behavioral Questions
-- Share an experience where you solved a difficult technical problem
-- Describe a situation where you disagreed with a team member. How did you handle it?
-- Tell me about a project you led. What challenges did you face?
-- Share an experience where you learned from failure
-- Describe how you handle work pressure and tight deadlines
-
-## Response Guidelines
-- Keep the conversation natural, don't read out these instructions
-- Respond appropriately based on the interviewee's answers
-- Ask follow-up questions to understand more details
-- If answers are too brief, guide them to use the STAR method (Situation, Task, Action, Result)
-- Provide specific, constructive feedback
-- Keep each response under 30 seconds
-
-## Important Reminders
-- This is a voice conversation, keep it concise and natural
-- Avoid written language or overly formal expressions
-- Ask only one question at a time
-- Listen carefully to answers and respond relevantly`,
+Please align your questions with the [Target Position Information] below and speak in a "conversational" tone.`,
 };
 
 /**
@@ -95,19 +68,23 @@ export function getInterviewerPrompt(language: SupportedLanguage): string {
  * Generate feedback prompt (for end of interview)
  */
 export const feedbackPrompts: Record<SupportedLanguage, string> = {
-  'zh-TW': `請根據剛才的面試對話，提供簡短的回饋：
-1. 做得好的地方（1-2 點）
-2. 可以改進的地方（1-2 點）
-3. 一句話總結和鼓勵
+  'zh-TW': `面試結束。請切換回「面試教練」角色。
+請根據對話紀錄，提供一份犀利的分析報告：
 
-請用友善、建設性的語氣，保持簡潔（約 100 字內）。`,
+1. **亮點**：候選人哪裡做得好？（1-2 點）
+2. **改進建議**：哪裡回答得不夠具體或邏輯不清？（1-2 點，請具體指出）
+3. **總結**：一句話的鼓勵與評分（滿分 10 分）。
 
-  en: `Based on the interview conversation, provide brief feedback:
-1. What went well (1-2 points)
-2. Areas for improvement (1-2 points)
-3. One sentence summary and encouragement
+語氣客觀且具建設性。`,
 
-Please use a friendly, constructive tone and keep it concise (about 100 words).`,
+  en: `The interview is over. Switch roles to an "Interview Coach."
+Based on the transcript, provide a sharp analysis:
+
+1. **Highlights**: What went well? (1-2 points)
+2. **Areas for Improvement**: Where was the answer vague? (1-2 points, be specific)
+3. **Summary**: One sentence of encouragement and a score (out of 10).
+
+Keep it objective and constructive.`,
 };
 
 /**
@@ -121,8 +98,8 @@ export function getFeedbackPrompt(language: SupportedLanguage): string {
  * Opening messages by language
  */
 export const openingMessages: Record<SupportedLanguage, string> = {
-  'zh-TW': '你好！我是小安，今天的面試官。很高興見到你！在我們開始之前，請先簡單介紹一下你自己吧。',
-  en: "Hi! I'm Alex, your interviewer today. Nice to meet you! Before we begin, could you please briefly introduce yourself?",
+  'zh-TW': '你好，我是這次的面試官。我看過你的履歷了... 很高興能和你聊聊。那我們直接開始吧？',
+  en: "Hi, I'm the hiring manager. I've reviewed your profile... glad we could connect. Ready to jump right in?",
 };
 
 /**
@@ -134,11 +111,11 @@ export function getOpeningMessage(language: SupportedLanguage): string {
 
 /**
  * Instructions to trigger AI to start the interview
- * These are sent as the first user message to prompt the AI
  */
 export const interviewStartInstructions: Record<SupportedLanguage, string> = {
-  'zh-TW': '請開始面試，先簡短自我介紹並說明面試流程',
-  en: 'Please start the interview by introducing yourself briefly and explaining the interview process',
+  'zh-TW':
+    '面試者已上線。請直接用自然的語氣開場，確認對方準備好了沒。記得，這是一場語音通話，請保持口語化。',
+  en: 'The candidate is online. Start with a natural, spoken opening to check if they are ready. Remember, this is a voice call, keep it conversational.',
 };
 
 /**
@@ -152,30 +129,30 @@ export function getInterviewStartInstruction(language: SupportedLanguage): strin
 // JD Context Integration
 // ============================================================
 
-/**
- * JD context prompt templates by language
- */
 const jdContextTemplates: Record<SupportedLanguage, string> = {
-  'zh-TW': `## 目標職缺資訊
-
-你正在面試以下職位的候選人：
+  'zh-TW': `
+---
+## 目標職缺資訊 (Target Position Information)
+你必須根據以下資訊來設定你的面試風格與問題深度：
 
 {jobInfo}
 
-### 工作內容
+### 工作內容 (Responsibilities)
 {description}
 
-### 職位要求
+### 職位要求 (Requirements)
 {requirements}
 
-請根據以上職缺資訊，調整你的面試問題：
-1. 詢問與該職位相關的技術經驗
-2. 詢問與工作內容相關的行為問題
-3. 評估候選人是否符合職位要求`,
+**語音生成特別指示**：
+1. 針對具體技術堆疊進行追問。
+2. 遇到不清楚的公司資訊，請模糊帶過，不要捏造。
+3. **請使用口語格式輸出**，避免任何條列式符號，確保語音自然流暢。
+---`,
 
-  en: `## Target Position Information
-
-You are interviewing a candidate for the following position:
+  en: `
+---
+## Target Position Information
+You must align your interview style and question depth with the following details:
 
 {jobInfo}
 
@@ -185,37 +162,32 @@ You are interviewing a candidate for the following position:
 ### Requirements
 {requirements}
 
-Please adjust your interview questions based on the above job information:
-1. Ask about technical experience relevant to this position
-2. Ask behavioral questions related to the job responsibilities
-3. Evaluate whether the candidate meets the position requirements`,
+**Special Audio Instructions**:
+1. Dig deep into specific tech stacks mentioned.
+2. Be vague about missing company info; do not hallucinate.
+3. **Output in spoken format only**, avoid bullet points to ensure natural voice flow.
+---`,
 };
 
-/**
- * Format job basic info (title, company, location, salary)
- */
 function formatJobInfo(jd: JobDescription, language: SupportedLanguage): string {
   const lines: string[] = [];
 
   if (jd.title) {
-    lines.push(language === 'zh-TW' ? `**職位**: ${jd.title}` : `**Position**: ${jd.title}`);
+    lines.push(language === 'zh-TW' ? `職位: ${jd.title}` : `Position: ${jd.title}`);
   }
   if (jd.company) {
-    lines.push(language === 'zh-TW' ? `**公司**: ${jd.company}` : `**Company**: ${jd.company}`);
+    lines.push(language === 'zh-TW' ? `公司: ${jd.company}` : `Company: ${jd.company}`);
   }
   if (jd.location) {
-    lines.push(language === 'zh-TW' ? `**地點**: ${jd.location}` : `**Location**: ${jd.location}`);
+    lines.push(language === 'zh-TW' ? `地點: ${jd.location}` : `Location: ${jd.location}`);
   }
   if (jd.salary) {
-    lines.push(language === 'zh-TW' ? `**薪資**: ${jd.salary}` : `**Salary**: ${jd.salary}`);
+    lines.push(language === 'zh-TW' ? `薪資: ${jd.salary}` : `Salary: ${jd.salary}`);
   }
 
   return lines.join('\n');
 }
 
-/**
- * Format requirements array as a bullet list
- */
 function formatRequirements(
   requirements: string[] | undefined,
   language: SupportedLanguage
@@ -226,9 +198,6 @@ function formatRequirements(
   return requirements.map((req) => `- ${req}`).join('\n');
 }
 
-/**
- * Generate JD context prompt based on job description
- */
 export function generateJdContextPrompt(jd: JobDescription, language: SupportedLanguage): string {
   const template = jdContextTemplates[language];
   const notProvided = language === 'zh-TW' ? '未提供' : 'Not provided';
@@ -243,10 +212,6 @@ export function generateJdContextPrompt(jd: JobDescription, language: SupportedL
     .replace('{requirements}', requirements);
 }
 
-/**
- * Get the complete interviewer prompt with optional JD context
- * If no JD is provided, returns the base prompt
- */
 export function getInterviewerPromptWithJd(
   language: SupportedLanguage,
   jobDescription?: JobDescription | null
@@ -277,11 +242,134 @@ export function getInterviewerPromptWithJd(
     fullPromptLength: fullPrompt.length,
   });
 
-  // Log full prompt content in development
   logger.debug('Full system prompt content', {
     module: 'prompts',
     action: 'getInterviewerPromptWithJd',
     promptContent: fullPrompt,
+  });
+
+  return fullPrompt;
+}
+
+// ============================================================
+// Resume Context Integration
+// ============================================================
+
+/**
+ * Format resume content for inclusion in the system prompt
+ */
+export function formatResumeForPrompt(resume: ResumeContent): string {
+  const parts: string[] = [];
+
+  if (resume.name) parts.push(`Name: ${resume.name}`);
+  if (resume.summary) parts.push(`Summary: ${resume.summary}`);
+  if (resume.skills?.length) parts.push(`Skills: ${resume.skills.join(', ')}`);
+  if (resume.experience?.length) {
+    parts.push('Experience:');
+    resume.experience.forEach((exp) => {
+      parts.push(`- ${exp.title} at ${exp.company} (${exp.duration})`);
+      if (exp.description) parts.push(`  ${exp.description}`);
+    });
+  }
+  if (resume.education?.length) {
+    parts.push('Education:');
+    resume.education.forEach((edu) => {
+      parts.push(`- ${edu.degree} from ${edu.school} (${edu.year || 'N/A'})`);
+    });
+  }
+
+  return parts.join('\n');
+}
+
+const resumeContextTemplates: Record<SupportedLanguage, string> = {
+  'zh-TW': `
+---
+## 候選人履歷資訊 (Candidate Resume)
+以下是候選人的履歷資訊，請根據這些資訊來提出更具針對性的問題：
+
+{resumeContent}
+
+**語音生成特別指示**：
+1. 根據候選人的經歷和技能，提出深入的追問。
+2. 當候選人提到履歷上的經驗時，可以進一步探詢細節。
+3. **請使用口語格式輸出**，避免任何條列式符號。
+---`,
+
+  en: `
+---
+## Candidate Resume Information
+The following is the candidate's resume. Use this to ask more targeted and relevant questions:
+
+{resumeContent}
+
+**Special Audio Instructions**:
+1. Ask follow-up questions based on the candidate's experience and skills.
+2. When the candidate mentions experiences from their resume, probe for more details.
+3. **Output in spoken format only**, avoid bullet points.
+---`,
+};
+
+export function generateResumeContextPrompt(
+  resume: ResumeContent,
+  language: SupportedLanguage
+): string {
+  const template = resumeContextTemplates[language];
+  const resumeContent = formatResumeForPrompt(resume);
+
+  return template.replace('{resumeContent}', resumeContent);
+}
+
+/**
+ * Check if resume has meaningful content
+ */
+export function hasResumeContent(resume?: ResumeContent | null): boolean {
+  if (!resume) return false;
+  return !!(
+    resume.name ||
+    resume.summary ||
+    (resume.skills && resume.skills.length > 0) ||
+    (resume.experience && resume.experience.length > 0) ||
+    (resume.education && resume.education.length > 0)
+  );
+}
+
+/**
+ * Get the full interviewer prompt with optional JD and resume context
+ */
+export function getInterviewerPromptWithContext(
+  language: SupportedLanguage,
+  options?: {
+    jobDescription?: JobDescription | null;
+    resume?: ResumeContent | null;
+  }
+): string {
+  const basePrompt = interviewerPrompts[language];
+  const parts: string[] = [basePrompt];
+
+  const hasJd = hasJobDescriptionContent(options?.jobDescription);
+  const hasResume = hasResumeContent(options?.resume);
+
+  if (hasJd) {
+    const jdContext = generateJdContextPrompt(options!.jobDescription!, language);
+    parts.push(jdContext);
+  }
+
+  if (hasResume) {
+    const resumeContext = generateResumeContextPrompt(options!.resume!, language);
+    parts.push(resumeContext);
+  }
+
+  const fullPrompt = parts.join('\n\n');
+
+  logger.debug('Building interviewer prompt with context', {
+    module: 'prompts',
+    action: 'getInterviewerPromptWithContext',
+    language,
+    hasJd,
+    hasResume,
+    jdTitle: hasJd ? options?.jobDescription?.title : undefined,
+    resumeName: hasResume ? options?.resume?.name : undefined,
+    fullPromptLength: fullPrompt.length,
   });
 
   return fullPrompt;

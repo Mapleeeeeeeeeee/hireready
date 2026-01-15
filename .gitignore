@@ -57,3 +57,6 @@ next-env.d.ts
 *.log
 
 /lib/generated/prisma
+
+# Private storage (resumes, uploads, etc.)
+/storage/

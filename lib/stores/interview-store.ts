@@ -9,6 +9,7 @@ import { logger } from '@/lib/utils/logger';
 import type { SessionState, TranscriptEntry } from '@/lib/gemini/types';
 import type { AppError } from '@/lib/utils/errors';
 import type { JobDescription } from '@/lib/jd/types';
+import type { ResumeContent } from '@/lib/resume/types';
 
 // ============================================================
 // Types
@@ -39,6 +40,9 @@ export interface InterviewStoreState {
   // Job description (optional)
   jobDescription: JobDescription | null;
 
+  // Resume content (optional)
+  resumeContent: ResumeContent | null;
+
   // Error state
   lastError: AppError | null;
 }
@@ -67,6 +71,7 @@ export interface InterviewStoreActions {
   setLanguage: (language: 'en' | 'zh-TW') => void;
   incrementTimer: () => void;
   setJobDescription: (jd: JobDescription | null) => void;
+  setResumeContent: (content: ResumeContent | null) => void;
 
   // Error actions
   setError: (error: AppError | null) => void;
@@ -94,6 +99,7 @@ const initialState: InterviewStoreState = {
   language: 'zh-TW',
   elapsedSeconds: 0,
   jobDescription: null,
+  resumeContent: null,
   lastError: null,
 };
 
@@ -208,6 +214,16 @@ export const useInterviewStore = create<InterviewStore>()(
           title: jd?.title,
         });
         set({ jobDescription: jd });
+      },
+
+      setResumeContent: (content) => {
+        logger.info('Resume content updated', {
+          module: 'interview-store',
+          action: 'setResumeContent',
+          hasContent: content !== null,
+          name: content?.name,
+        });
+        set({ resumeContent: content });
       },
 
       // Error actions

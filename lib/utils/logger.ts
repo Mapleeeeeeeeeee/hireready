@@ -127,7 +127,8 @@ function createLogEntry(
 
 function shouldLog(level: LogLevel): boolean {
   const logLevels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
-  const minLevel = getIsDev() ? 'debug' : 'info';
+  // Force debug level in development for transcript debugging
+  const minLevel = 'debug';
   return logLevels.indexOf(level) >= logLevels.indexOf(minLevel);
 }
 
@@ -135,7 +136,8 @@ export const logger = {
   debug(message: string, context?: LogContext): void {
     if (!shouldLog('debug')) return;
     const entry = createLogEntry('debug', message, context);
-    console.debug(formatLogEntry(entry));
+    // Use console.log instead of console.debug to ensure visibility
+    console.log(formatLogEntry(entry));
   },
 
   info(message: string, context?: LogContext): void {

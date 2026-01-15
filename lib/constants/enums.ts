@@ -13,18 +13,6 @@
 export const INTERVIEW_STATUSES = ['pending', 'in_progress', 'completed'] as const;
 export type InterviewStatus = (typeof INTERVIEW_STATUSES)[number];
 
-/**
- * Interview scenarios/types
- */
-export const INTERVIEW_SCENARIOS = [
-  'behavioral',
-  'technical',
-  'system_design',
-  'coding',
-  'general',
-] as const;
-export type InterviewScenario = (typeof INTERVIEW_SCENARIOS)[number];
-
 // ============================================================
 // User Settings Related
 // ============================================================
@@ -79,4 +67,28 @@ export const DEFAULT_USER_SETTINGS = {
     interviewReminders: true,
     weeklyReport: false,
   },
+} as const;
+
+// ============================================================
+// Status Color Mappings
+// ============================================================
+
+/**
+ * HeroUI color variants for interview status
+ * Used in StatusChip component
+ */
+export const STATUS_COLORS: Record<InterviewStatus, 'warning' | 'primary' | 'success'> = {
+  pending: 'warning',
+  in_progress: 'primary',
+  completed: 'success',
+} as const;
+
+/**
+ * Tailwind accent background colors for interview status
+ * Used in InterviewCard left accent bar
+ */
+export const STATUS_ACCENT_COLORS: Record<InterviewStatus, string> = {
+  pending: 'bg-warning',
+  in_progress: 'bg-primary',
+  completed: 'bg-success',
 } as const;

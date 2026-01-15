@@ -3,6 +3,8 @@
  * Used across API routes and stores for consistency
  */
 
+import type { ModelAnswer } from '@/lib/types/interview';
+
 // ============================================================
 // Notification Settings
 // ============================================================
@@ -29,17 +31,33 @@ export interface NotificationSettingsJson extends NotificationSettings {
 // ============================================================
 
 /**
+ * Job description data stored with interview
+ */
+export interface JobDescriptionData {
+  source?: string;
+  url?: string;
+  title?: string;
+  company?: string;
+  location?: string;
+  salary?: string;
+  description?: string;
+  requirements?: string[];
+}
+
+/**
  * Interview list item from API (paginated list)
  */
 export interface InterviewListItem {
   id: string;
-  scenario: string;
   status: string;
   score: number | null;
   duration: number | null;
   feedback: string | null;
   strengths: string[];
   improvements: string[];
+  jobDescriptionUrl: string | null;
+  jobDescription: JobDescriptionData | null;
+  modelAnswer: ModelAnswer | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -49,7 +67,6 @@ export interface InterviewListItem {
  */
 export interface RecentInterview {
   id: string;
-  scenario: string;
   status: string;
   score: number | null;
   duration: number | null;
