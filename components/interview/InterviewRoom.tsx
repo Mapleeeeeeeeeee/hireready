@@ -1,16 +1,29 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { ControlBar } from './ControlBar';
 import { VideoPreview } from './VideoPreview';
+import { SaveConfirmDialog } from './SaveConfirmDialog';
 import { Activity, AlertCircle, Loader2 } from 'lucide-react';
 import { useLiveApi } from '@/lib/hooks/use-live-api';
 import { useVideoPreview } from '@/lib/hooks/use-video-preview';
 import { useAudioLevel } from '@/lib/hooks/use-audio-level';
 import { useInterviewStore } from '@/lib/stores/interview-store';
+import { apiClient } from '@/lib/utils/api-client';
+import { toAppError } from '@/lib/utils/errors';
+import { logger } from '@/lib/utils/logger';
 import type { SupportedLanguage } from '@/lib/gemini/prompts';
+
+// ============================================================
+// Types
+// ============================================================
+
+interface SaveInterviewResponse {
+  id: string;
+  createdAt: string;
+}
 
 export function InterviewRoom() {
   const router = useRouter();
@@ -19,6 +32,10 @@ export function InterviewRoom() {
 
   // Ref to prevent double connection in StrictMode
   const hasConnectedRef = useRef(false);
+
+  // Save dialog state
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Use the Live API hook
   const {
@@ -41,6 +58,10 @@ export function InterviewRoom() {
   const isCaptionOn = useInterviewStore((state) => state.isCaptionOn);
   const toggleCaption = useInterviewStore((state) => state.toggleCaption);
   const interimAiTranscript = useInterviewStore((state) => state.interimAiTranscript);
+
+  // Interview data from store
+  const transcripts = useInterviewStore((state) => state.transcripts);
+  const jobDescription = useInterviewStore((state) => state.jobDescription);
 
   // Use the Audio Level hook for real-time microphone visualization
   const {
@@ -92,8 +113,46 @@ export function InterviewRoom() {
   // Handle end call
   const handleEndCall = useCallback(() => {
     disconnect();
+    setShowSaveDialog(true);
+  }, [disconnect]);
+
+  // Handle save interview
+  const handleSave = useCallback(async () => {
+    setIsSaving(true);
+    try {
+      const response = await apiClient.post<SaveInterviewResponse>('/api/interview/save', {
+        transcripts,
+        duration: elapsedSeconds,
+        language: locale as 'en' | 'zh-TW',
+        jobDescriptionUrl: jobDescription?.url,
+      });
+
+      logger.info('Interview saved', {
+        module: 'interview-room',
+        action: 'save',
+        interviewId: response.id,
+      });
+
+      router.push(`/history/${response.id}`);
+    } catch (error) {
+      logger.error('Failed to save interview', error as Error, {
+        module: 'interview-room',
+        action: 'save',
+      });
+
+      const appError = toAppError(error);
+      // TODO: Show error message to user (can use toast)
+      alert(appError.message);
+
+      setIsSaving(false);
+    }
+  }, [transcripts, elapsedSeconds, locale, jobDescription, router]);
+
+  // Handle discard interview
+  const handleDiscard = useCallback(() => {
+    setShowSaveDialog(false);
     router.push('/');
-  }, [disconnect, router]);
+  }, [router]);
 
   // Get connection status display
   const getConnectionStatus = useCallback(() => {
@@ -205,6 +264,17 @@ export function InterviewRoom() {
           }}
         />
       </div>
+
+      {/* Save Confirm Dialog */}
+      <SaveConfirmDialog
+        isOpen={showSaveDialog}
+        onSave={handleSave}
+        onDiscard={handleDiscard}
+        duration={elapsedSeconds}
+        transcriptCount={transcripts.length}
+        jobDescriptionUrl={jobDescription?.url}
+        isSaving={isSaving}
+      />
     </div>
   );
 }

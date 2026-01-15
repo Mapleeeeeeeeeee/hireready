@@ -198,6 +198,16 @@
         "ready": "準備中"
       },
       "caption": "AI 字幕"
+    },
+    "saveDialog": {
+      "title": "儲存面試記錄",
+      "duration": "面試時長",
+      "transcriptCount": "對話數量",
+      "jobDescription": "職缺資訊",
+      "analysisNotice": "AI 將分析你的回答並生成模範回答（需 10-20 秒）",
+      "save": "儲存",
+      "discard": "放棄",
+      "savingNotice": "AI 正在生成分析與模範回答..."
     }
   },
   "auth": {

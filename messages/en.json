@@ -198,6 +198,16 @@
         "ready": "Ready"
       },
       "caption": "AI Captions"
+    },
+    "saveDialog": {
+      "title": "Save Interview Record",
+      "duration": "Interview Duration",
+      "transcriptCount": "Conversation Count",
+      "jobDescription": "Job Description",
+      "analysisNotice": "AI will analyze your answers and generate model responses (takes 10-20 seconds)",
+      "save": "Save",
+      "discard": "Discard",
+      "savingNotice": "AI is generating analysis and model responses..."
     }
   },
   "auth": {
