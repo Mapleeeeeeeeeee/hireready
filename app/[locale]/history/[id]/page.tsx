@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
-import { Button, Card, CardBody, Tabs, Tab } from '@heroui/react';
+import { Button, Card, CardBody, Tabs, Tab, Tooltip } from '@heroui/react';
 import {
   ArrowLeft,
   Calendar,
@@ -12,13 +12,18 @@ import {
   Briefcase,
   CheckCircle,
   AlertCircle,
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, StatusChip } from '@/components/common';
 import { TranscriptViewer, type TranscriptEntry } from '@/components/history/TranscriptViewer';
 import { AudioPlayer } from '@/components/history/AudioPlayer';
+import { DeleteConfirmDialog } from '@/components/history';
 import { useUserStore } from '@/lib/stores/user-store';
-import { formatDateLong, formatDuration } from '@/lib/utils/date-format';
+import { useInterviewStore } from '@/lib/stores/interview-store';
+import { toJobDescription } from '@/lib/jd';
+import { formatDate, formatDateLong, formatDuration } from '@/lib/utils/date-format';
 import type { InterviewStatus } from '@/lib/constants/enums';
 
 // ============================================================
@@ -64,10 +69,16 @@ function HistoryDetailContent() {
   const {
     selectedInterview,
     isLoadingInterviewDetail,
+    isDeletingInterview,
     error,
     fetchInterviewById,
     clearSelectedInterview,
+    deleteInterview,
   } = useUserStore();
+
+  const setJobDescription = useInterviewStore((state) => state.setJobDescription);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (interviewId) {
@@ -78,6 +89,26 @@ function HistoryDetailContent() {
       clearSelectedInterview();
     };
   }, [interviewId, fetchInterviewById, clearSelectedInterview]);
+
+  const handleRetry = () => {
+    if (!selectedInterview?.jobDescription) return;
+
+    setJobDescription(toJobDescription(selectedInterview.jobDescription));
+    router.push('/interview/setup');
+  };
+
+  const handleDelete = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedInterview) return;
+    const success = await deleteInterview(selectedInterview.id);
+    if (success) {
+      setDeleteDialogOpen(false);
+      router.replace('/history');
+    }
+  };
 
   const handleBack = () => {
     router.push('/history');
@@ -133,7 +164,36 @@ function HistoryDetailContent() {
             <div className="space-y-1">
               <h1 className="text-charcoal font-serif text-2xl font-semibold">{t('title')}</h1>
             </div>
-            <StatusChip status={interview.status as InterviewStatus} size="md" />
+            <div className="flex items-center gap-3">
+              {/* Actions */}
+              {interview.jobDescription && (
+                <Tooltip content={t('retryInterview')}>
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    onPress={handleRetry}
+                    className="text-terracotta/70 hover:text-terracotta hover:bg-terracotta/10"
+                  >
+                    <RefreshCw className="h-5 w-5" />
+                  </Button>
+                </Tooltip>
+              )}
+
+              <Tooltip content={t('delete')}>
+                <Button
+                  isIconOnly
+                  variant="light"
+                  onPress={handleDelete}
+                  className="text-gray-300 transition-colors hover:text-red-600"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </Button>
+              </Tooltip>
+
+              <div className="mx-1 h-6 w-px bg-gray-200" />
+
+              <StatusChip status={interview.status as InterviewStatus} size="md" />
+            </div>
           </div>
 
           {/* Info Grid */}
@@ -262,6 +322,18 @@ function HistoryDetailContent() {
         /* If no model answer, just show the transcript directly */
         <TranscriptViewer transcript={transcript} />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={isDeletingInterview}
+        interviewInfo={{
+          title: interview.jobDescription?.company || interview.jobDescription?.title || t('title'),
+          date: formatDate(interview.createdAt),
+        }}
+      />
     </div>
   );
 }

@@ -117,6 +117,15 @@ export function InterviewRoom() {
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     setSaveError(''); // Clear previous errors
+
+    logger.info('Preparing to save interview', {
+      module: 'interview-room',
+      action: 'save-prepare',
+      transcriptCount: transcripts.length,
+      duration: elapsedSeconds,
+      hasJobDescription: !!jobDescription,
+    });
+
     try {
       const response = await apiClient.post<SaveInterviewResponse>('/api/interview/save', {
         transcripts,
@@ -130,6 +139,7 @@ export function InterviewRoom() {
         module: 'interview-room',
         action: 'save',
         interviewId: response.id,
+        transcriptCount: transcripts.length,
       });
 
       router.push(`/history/${response.id}`);

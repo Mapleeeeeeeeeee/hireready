@@ -12,7 +12,7 @@ export const appConfig = {
 
 // Gemini API configuration
 export const geminiConfig = {
-  model: 'gemini-2.0-flash-exp' as const,
+  model: 'gemini-3-flash-preview' as const,
   timeouts: {
     analysis: 20000, // 20 seconds
     tts: 20000, // 20 seconds

@@ -8,6 +8,9 @@
 export type { JobDescription, JDSource, ManualJobInput } from './types';
 export { hasJobDescriptionContent } from './types';
 
+// Mappers
+export { toJobDescription } from './mappers';
+
 // Provider types
 export type { JDProvider, ProviderConfig } from './providers';
 

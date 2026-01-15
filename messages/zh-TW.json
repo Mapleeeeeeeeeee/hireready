@@ -264,7 +264,18 @@
       "pause": "暫停",
       "loading": "載入中...",
       "error": "無法載入音檔"
-    }
+    },
+    "delete": "刪除",
+    "deleteConfirm": {
+      "title": "刪除面試記錄",
+      "message": "您確定要刪除此面試記錄嗎？此操作無法復原。",
+      "confirm": "刪除",
+      "cancel": "取消",
+      "deleting": "刪除中..."
+    },
+    "untitledInterview": "未命名面試",
+    "scoreLabel": "分數",
+    "noScore": "無分數"
   },
   "profile": {
     "title": "個人資料",

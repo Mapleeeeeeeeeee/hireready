@@ -68,3 +68,27 @@ export const DEFAULT_USER_SETTINGS = {
     weeklyReport: false,
   },
 } as const;
+
+// ============================================================
+// Status Color Mappings
+// ============================================================
+
+/**
+ * HeroUI color variants for interview status
+ * Used in StatusChip component
+ */
+export const STATUS_COLORS: Record<InterviewStatus, 'warning' | 'primary' | 'success'> = {
+  pending: 'warning',
+  in_progress: 'primary',
+  completed: 'success',
+} as const;
+
+/**
+ * Tailwind accent background colors for interview status
+ * Used in InterviewCard left accent bar
+ */
+export const STATUS_ACCENT_COLORS: Record<InterviewStatus, string> = {
+  pending: 'bg-warning',
+  in_progress: 'bg-primary',
+  completed: 'bg-success',
+} as const;

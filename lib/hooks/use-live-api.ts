@@ -22,6 +22,7 @@ import {
 import { createTranscriptEntry, type SessionState } from '@/lib/gemini/types';
 import { logger } from '@/lib/utils/logger';
 import { BadRequestError } from '@/lib/utils/errors';
+import { useInterviewTimer } from './use-interview-timer';
 
 // ============================================================
 // Types
@@ -69,11 +70,13 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
   const store = useInterviewStore();
   const visualizerVolume = useInterviewStore(selectVisualizerVolume);
 
+  // Timer hook
+  const { startTimer, stopTimer, elapsedSeconds } = useInterviewTimer();
+
   // Refs for instances
   const clientRef = useRef<GeminiProxyClient | null>(null);
   const recorderRef = useRef<AudioRecorder | null>(null);
   const streamerRef = useRef<AudioStreamer | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Check browser support (delayed to avoid SSR hydration mismatch)
   const [isSupported, setIsSupported] = useState(true); // Default true to avoid showing error during SSR
@@ -85,28 +88,6 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
       const supported = isAudioRecordingSupported() && isAudioPlaybackSupported();
       setIsSupported(supported);
     });
-  }, []);
-
-  /**
-   * Start the session timer
-   */
-  const startTimer = useCallback(() => {
-    if (timerRef.current) return;
-    timerRef.current = setInterval(() => {
-      store.incrementTimer();
-    }, 1000);
-  }, [store]);
-
-  /**
-   * Stop the session timer
-   * Uses atomic swap to prevent race conditions with multiple calls
-   */
-  const stopTimer = useCallback(() => {
-    const timer = timerRef.current;
-    if (timer) {
-      timerRef.current = null;
-      clearInterval(timer);
-    }
   }, []);
 
   /**
@@ -147,25 +128,49 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
 
     // Transcript events
     client.on('inputTranscript', (text, isFinal) => {
+      logger.debug('Received input transcript', {
+        module: 'use-live-api',
+        action: 'inputTranscript',
+        textLength: text.length,
+        isFinal,
+        textPreview: text.slice(0, 50),
+      });
+
       if (isFinal) {
         store.addTranscript(createTranscriptEntry('user', text, true));
         store.setInterimUserTranscript('');
+        logger.info('Added user transcript to store', {
+          module: 'use-live-api',
+          action: 'addTranscript',
+          role: 'user',
+          textLength: text.length,
+        });
       } else {
         store.setInterimUserTranscript(text);
       }
     });
 
     client.on('outputTranscript', (text, isFinal) => {
+      logger.debug('Received output transcript', {
+        module: 'use-live-api',
+        action: 'outputTranscript',
+        textLength: text.length,
+        isFinal,
+        textPreview: text.slice(0, 50),
+      });
+
       if (isFinal) {
-        // Show the complete sentence as caption before adding to transcript
-        store.setInterimAiTranscript(text);
-        // Add a small delay to show the complete sentence
-        setTimeout(() => {
-          store.addTranscript(createTranscriptEntry('ai', text, true));
-          store.setInterimAiTranscript('');
-        }, 1500); // Show complete sentence for 1.5 seconds
+        // Final transcript - add to history immediately
+        store.addTranscript(createTranscriptEntry('ai', text, true));
+        logger.info('Added AI transcript to store', {
+          module: 'use-live-api',
+          action: 'addTranscript',
+          role: 'ai',
+          textLength: text.length,
+        });
       } else {
-        // Show partial transcripts in real-time for better UX
+        // Interim transcript - display directly (simplified from typewriter effect)
+        // The CaptionOverlay component handles smooth visual transitions via Framer Motion
         store.setInterimAiTranscript(text);
       }
     });
@@ -176,6 +181,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
 
     client.on('interrupted', () => {
       streamerRef.current?.fadeOut();
+      store.clearInterimTranscripts();
     });
   }, [language, store, startTimer, stopTimer]);
 
@@ -216,6 +222,15 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
     // Update output volume
     streamer.on('volume', (volume) => {
       store.setOutputVolume(volume);
+    });
+
+    // Clear caption when audio playback completes
+    streamer.on('complete', () => {
+      logger.debug('Audio playback complete', {
+        module: 'use-live-api',
+        action: 'streamer-complete',
+      });
+      store.setInterimAiTranscript('');
     });
 
     streamer.on('error', (error) => {
@@ -334,6 +349,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
 
   /**
    * Clean up all resources (shared between disconnect and unmount)
+   * Note: Does NOT call store methods to avoid infinite loops during unmount
    */
   const cleanup = useCallback(() => {
     stopTimer();
@@ -406,7 +422,7 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
     transcripts: store.transcripts,
     interimUserTranscript: store.interimUserTranscript,
     interimAiTranscript: store.interimAiTranscript,
-    elapsedSeconds: store.elapsedSeconds,
+    elapsedSeconds,
     lastError: store.lastError,
 
     // Actions

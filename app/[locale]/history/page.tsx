@@ -1,17 +1,19 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Button, Pagination, Link } from '@heroui/react';
 import { ClipboardList, ArrowRight } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, PageErrorState } from '@/components/common';
-import { InterviewCard } from '@/components/history/InterviewCard';
+import { InterviewCard, DeleteConfirmDialog } from '@/components/history';
 import { useUserStore, selectTotalPages } from '@/lib/stores/user-store';
 import { useInterviewStore } from '@/lib/stores/interview-store';
+import { toJobDescription } from '@/lib/jd';
+import { formatDate } from '@/lib/utils/date-format';
 import type { InterviewStatus } from '@/lib/constants/enums';
-import type { JobDescriptionData } from '@/lib/types/user';
+import type { JobDescriptionData, InterviewListItem } from '@/lib/types/user';
 
 // ============================================================
 // History Content Component
@@ -27,8 +29,10 @@ function HistoryContent() {
     interviewsPage,
     interviewsTotal,
     isLoadingInterviews,
+    isDeletingInterview,
     error,
     fetchInterviews,
+    deleteInterview,
   } = useUserStore();
 
   const setJobDescription = useInterviewStore((state) => state.setJobDescription);
@@ -55,22 +59,35 @@ function HistoryContent() {
 
   const handleRetryInterview = useCallback(
     (jobDescription: JobDescriptionData) => {
-      // Convert JobDescriptionData to JobDescription format expected by store
-      setJobDescription({
-        source: (jobDescription.source as 'manual' | '104' | '1111') || 'manual',
-        url: jobDescription.url,
-        title: jobDescription.title || '',
-        company: jobDescription.company || '',
-        location: jobDescription.location,
-        salary: jobDescription.salary,
-        description: jobDescription.description || '',
-        requirements: jobDescription.requirements,
-        fetchedAt: new Date(),
-      });
+      setJobDescription(toJobDescription(jobDescription));
       router.push('/interview/setup');
     },
     [setJobDescription, router]
   );
+
+  // Delete interview state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [interviewToDelete, setInterviewToDelete] = useState<InterviewListItem | null>(null);
+
+  const handleDeleteClick = useCallback((interview: InterviewListItem) => {
+    setInterviewToDelete(interview);
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteDialogOpen(false);
+    setInterviewToDelete(null);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!interviewToDelete) return;
+
+    const success = await deleteInterview(interviewToDelete.id);
+    if (success) {
+      setDeleteDialogOpen(false);
+      setInterviewToDelete(null);
+    }
+  }, [interviewToDelete, deleteInterview]);
 
   // Loading state
   if (isLoadingInterviews && interviews.length === 0) {
@@ -110,7 +127,7 @@ function HistoryContent() {
         </div>
       ) : (
         <>
-          <div className="space-y-3">
+          <div className="space-y-5">
             {interviews.map((interview) => (
               <InterviewCard
                 key={interview.id}
@@ -127,6 +144,7 @@ function HistoryContent() {
                     ? () => handleRetryInterview(interview.jobDescription!)
                     : undefined
                 }
+                onDelete={() => handleDeleteClick(interview)}
               />
             ))}
           </div>
@@ -153,6 +171,25 @@ function HistoryContent() {
           </p>
         </>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={isDeletingInterview}
+        interviewInfo={
+          interviewToDelete
+            ? {
+                title:
+                  interviewToDelete.jobDescription?.company ||
+                  interviewToDelete.jobDescription?.title ||
+                  t('title'),
+                date: formatDate(interviewToDelete.createdAt),
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }
