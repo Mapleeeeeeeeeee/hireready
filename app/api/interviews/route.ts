@@ -82,6 +82,8 @@ async function handleGetInterviews(
         feedback: true,
         strengths: true,
         improvements: true,
+        jobDescriptionUrl: true,
+        modelAnswer: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -100,6 +102,8 @@ async function handleGetInterviews(
     feedback: i.feedback,
     strengths: i.strengths,
     improvements: i.improvements,
+    jobDescriptionUrl: i.jobDescriptionUrl,
+    modelAnswer: i.modelAnswer,
     createdAt: i.createdAt.toISOString(),
     updatedAt: i.updatedAt.toISOString(),
   }));

@@ -259,6 +259,16 @@
       "title": "對話記錄",
       "messages": "則訊息",
       "emptyTranscript": "尚無對話記錄"
+    },
+    "jobPosition": "面試職缺",
+    "yourAnswer": "你的回答",
+    "modelAnswer": "模範回答",
+    "transcriptTabs": "對話記錄切換",
+    "audio": {
+      "play": "播放",
+      "pause": "暫停",
+      "loading": "載入中...",
+      "error": "無法載入音檔"
     }
   },
   "profile": {

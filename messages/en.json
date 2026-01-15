@@ -259,6 +259,16 @@
       "title": "Transcript",
       "messages": "messages",
       "emptyTranscript": "No transcript available"
+    },
+    "jobPosition": "Job Position",
+    "yourAnswer": "Your Answer",
+    "modelAnswer": "Model Answer",
+    "transcriptTabs": "Transcript Tabs",
+    "audio": {
+      "play": "Play",
+      "pause": "Pause",
+      "loading": "Loading...",
+      "error": "Failed to load audio"
     }
   },
   "profile": {

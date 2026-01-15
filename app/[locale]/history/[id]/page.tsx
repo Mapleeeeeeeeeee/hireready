@@ -3,14 +3,16 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
-import { Button, Card, CardBody } from '@heroui/react';
+import { Button, Card, CardBody, Tabs, Tab } from '@heroui/react';
 import { ArrowLeft, Calendar, Clock, Award, Briefcase } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, StatusChip } from '@/components/common';
 import { TranscriptViewer, type TranscriptEntry } from '@/components/history/TranscriptViewer';
+import { AudioPlayer } from '@/components/history/AudioPlayer';
 import { useUserStore } from '@/lib/stores/user-store';
 import { formatDateLong, formatDuration } from '@/lib/utils/date-format';
 import type { InterviewStatus } from '@/lib/constants/enums';
+import type { ModelAnswer } from '@/lib/types/interview';
 
 // ============================================================
 // Types
@@ -103,6 +105,11 @@ function HistoryDetailContent() {
     ? (interview.transcript as TranscriptEntry[])
     : [];
 
+  // Parse model answer if it exists
+  const modelAnswer: ModelAnswer | null = interview.modelAnswer
+    ? (interview.modelAnswer as ModelAnswer)
+    : null;
+
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       {/* Back Button */}
@@ -147,8 +154,53 @@ function HistoryDetailContent() {
         </CardBody>
       </Card>
 
-      {/* Transcript Section */}
-      <TranscriptViewer transcript={transcript} />
+      {/* Job Description Section */}
+      {interview.jobDescriptionUrl && (
+        <Card className="border-warm-gray/10 border bg-white/50 shadow-none">
+          <CardBody className="space-y-3 p-6">
+            <div className="flex items-center gap-2">
+              <Briefcase className="text-terracotta h-5 w-5" />
+              <h2 className="text-charcoal font-semibold">{t('jobPosition')}</h2>
+            </div>
+            <a
+              href={interview.jobDescriptionUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-terracotta hover:text-terracotta/80 text-sm break-all underline"
+            >
+              {interview.jobDescriptionUrl}
+            </a>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Transcript Comparison Section */}
+      {modelAnswer ? (
+        <Card className="border-warm-gray/10 border bg-white/50 shadow-none">
+          <CardBody className="p-6">
+            <Tabs aria-label={t('transcriptTabs')}>
+              {/* Your Answer Tab */}
+              <Tab key="user" title={t('yourAnswer')}>
+                <TranscriptViewer transcript={transcript} />
+              </Tab>
+
+              {/* Model Answer Tab */}
+              <Tab key="model" title={t('modelAnswer')}>
+                <div className="space-y-4">
+                  {/* Audio Player for TTS */}
+                  {modelAnswer.audioUrl && <AudioPlayer src={modelAnswer.audioUrl} />}
+
+                  {/* Model Transcript */}
+                  <TranscriptViewer transcript={modelAnswer.transcript as TranscriptEntry[]} />
+                </div>
+              </Tab>
+            </Tabs>
+          </CardBody>
+        </Card>
+      ) : (
+        /* If no model answer, just show the transcript directly */
+        <TranscriptViewer transcript={transcript} />
+      )}
     </div>
   );
 }
