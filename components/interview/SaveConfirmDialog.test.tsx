@@ -213,14 +213,23 @@ describe('SaveConfirmDialog', () => {
   });
 
   describe('Error Handling', () => {
-    it('should display error message when provided', () => {
+    it('should display error message when provided', async () => {
       renderWithIntl(
         <SaveConfirmDialog {...defaultProps} errorMessage="Network connection failed" />
       );
 
       expect(screen.getByText('Save Failed')).toBeInTheDocument();
-      expect(screen.getByText('Network connection failed')).toBeInTheDocument();
+      expect(screen.getByText('Save Failed')).toBeInTheDocument();
+      // Error details should be hidden initially
+      expect(screen.queryByText('Network connection failed')).not.toBeInTheDocument();
       expect(screen.getByText('Please try again or contact support.')).toBeInTheDocument();
+
+      // Click to expand
+      const errorHeader = screen.getByText('Save Failed').closest('div');
+      await userEvent.click(errorHeader!);
+
+      // Now error details should be visible
+      expect(screen.getByText('Network connection failed')).toBeInTheDocument();
     });
 
     it('should not display error section when errorMessage is not provided', () => {
@@ -275,7 +284,7 @@ describe('SaveConfirmDialog', () => {
       );
 
       expect(screen.getByText('Save Failed')).toBeInTheDocument();
-      expect(screen.getByText('Previous error')).toBeInTheDocument();
+      expect(screen.queryByText('Previous error')).not.toBeInTheDocument();
       expect(screen.getByText(/AI is generating analysis/)).toBeInTheDocument();
     });
   });

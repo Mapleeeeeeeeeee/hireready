@@ -102,8 +102,8 @@ async function handleGetInterviews(
     strengths: i.strengths,
     improvements: i.improvements,
     jobDescriptionUrl: i.jobDescriptionUrl,
-    jobDescription: i.jobDescription,
-    modelAnswer: i.modelAnswer,
+    jobDescription: i.jobDescription as InterviewListItem['jobDescription'],
+    modelAnswer: i.modelAnswer as InterviewListItem['modelAnswer'],
     createdAt: i.createdAt.toISOString(),
     updatedAt: i.updatedAt.toISOString(),
   }));

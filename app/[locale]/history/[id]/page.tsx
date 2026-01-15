@@ -4,7 +4,15 @@ import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Card, CardBody, Tabs, Tab } from '@heroui/react';
-import { ArrowLeft, Calendar, Clock, Award, Briefcase } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Award,
+  Briefcase,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, StatusChip } from '@/components/common';
 import { TranscriptViewer, type TranscriptEntry } from '@/components/history/TranscriptViewer';
@@ -12,7 +20,6 @@ import { AudioPlayer } from '@/components/history/AudioPlayer';
 import { useUserStore } from '@/lib/stores/user-store';
 import { formatDateLong, formatDuration } from '@/lib/utils/date-format';
 import type { InterviewStatus } from '@/lib/constants/enums';
-import type { ModelAnswer } from '@/lib/types/interview';
 
 // ============================================================
 // Types
@@ -94,6 +101,7 @@ function HistoryDetailContent() {
   }
 
   const interview = selectedInterview;
+  const score = interview.score;
   const formattedDate = formatDateLong(interview.createdAt);
   const formattedDuration = interview.duration ? formatDuration(interview.duration) : '-';
 
@@ -102,10 +110,8 @@ function HistoryDetailContent() {
     ? (interview.transcript as TranscriptEntry[])
     : [];
 
-  // Parse model answer if it exists
-  const modelAnswer: ModelAnswer | null = interview.modelAnswer
-    ? (interview.modelAnswer as ModelAnswer)
-    : null;
+  // Get model answer (properly typed from store)
+  const modelAnswer = interview.modelAnswer;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
@@ -134,15 +140,19 @@ function HistoryDetailContent() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoItem icon={Calendar} label={t('date')} value={formattedDate} />
             <InfoItem icon={Clock} label={t('duration')} value={formattedDuration} />
-            <InfoItem icon={Award} label={t('score')} value={interview.score ?? '-'} />
+            <InfoItem
+              icon={Award}
+              label={t('score')}
+              value={score !== null ? String(score) : '-'}
+            />
           </div>
 
           {/* Score Highlight */}
-          {interview.score !== null && (
+          {score !== null && (
             <div className="bg-terracotta/5 border-terracotta/10 flex items-center justify-center rounded-xl border py-6">
               <div className="text-center">
                 <p className="text-charcoal/60 mb-1 text-sm">{t('score')}</p>
-                <p className="text-terracotta text-5xl font-bold">{interview.score}</p>
+                <p className="text-terracotta text-5xl font-bold">{score}</p>
               </div>
             </div>
           )}
@@ -150,24 +160,80 @@ function HistoryDetailContent() {
       </Card>
 
       {/* Job Description Section */}
-      {interview.jobDescriptionUrl && (
+      {(interview.jobDescriptionUrl || interview.jobDescription) && (
         <Card className="border-warm-gray/10 border bg-white/50 shadow-none">
           <CardBody className="space-y-3 p-6">
             <div className="flex items-center gap-2">
               <Briefcase className="text-terracotta h-5 w-5" />
               <h2 className="text-charcoal font-semibold">{t('jobPosition')}</h2>
             </div>
-            <a
-              href={interview.jobDescriptionUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-terracotta hover:text-terracotta/80 text-sm break-all underline"
-            >
-              {interview.jobDescriptionUrl}
-            </a>
+            <div className="space-y-1">
+              {interview.jobDescription?.title && (
+                <p className="text-charcoal text-sm font-medium">
+                  {interview.jobDescription.title}
+                </p>
+              )}
+              {interview.jobDescription?.company && (
+                <p className="text-charcoal/60 text-sm">{interview.jobDescription.company}</p>
+              )}
+              {(interview.jobDescription?.url || interview.jobDescriptionUrl) && (
+                <a
+                  href={interview.jobDescription?.url || interview.jobDescriptionUrl || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-terracotta hover:text-terracotta/80 inline-flex items-center gap-1 text-sm underline"
+                >
+                  {t('viewOriginalJob')}
+                </a>
+              )}
+            </div>
           </CardBody>
         </Card>
       )}
+
+      {/* Strengths Section */}
+      {interview.strengths &&
+        Array.isArray(interview.strengths) &&
+        interview.strengths.length > 0 && (
+          <Card className="border-warm-gray/10 border bg-white/50 shadow-none">
+            <CardBody className="space-y-3 p-6">
+              <h2 className="text-charcoal flex items-center gap-2 font-semibold">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                {t('strengths')}
+              </h2>
+              <ul className="space-y-2">
+                {(interview.strengths as string[]).map((strength, idx) => (
+                  <li key={idx} className="text-charcoal/80 flex gap-2 text-sm">
+                    <span className="mt-1 text-xs text-green-600">•</span>
+                    <span>{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardBody>
+          </Card>
+        )}
+
+      {/* Improvements Section */}
+      {interview.improvements &&
+        Array.isArray(interview.improvements) &&
+        interview.improvements.length > 0 && (
+          <Card className="border-warm-gray/10 border bg-white/50 shadow-none">
+            <CardBody className="space-y-3 p-6">
+              <h2 className="text-charcoal flex items-center gap-2 font-semibold">
+                <AlertCircle className="h-5 w-5 text-orange-600" />
+                {t('improvements')}
+              </h2>
+              <ul className="space-y-2">
+                {(interview.improvements as string[]).map((improvement, idx) => (
+                  <li key={idx} className="text-charcoal/80 flex gap-2 text-sm">
+                    <span className="mt-1 text-xs text-orange-600">•</span>
+                    <span>{improvement}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardBody>
+          </Card>
+        )}
 
       {/* Transcript Comparison Section */}
       {modelAnswer ? (
