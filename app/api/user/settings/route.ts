@@ -4,6 +4,8 @@
  * PUT /api/user/settings - Update user settings
  */
 
+export const dynamic = 'force-dynamic';
+
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
 import { parseJsonBody } from '@/lib/utils/resource-helpers';

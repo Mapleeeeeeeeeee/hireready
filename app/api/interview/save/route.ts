@@ -4,6 +4,8 @@
  * Saves interview transcript and metadata to database
  */
 
+export const dynamic = 'force-dynamic';
+
 import { promises as fs } from 'fs';
 import path from 'path';
 import { prisma } from '@/lib/db';

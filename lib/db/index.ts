@@ -13,16 +13,13 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-function createPrismaClient(): PrismaClient {
-  const pool = new Pool({ connectionString: serverEnv.databaseUrl });
-  const adapter = new PrismaPg(pool);
-  return new PrismaClient({ adapter });
-}
-
 // Lazy initialization - only create client when accessed
 function getPrismaClient(): PrismaClient {
   if (!globalThis.prisma) {
-    globalThis.prisma = createPrismaClient();
+    // Defer Pool and adapter creation until actually needed
+    const pool = new Pool({ connectionString: serverEnv.databaseUrl });
+    const adapter = new PrismaPg(pool);
+    globalThis.prisma = new PrismaClient({ adapter });
   }
   return globalThis.prisma;
 }

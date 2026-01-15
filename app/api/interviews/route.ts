@@ -4,6 +4,8 @@
  * Returns paginated list of user interviews
  */
 
+export const dynamic = 'force-dynamic';
+
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
 import { parsePaginationWithFilters, toPrismaOptions } from '@/lib/utils/pagination';
