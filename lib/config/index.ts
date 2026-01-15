@@ -10,5 +10,19 @@ export const appConfig = {
   locales: ['zh-TW', 'en'] as const,
 } as const;
 
+// Gemini API configuration
+export const geminiConfig = {
+  model: 'gemini-2.0-flash-exp' as const,
+  timeouts: {
+    analysis: 20000, // 20 seconds
+    tts: 20000, // 20 seconds
+  },
+  voices: {
+    'zh-TW': 'Puck',
+    en: 'Aoede',
+  } as const,
+} as const;
+
 // Type for appConfig
 export type AppConfig = typeof appConfig;
+export type GeminiConfig = typeof geminiConfig;

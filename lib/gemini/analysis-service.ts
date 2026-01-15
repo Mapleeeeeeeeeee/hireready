@@ -9,6 +9,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { serverEnv } from '@/lib/config/server';
+import { geminiConfig } from '@/lib/config';
 import { logger } from '@/lib/utils/logger';
 import type { TranscriptEntry } from '@/lib/gemini/types';
 import type { ModelAnswer } from '@/lib/types/interview';
@@ -53,9 +54,8 @@ interface GeminiAnalysisResponse {
 // Constants
 // ============================================================
 
-const GEMINI_API_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
-const REQUEST_TIMEOUT_MS = 20000;
+const GEMINI_API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${geminiConfig.model}:generateContent`;
+const REQUEST_TIMEOUT_MS = geminiConfig.timeouts.analysis;
 const MODEL_ANSWERS_DIR = 'model-answers';
 
 // ============================================================
@@ -183,14 +183,14 @@ async function generateTTS(
     }
 
     // Select voice based on language
-    const voiceName = language === 'zh-TW' ? 'Puck' : 'Aoede';
+    const voiceName = geminiConfig.voices[language];
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const timeoutId = setTimeout(() => controller.abort(), geminiConfig.timeouts.tts);
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${geminiConfig.model}:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
