@@ -48,7 +48,11 @@ const DOMAIN_SOURCE_MAP: Record<string, string> = {
  */
 export function isValidUrl(url: string): boolean {
   try {
-    new URL(url);
+    const parsed = new URL(url);
+    // Only allow http and https schemes
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return false;
+    }
     return true;
   } catch {
     return false;

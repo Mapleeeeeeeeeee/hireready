@@ -126,13 +126,35 @@ async function handleSaveInterview(
 
     // Step 3: Rename audio file from UUID to interview ID
     if (analysis.modelAnswer.audioUrl) {
-      const oldPath = path.join(process.cwd(), 'public', analysis.modelAnswer.audioUrl);
-      const newAudioPath = `/model-answers/${interview.id}.mp3`;
-      const newPath = path.join(process.cwd(), 'public', newAudioPath);
+      // Validate interview ID format (CUID)
+      if (!/^c[a-z0-9]{24}$/i.test(interview.id)) {
+        logger.error('Invalid interview ID format', undefined, {
+          module: 'api-interview-save',
+          action: 'rename-audio',
+          interviewId: interview.id,
+        });
+        throw new Error('Invalid interview ID format');
+      }
+
+      const modelAnswersDir = path.join(process.cwd(), 'public', 'model-answers');
+      const oldFileName = path.basename(analysis.modelAnswer.audioUrl);
+      const oldPath = path.resolve(modelAnswersDir, oldFileName);
+      const newPath = path.resolve(modelAnswersDir, `${interview.id}.mp3`);
+
+      // Verify resolved paths are within model-answers directory
+      if (!oldPath.startsWith(modelAnswersDir) || !newPath.startsWith(modelAnswersDir)) {
+        logger.error('Invalid file path detected', undefined, {
+          module: 'api-interview-save',
+          action: 'rename-audio',
+          oldPath,
+          newPath,
+        });
+        throw new Error('Invalid file path');
+      }
 
       try {
         await fs.rename(oldPath, newPath);
-        analysis.modelAnswer.audioUrl = newAudioPath;
+        analysis.modelAnswer.audioUrl = `/model-answers/${interview.id}.mp3`;
       } catch (renameError) {
         logger.error('Failed to rename audio file', renameError as Error, {
           module: 'api-interview-save',

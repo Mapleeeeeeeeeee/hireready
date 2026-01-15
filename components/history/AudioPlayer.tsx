@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button, Progress } from '@heroui/react';
 import { Play, Pause } from 'lucide-react';
 import { formatTimeDisplay } from '@/lib/utils/format';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================
 // Types
@@ -95,7 +96,10 @@ export function AudioPlayer({ src, className = '' }: AudioPlayerProps) {
         await audio.play();
         setIsPlaying(true);
       } catch (err) {
-        console.error('Failed to play audio:', err);
+        logger.error('Failed to play audio', err as Error, {
+          module: 'audio-player',
+          action: 'play',
+        });
         setError(true);
       }
     }

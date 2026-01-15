@@ -190,10 +190,13 @@ async function generateTTS(
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${geminiConfig.model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${geminiConfig.model}:generateContent`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
           signal: controller.signal,
           body: JSON.stringify({
             contents: [
@@ -315,9 +318,12 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
 
     let response: Response;
     try {
-      response = await fetch(`${GEMINI_API_ENDPOINT}?key=${apiKey}`, {
+      response = await fetch(GEMINI_API_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
+        },
         signal: controller.signal,
         body: JSON.stringify({
           contents: [
