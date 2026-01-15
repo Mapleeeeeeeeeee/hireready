@@ -95,6 +95,7 @@
     "title": "面試練習",
     "selectScenario": "選擇面試情境",
     "scenarios": {
+      "behavioral": "行為面試",
       "selfIntro": "自我介紹",
       "whyLeave": "離職原因",
       "teamwork": "團隊合作經驗",
