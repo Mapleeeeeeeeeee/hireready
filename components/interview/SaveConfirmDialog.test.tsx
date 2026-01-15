@@ -25,6 +25,9 @@ const messages = {
       save: 'Save',
       discard: 'Discard',
       savingNotice: 'AI is generating analysis and model responses...',
+      errorTitle: 'Save Failed',
+      errorRetry: 'Please try again or contact support.',
+      errorOccurred: 'An error occurred',
     },
   },
 };
@@ -206,6 +209,74 @@ describe('SaveConfirmDialog', () => {
       // Modal should not have close button when saving
       // This is implementation specific to HeroUI, so we just verify the prop is passed
       expect(screen.queryByLabelText('Close')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should display error message when provided', () => {
+      renderWithIntl(
+        <SaveConfirmDialog {...defaultProps} errorMessage="Network connection failed" />
+      );
+
+      expect(screen.getByText('Save Failed')).toBeInTheDocument();
+      expect(screen.getByText('Network connection failed')).toBeInTheDocument();
+      expect(screen.getByText('Please try again or contact support.')).toBeInTheDocument();
+    });
+
+    it('should not display error section when errorMessage is not provided', () => {
+      renderWithIntl(<SaveConfirmDialog {...defaultProps} />);
+
+      expect(screen.queryByText('Save Failed')).not.toBeInTheDocument();
+    });
+
+    it('should not display error section when errorMessage is empty string', () => {
+      renderWithIntl(<SaveConfirmDialog {...defaultProps} errorMessage="" />);
+
+      expect(screen.queryByText('Save Failed')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle negative duration gracefully', () => {
+      renderWithIntl(<SaveConfirmDialog {...defaultProps} duration={-10} />);
+
+      expect(screen.getByText('00:00')).toBeInTheDocument();
+    });
+
+    it('should handle zero transcript count', () => {
+      renderWithIntl(<SaveConfirmDialog {...defaultProps} transcriptCount={0} />);
+
+      expect(screen.getByText('0')).toBeInTheDocument();
+    });
+
+    it('should handle extremely long job description URL', () => {
+      const longUrl = 'https://example.com/job/' + 'a'.repeat(300);
+      renderWithIntl(<SaveConfirmDialog {...defaultProps} jobDescriptionUrl={longUrl} />);
+
+      const link = screen.getByRole('link');
+      expect(link).toHaveAttribute('href', longUrl);
+    });
+
+    it('should handle very large duration (hours)', () => {
+      renderWithIntl(<SaveConfirmDialog {...defaultProps} duration={7200} />);
+
+      expect(screen.getByText('120:00')).toBeInTheDocument(); // 2 hours
+    });
+
+    it('should handle very large transcript count', () => {
+      renderWithIntl(<SaveConfirmDialog {...defaultProps} transcriptCount={9999} />);
+
+      expect(screen.getByText('9999')).toBeInTheDocument();
+    });
+
+    it('should handle both error message and saving state', () => {
+      renderWithIntl(
+        <SaveConfirmDialog {...defaultProps} errorMessage="Previous error" isSaving={true} />
+      );
+
+      expect(screen.getByText('Save Failed')).toBeInTheDocument();
+      expect(screen.getByText('Previous error')).toBeInTheDocument();
+      expect(screen.getByText(/AI is generating analysis/)).toBeInTheDocument();
     });
   });
 });
