@@ -14,6 +14,8 @@ import { useInterviewStore } from '@/lib/stores/interview-store';
 import { apiClient } from '@/lib/utils/api-client';
 import { toAppError } from '@/lib/utils/errors';
 import { logger } from '@/lib/utils/logger';
+import { formatDuration } from '@/lib/utils/format';
+import { showErrorToast } from '@/lib/utils/toast';
 import type { SupportedLanguage } from '@/lib/gemini/prompts';
 
 // ============================================================
@@ -36,6 +38,7 @@ export function InterviewRoom() {
   // Save dialog state
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string>('');
 
   // Use the Live API hook
   const {
@@ -103,22 +106,17 @@ export function InterviewRoom() {
   };
   const displayAudioLevel = getDisplayAudioLevel();
 
-  // Format time display
-  const formatTime = useCallback((seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }, []);
-
   // Handle end call
   const handleEndCall = useCallback(() => {
     disconnect();
+    setSaveError(''); // Clear any previous errors
     setShowSaveDialog(true);
   }, [disconnect]);
 
   // Handle save interview
   const handleSave = useCallback(async () => {
     setIsSaving(true);
+    setSaveError(''); // Clear previous errors
     try {
       const response = await apiClient.post<SaveInterviewResponse>('/api/interview/save', {
         transcripts,
@@ -141,12 +139,19 @@ export function InterviewRoom() {
       });
 
       const appError = toAppError(error);
-      // TODO: Show error message to user (can use toast)
-      alert(appError.message);
+
+      // Show error in dialog (keep dialog open)
+      setSaveError(appError.message);
+
+      // Also show toast notification
+      showErrorToast({
+        title: t('saveDialog.errorTitle'),
+        description: appError.message,
+      });
 
       setIsSaving(false);
     }
-  }, [transcripts, elapsedSeconds, locale, jobDescription, router]);
+  }, [transcripts, elapsedSeconds, locale, jobDescription, router, t]);
 
   // Handle discard interview
   const handleDiscard = useCallback(() => {
@@ -214,7 +219,7 @@ export function InterviewRoom() {
           <div
             className={`h-2 w-2 rounded-full ${isConnected ? 'bg-terracotta animate-pulse' : 'bg-gray-400'}`}
           />
-          {t('liveSession')} • {formatTime(elapsedSeconds)}
+          {t('liveSession')} • {formatDuration(elapsedSeconds)}
         </div>
         <div className="border-warm-gray/20 flex items-center gap-2 rounded-full border bg-white/50 px-3 py-1 backdrop-blur-sm">
           {getConnectionStatus()}
@@ -274,6 +279,7 @@ export function InterviewRoom() {
         transcriptCount={transcripts.length}
         jobDescriptionUrl={jobDescription?.url}
         isSaving={isSaving}
+        errorMessage={saveError}
       />
     </div>
   );

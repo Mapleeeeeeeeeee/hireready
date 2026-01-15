@@ -10,7 +10,8 @@ import {
   Divider,
 } from '@heroui/react';
 import { useTranslations } from 'next-intl';
-import { Clock, MessageSquare, Briefcase } from 'lucide-react';
+import { Clock, MessageSquare, Briefcase, AlertCircle } from 'lucide-react';
+import { formatDuration } from '@/lib/utils/format';
 
 // ============================================================
 // Types
@@ -24,6 +25,7 @@ export interface SaveConfirmDialogProps {
   transcriptCount: number;
   jobDescriptionUrl?: string;
   isSaving: boolean;
+  errorMessage?: string;
 }
 
 // ============================================================
@@ -38,15 +40,9 @@ export function SaveConfirmDialog({
   transcriptCount,
   jobDescriptionUrl,
   isSaving,
+  errorMessage,
 }: SaveConfirmDialogProps) {
   const t = useTranslations('interview.saveDialog');
-
-  // Format duration as MM:SS
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   return (
     <Modal
@@ -114,6 +110,20 @@ export function SaveConfirmDialog({
             </div>
 
             <Divider className="bg-warm-gray/20" />
+
+            {/* Error message */}
+            {errorMessage && (
+              <div className="rounded-lg bg-red-50 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+                  <div className="flex-1">
+                    <p className="mb-1 font-medium text-red-900">{t('errorTitle')}</p>
+                    <p className="text-sm text-red-700">{errorMessage}</p>
+                    <p className="mt-2 text-sm text-red-600">{t('errorRetry')}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Notice about AI analysis */}
             <div className="bg-soft-clay/30 rounded-lg p-4">
