@@ -207,7 +207,10 @@
       "analysisNotice": "AI will analyze your answers and generate model responses (takes 10-20 seconds)",
       "save": "Save",
       "discard": "Discard",
-      "savingNotice": "AI is generating analysis and model responses..."
+      "savingNotice": "AI is generating analysis and model responses...",
+      "errorTitle": "Save Failed",
+      "errorRetry": "Please try again or contact support.",
+      "errorOccurred": "An error occurred"
     }
   },
   "auth": {

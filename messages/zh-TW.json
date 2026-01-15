@@ -207,7 +207,10 @@
       "analysisNotice": "AI 將分析你的回答並生成模範回答（需 10-20 秒）",
       "save": "儲存",
       "discard": "放棄",
-      "savingNotice": "AI 正在生成分析與模範回答..."
+      "savingNotice": "AI 正在生成分析與模範回答...",
+      "errorTitle": "儲存失敗",
+      "errorRetry": "請重試或聯絡客服。",
+      "errorOccurred": "發生錯誤"
     }
   },
   "auth": {
