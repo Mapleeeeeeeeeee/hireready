@@ -9,10 +9,10 @@
   "marketing": {
     "hero": {
       "badge": "AI 視訊智能分析 v2.0",
-      "titlePart1": "掌握您的",
-      "titlePart2": "視訊面試",
-      "subtitle": "針對語音、表情與回答內容的真實 AI 分析。這不僅僅是聊天，而是一場全真模擬。",
-      "cta": "開始分析",
+      "titlePart1": "練就完美的",
+      "titlePart2": "面試表現",
+      "subtitle": "即時語音的面試對談，不再花時間輸入文字。",
+      "cta": "現在就開始練習",
       "demo": "試聽演示"
     },
     "interface": {
@@ -49,7 +49,7 @@
     },
     "footer": {
       "title": "準備好加速您的職涯發展了嗎？",
-      "subtitle": "加入數千位求職者，使用 HireReady 征服面試。",
+      "subtitle": "使用 HireReady 征服面試。",
       "cta": "立即開始練習"
     },
     "ticker": {

@@ -4,15 +4,15 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "retry": "Retry",
-    "startInterview": "Start Interview"
+    "startInterview": "Start Mock Interview"
   },
   "marketing": {
     "hero": {
       "badge": "AI Video Intelligence v2.0",
-      "titlePart1": "Master the",
-      "titlePart2": "Video Interview",
-      "subtitle": "REAL AI analysis of your voice, expression, and improved answers. It's not just a chat—it's a simulation.",
-      "cta": "Start Analysis",
+      "titlePart1": "Master Your",
+      "titlePart2": "Perfect Interview",
+      "subtitle": "Real-time voice interviews. No more typing.",
+      "cta": "Get HireReady Now",
       "demo": "Hear a Demo"
     },
     "interface": {
@@ -49,7 +49,7 @@
     },
     "footer": {
       "title": "Ready to fast-track your career?",
-      "subtitle": "Join thousands of candidates who are crushing their interviews with HireReady.",
+      "subtitle": "Conquer interviews with HireReady.",
       "cta": "Start Practicing Now"
     },
     "ticker": {

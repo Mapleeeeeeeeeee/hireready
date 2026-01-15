@@ -81,21 +81,33 @@ export function Navbar() {
         </NavbarBrand>
       </NavbarContent>
 
-      {/* Desktop menu - Centered */}
-      <NavbarContent className="hidden gap-8 md:flex" justify="center">
-        {menuItems.map((item) => (
-          <NavbarItem key={item.key} isActive={pathname === item.href}>
+      {/* Desktop menu - Absolutely centered */}
+      <div className="absolute left-1/2 hidden -translate-x-1/2 gap-8 md:flex">
+        {menuItems.map((item) => {
+          const isInterview = item.key === 'interview';
+          const isActive = pathname === item.href;
+
+          return isInterview ? (
             <Link
+              key={item.key}
+              href={item.href}
+              className="text-terracotta hover:text-terracotta/80 text-sm font-medium tracking-wide transition-colors"
+            >
+              {item.label}
+            </Link>
+          ) : (
+            <Link
+              key={item.key}
               href={item.href}
               className={`text-sm font-medium tracking-wide transition-colors ${
-                pathname === item.href ? 'text-terracotta' : 'text-charcoal/60 hover:text-charcoal'
+                isActive ? 'text-terracotta' : 'text-charcoal/60 hover:text-terracotta'
               }`}
             >
               {item.label}
             </Link>
-          </NavbarItem>
-        ))}
-      </NavbarContent>
+          );
+        })}
+      </div>
 
       {/* Auth section with Language toggle - Right aligned */}
       <NavbarContent justify="end" className="gap-4">
@@ -172,15 +184,12 @@ export function Navbar() {
           </NavbarItem>
         ) : (
           <NavbarItem>
-            <Button
-              as={Link}
+            <Link
               href="/login"
-              size="md"
-              variant="light"
-              className="text-charcoal/80 hover:text-charcoal hover:bg-warm-gray/10 rounded-lg px-5 font-medium transition-all"
+              className="text-terracotta hover:text-terracotta/80 text-sm font-medium tracking-wide transition-colors"
             >
               {t('nav.login')}
-            </Button>
+            </Link>
           </NavbarItem>
         )}
       </NavbarContent>

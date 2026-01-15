@@ -175,7 +175,7 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
                 color="primary"
                 onPress={handleParseUrl}
                 isDisabled={!url.trim() || isLoading}
-                className="bg-terracotta hover:bg-terracotta/90 h-12 min-w-[120px] text-white shadow-md transition-transform active:scale-[0.98]"
+                className="disabled:bg-terracotta/50 bg-terracotta hover:bg-terracotta/90 enabled:hover:bg-terracotta/90 h-12 min-w-[120px] text-white shadow-md transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 startContent={
                   isLoading ? <Spinner size="sm" color="current" /> : <Search className="h-5 w-5" />
                 }
@@ -264,7 +264,7 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
                 color="primary"
                 onPress={handleManualSubmit}
                 isDisabled={!jobTitle.trim() || !description.trim() || isLoading}
-                className="bg-terracotta hover:bg-terracotta/90 text-white"
+                className="disabled:bg-terracotta/50 bg-terracotta hover:bg-terracotta/90 enabled:hover:bg-terracotta/90 text-white transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t('confirm')}
               </Button>
