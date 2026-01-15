@@ -3,10 +3,10 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Button, Pagination, Link } from '@heroui/react';
-import { ClipboardList, ArrowRight } from 'lucide-react';
+import { Pagination } from '@heroui/react';
+import { ClipboardList } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { PageLoadingState, PageErrorState } from '@/components/common';
+import { PageLoadingState, PageErrorState, EmptyState } from '@/components/common';
 import { InterviewCard, DeleteConfirmDialog } from '@/components/history';
 import { useUserStore, selectTotalPages } from '@/lib/stores/user-store';
 import { useInterviewStore } from '@/lib/stores/interview-store';
@@ -109,25 +109,16 @@ function HistoryContent() {
 
       {/* Interview List */}
       {interviews.length === 0 ? (
-        <div className="bg-warm-gray/5 border-warm-gray/10 flex flex-col items-center justify-center rounded-xl border py-16">
-          <div className="bg-warm-gray/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-            <ClipboardList className="text-charcoal/30 h-8 w-8" />
-          </div>
-          <p className="text-charcoal/60 mb-2 text-lg">{t('empty')}</p>
-          <p className="text-charcoal/40 mb-6 text-sm">{t('emptyDescription')}</p>
-          <Button
-            as={Link}
-            href="/interview/setup"
-            color="primary"
-            endContent={<ArrowRight className="h-4 w-4" />}
-            className="bg-terracotta hover:bg-terracotta/90 text-white"
-          >
-            {tCommon('startInterview')}
-          </Button>
-        </div>
+        <EmptyState
+          icon={ClipboardList}
+          title={t('empty')}
+          description={t('emptyDescription')}
+          actionLabel={tCommon('startInterview')}
+          actionHref="/interview/setup"
+        />
       ) : (
         <>
-          <div className="space-y-5">
+          <div className="space-y-3">
             {interviews.map((interview) => (
               <InterviewCard
                 key={interview.id}

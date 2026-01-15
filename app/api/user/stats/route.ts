@@ -46,6 +46,8 @@ async function handleGetStats(request: Request, userId: string): Promise<UserSta
         score: true,
         duration: true,
         createdAt: true,
+        jobDescriptionUrl: true,
+        jobDescription: true,
       },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -66,6 +68,8 @@ async function handleGetStats(request: Request, userId: string): Promise<UserSta
     score: i.score,
     duration: i.duration,
     createdAt: i.createdAt.toISOString(),
+    jobDescriptionUrl: i.jobDescriptionUrl,
+    jobDescription: i.jobDescription as RecentInterview['jobDescription'],
   }));
 
   return {

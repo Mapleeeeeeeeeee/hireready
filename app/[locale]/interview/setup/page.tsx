@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import {
@@ -21,9 +21,8 @@ import { ResumeUpload } from '@/components/resume/ResumeUpload';
 import { ResumeCard } from '@/components/resume/ResumeCard';
 import { ResumePreview } from '@/components/resume/ResumePreview';
 import { useInterviewStore } from '@/lib/stores/interview-store';
+import { useResumeManager } from '@/lib/hooks/use-resume-manager';
 import type { JobDescription } from '@/lib/jd/types';
-import type { ResumeData } from '@/lib/resume/types';
-import type { ApiResponse } from '@/lib/utils/api-response';
 
 // ============================================================
 // Custom Components
@@ -73,34 +72,22 @@ export default function InterviewSetupPage() {
   const setJobDescription = useInterviewStore((state) => state.setJobDescription);
   const setResumeContent = useInterviewStore((state) => state.setResumeContent);
 
-  // Resume state
-  const [resume, setResume] = useState<ResumeData | null>(null);
-  const [isLoadingResume, setIsLoadingResume] = useState(true);
-  const [isDeletingResume, setIsDeletingResume] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isReplacing, setIsReplacing] = useState(false);
-
-  // Fetch user's resume on mount
-  useEffect(() => {
-    async function fetchResume() {
-      try {
-        const response = await fetch('/api/resume', { credentials: 'include' });
-        const json: ApiResponse<ResumeData | null> = await response.json();
-
-        if (json.success && json.data) {
-          setResume(json.data);
-          // Also update store with resume content for interview
-          setResumeContent(json.data.content);
-        }
-      } catch {
-        // User might not have a resume, which is fine
-      } finally {
-        setIsLoadingResume(false);
-      }
-    }
-
-    fetchResume();
-  }, [setResumeContent]);
+  // Use the resume manager hook with content sync
+  const {
+    resume,
+    isLoadingResume,
+    isDeletingResume,
+    isPreviewOpen,
+    isReplacing,
+    handleResumeUploadSuccess,
+    handleResumePreview,
+    handleResumeReplace,
+    handleResumeDelete,
+    handleCancelReplace,
+    handleClosePreview,
+  } = useResumeManager({
+    onContentChange: setResumeContent,
+  });
 
   // Handle JD parsed
   const handleJdParsed = useCallback(
@@ -122,52 +109,6 @@ export default function InterviewSetupPage() {
     },
     [setLanguage]
   );
-
-  // Handle resume upload success
-  const handleResumeUploadSuccess = useCallback(
-    (data: ResumeData) => {
-      setResume(data);
-      setResumeContent(data.content);
-      setIsReplacing(false);
-    },
-    [setResumeContent]
-  );
-
-  // Handle resume preview
-  const handleResumePreview = useCallback(() => {
-    setIsPreviewOpen(true);
-  }, []);
-
-  // Handle resume replace
-  const handleResumeReplace = useCallback(() => {
-    setIsReplacing(true);
-  }, []);
-
-  // Handle resume delete
-  const handleResumeDelete = useCallback(async () => {
-    setIsDeletingResume(true);
-    try {
-      const response = await fetch('/api/resume', {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      const json: ApiResponse<{ deleted: boolean }> = await response.json();
-
-      if (json.success) {
-        setResume(null);
-        setResumeContent(null);
-      }
-    } catch {
-      // Handle error silently
-    } finally {
-      setIsDeletingResume(false);
-    }
-  }, [setResumeContent]);
-
-  // Handle cancel replace
-  const handleCancelReplace = useCallback(() => {
-    setIsReplacing(false);
-  }, []);
 
   // Handle start interview
   const handleStartInterview = useCallback(() => {
@@ -261,7 +202,7 @@ export default function InterviewSetupPage() {
                       url={resume.url}
                       fileName={resume.fileName}
                       isOpen={isPreviewOpen}
-                      onClose={() => setIsPreviewOpen(false)}
+                      onClose={handleClosePreview}
                     />
                   </>
                 ) : (

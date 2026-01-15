@@ -22,6 +22,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from '@/lib/auth/auth-client';
 import { getRedirectUrl, clearRedirectUrl } from '@/lib/auth/utils';
+import { LanguageToggle } from './LanguageToggle';
 
 export function Navbar() {
   const t = useTranslations();
@@ -55,7 +56,6 @@ export function Navbar() {
     { key: 'dashboard', label: t('nav.dashboard'), href: '/dashboard' },
     { key: 'history', label: t('nav.history'), href: '/history' },
     { key: 'profile', label: t('nav.profile'), href: '/profile' },
-    { key: 'settings', label: t('nav.settings'), href: '/settings' },
   ];
 
   return (
@@ -97,8 +97,13 @@ export function Navbar() {
         ))}
       </NavbarContent>
 
-      {/* Auth section - Minimalist */}
-      <NavbarContent justify="end">
+      {/* Auth section with Language toggle - Right aligned */}
+      <NavbarContent justify="end" className="gap-4">
+        {/* Language toggle - Desktop */}
+        <NavbarItem className="hidden md:flex">
+          <LanguageToggle />
+        </NavbarItem>
+
         {isPending ? (
           <NavbarItem>
             <Button isLoading size="sm" variant="light" className="text-charcoal/50">
@@ -124,7 +129,11 @@ export function Navbar() {
                   />
                 </button>
               </DropdownTrigger>
-              <DropdownMenu aria-label={t('nav.userMenu')} variant="flat" className="w-56">
+              <DropdownMenu
+                aria-label={t('nav.userMenu')}
+                variant="flat"
+                className="bg-warm-paper border-warm-gray/15 w-56 rounded-lg border shadow-md"
+              >
                 <DropdownSection showDivider>
                   <DropdownItem
                     key="user-info"
@@ -190,6 +199,13 @@ export function Navbar() {
             </Link>
           </NavbarMenuItem>
         ))}
+
+        {/* Language toggle - Mobile */}
+        <NavbarMenuItem>
+          <div className="border-warm-gray/10 mt-4 border-t py-4">
+            <LanguageToggle />
+          </div>
+        </NavbarMenuItem>
 
         {session?.user && (
           <>

@@ -71,7 +71,6 @@
     "dashboard": "Dashboard",
     "history": "Interview History",
     "profile": "Profile",
-    "settings": "Settings",
     "login": "Login",
     "logout": "Logout",
     "openMenu": "Open menu",
@@ -288,26 +287,8 @@
     "memberSince": "Member Since",
     "editProfile": "Edit Profile",
     "saveChanges": "Save Changes",
-    "cancel": "Cancel"
-  },
-  "settings": {
-    "title": "Settings",
-    "subtitle": "Customize your experience",
-    "language": "Language",
-    "languageDescription": "Choose your preferred interface language",
-    "theme": "Theme",
-    "themeDescription": "Choose your preferred appearance",
-    "themes": {
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System Default"
-    },
-    "notifications": "Notifications",
-    "notificationsDescription": "Manage your notification preferences",
-    "emailNotifications": "Email Notifications",
-    "pushNotifications": "Push Notifications",
-    "save": "Save Settings",
-    "saved": "Settings Saved"
+    "cancel": "Cancel",
+    "resume": "Resume"
   },
   "resume": {
     "title": "Resume",

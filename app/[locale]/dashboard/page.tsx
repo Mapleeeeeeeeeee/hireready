@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Link } from '@heroui/react';
 import { Calendar, Award, Clock, ArrowRight } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { PageLoadingState, PageErrorState } from '@/components/common';
+import { PageLoadingState, PageErrorState, EmptyState } from '@/components/common';
 import { StatsCard } from '@/components/user/StatsCard';
 import { InterviewCard } from '@/components/history/InterviewCard';
 import { useUserStore } from '@/lib/stores/user-store';
@@ -105,18 +105,12 @@ function DashboardContent({ userName }: DashboardContentProps) {
         </div>
 
         {recentInterviews.length === 0 ? (
-          <div className="bg-warm-gray/5 border-warm-gray/10 flex flex-col items-center justify-center rounded-xl border py-12">
-            <p className="text-charcoal/60 mb-2">{t('noInterviews')}</p>
-            <p className="text-charcoal/40 mb-6 text-sm">{t('startFirst')}</p>
-            <Button
-              as={Link}
-              href="/interview/setup"
-              color="primary"
-              className="bg-terracotta hover:bg-terracotta/90 text-white"
-            >
-              {tCommon('startInterview')}
-            </Button>
-          </div>
+          <EmptyState
+            title={t('noInterviews')}
+            description={t('startFirst')}
+            actionLabel={tCommon('startInterview')}
+            actionHref="/interview/setup"
+          />
         ) : (
           <div className="space-y-3">
             {recentInterviews.map((interview) => (
@@ -127,6 +121,8 @@ function DashboardContent({ userName }: DashboardContentProps) {
                 score={interview.score}
                 duration={interview.duration}
                 createdAt={interview.createdAt}
+                jobDescriptionUrl={interview.jobDescriptionUrl}
+                jobDescription={interview.jobDescription}
                 onClick={() => handleViewInterview(interview.id)}
               />
             ))}

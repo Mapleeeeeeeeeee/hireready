@@ -207,9 +207,9 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
             </div>
           }
         >
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-6">
             <p className="text-charcoal/60 text-sm">{t('textDescription')}</p>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2">
               <Input
                 label={t('jobTitle')}
                 placeholder={t('jobTitlePlaceholder')}
@@ -217,10 +217,12 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
                 onValueChange={setJobTitle}
                 isDisabled={isLoading}
                 isRequired
+                labelPlacement="outside"
                 classNames={{
+                  mainWrapper: 'pt-4',
                   input: 'text-charcoal',
                   inputWrapper: 'border-warm-gray/30 bg-white/80',
-                  label: 'text-charcoal/70',
+                  label: 'text-charcoal/70 pb-1',
                 }}
               />
               <Input
@@ -229,10 +231,12 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
                 value={company}
                 onValueChange={setCompany}
                 isDisabled={isLoading}
+                labelPlacement="outside"
                 classNames={{
+                  mainWrapper: 'pt-4',
                   input: 'text-charcoal',
                   inputWrapper: 'border-warm-gray/30 bg-white/80',
-                  label: 'text-charcoal/70',
+                  label: 'text-charcoal/70 pb-1',
                 }}
               />
             </div>
@@ -243,15 +247,17 @@ export function JdInput({ onParsed, isLoading: externalLoading = false }: JdInpu
               onValueChange={setDescription}
               isDisabled={isLoading}
               isRequired
+              labelPlacement="outside"
               minRows={4}
               maxRows={8}
               classNames={{
+                base: 'pt-2',
                 input: 'text-charcoal',
                 inputWrapper: 'border-warm-gray/30 bg-white/80',
-                label: 'text-charcoal/70',
+                label: 'text-charcoal/70 pb-1',
               }}
             />
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <Button
                 color="primary"
                 onPress={handleManualSubmit}

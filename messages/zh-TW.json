@@ -71,7 +71,6 @@
     "dashboard": "儀表板",
     "history": "面試歷史",
     "profile": "個人資料",
-    "settings": "設定",
     "login": "登入",
     "logout": "登出",
     "openMenu": "開啟選單",
@@ -288,26 +287,8 @@
     "memberSince": "加入日期",
     "editProfile": "編輯資料",
     "saveChanges": "儲存變更",
-    "cancel": "取消"
-  },
-  "settings": {
-    "title": "設定",
-    "subtitle": "自訂您的使用體驗",
-    "language": "語言",
-    "languageDescription": "選擇您偏好的介面語言",
-    "theme": "主題",
-    "themeDescription": "選擇您偏好的外觀主題",
-    "themes": {
-      "light": "淺色",
-      "dark": "深色",
-      "system": "系統預設"
-    },
-    "notifications": "通知",
-    "notificationsDescription": "管理您的通知偏好設定",
-    "emailNotifications": "電子郵件通知",
-    "pushNotifications": "推播通知",
-    "save": "儲存設定",
-    "saved": "設定已儲存"
+    "cancel": "取消",
+    "resume": "履歷"
   },
   "resume": {
     "title": "履歷",
