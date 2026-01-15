@@ -252,9 +252,12 @@
       "emptyTranscript": "尚無對話記錄"
     },
     "jobPosition": "面試職缺",
+    "viewOriginalJob": "查看原始職缺",
     "yourAnswer": "你的回答",
     "modelAnswer": "模範回答",
     "transcriptTabs": "對話記錄切換",
+    "strengths": "優點",
+    "improvements": "改進建議",
     "audio": {
       "play": "播放",
       "pause": "暫停",

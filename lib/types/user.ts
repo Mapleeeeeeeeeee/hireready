@@ -40,6 +40,7 @@ export interface InterviewListItem {
   strengths: string[];
   improvements: string[];
   jobDescriptionUrl: string | null;
+  jobDescription: unknown;
   modelAnswer: unknown;
   createdAt: string;
   updatedAt: string;

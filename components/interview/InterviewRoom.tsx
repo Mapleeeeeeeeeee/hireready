@@ -123,6 +123,7 @@ export function InterviewRoom() {
         duration: elapsedSeconds,
         language: locale as 'en' | 'zh-TW',
         jobDescriptionUrl: jobDescription?.url,
+        jobDescription: jobDescription,
       });
 
       logger.info('Interview saved', {

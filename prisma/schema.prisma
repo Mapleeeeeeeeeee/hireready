@@ -96,6 +96,7 @@ model Interview {
   strengths         String[] // strengths
   improvements      String[] // improvement suggestions
   jobDescriptionUrl String?  @db.Text  // Job description URL
+  jobDescription    Json?               // Full job description object
   modelAnswer       Json?               // { transcript: TranscriptEntry[], audioUrl?: string }
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt

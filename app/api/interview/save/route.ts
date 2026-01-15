@@ -27,6 +27,7 @@ interface SaveInterviewInput {
   feedback?: string;
   language: 'en' | 'zh-TW';
   jobDescriptionUrl?: string;
+  jobDescription?: unknown;
 }
 
 function validateSaveInterviewInput(
@@ -67,12 +68,22 @@ function validateSaveInterviewInput(
     jobDescriptionUrl = urlResult.value.trim() || undefined;
   }
 
+  // Validate jobDescription (optional, must be object if provided)
+  let jobDescription: unknown = undefined;
+  if (data.jobDescription !== undefined && data.jobDescription !== null) {
+    if (typeof data.jobDescription !== 'object') {
+      return Err(new ValidationError('jobDescription', 'jobDescription must be an object'));
+    }
+    jobDescription = data.jobDescription;
+  }
+
   return Ok({
     transcripts: transcriptsResult.value,
     duration: durationResult.value,
     feedback: feedbackResult.value,
     language: languageResult.value,
     jobDescriptionUrl,
+    jobDescription,
   });
 }
 
@@ -92,7 +103,8 @@ async function handleSaveInterview(
     throw validationResult.error;
   }
 
-  const { transcripts, duration, feedback, language, jobDescriptionUrl } = validationResult.value;
+  const { transcripts, duration, feedback, language, jobDescriptionUrl, jobDescription } =
+    validationResult.value;
 
   // Step 1: Save basic interview record first
   const interview = await prisma.interview.create({
@@ -102,6 +114,9 @@ async function handleSaveInterview(
       duration,
       feedback,
       jobDescriptionUrl,
+      jobDescription: jobDescription as unknown as Parameters<
+        typeof prisma.interview.create
+      >[0]['data']['jobDescription'],
       transcript: transcripts as unknown as Parameters<
         typeof prisma.interview.create
       >[0]['data']['transcript'],
@@ -111,6 +126,15 @@ async function handleSaveInterview(
 
   // Step 2: Perform AI analysis asynchronously (errors should not fail the save)
   try {
+    logger.info('Preparing for AI analysis', {
+      module: 'api-interview-save',
+      action: 'pre-analyze',
+      interviewId: interview.id,
+      transcriptCount: transcripts.length,
+      hasJobDescription: !!jobDescriptionUrl,
+      language,
+    });
+
     logger.info('Starting AI analysis', {
       module: 'api-interview-save',
       action: 'analyze',
@@ -121,6 +145,16 @@ async function handleSaveInterview(
       transcripts,
       jobDescriptionUrl,
       language,
+    });
+
+    logger.info('AI analysis result received', {
+      module: 'api-interview-save',
+      action: 'analyze',
+      interviewId: interview.id,
+      hasScore: !!analysis.score,
+      strengthsCount: analysis.strengths.length,
+      improvementsCount: analysis.improvements.length,
+      hasAudio: !!analysis.modelAnswer.audioUrl,
     });
 
     // Step 3: Rename audio file from UUID to interview ID
@@ -188,6 +222,8 @@ async function handleSaveInterview(
       module: 'api-interview-save',
       action: 'analyze',
       interviewId: interview.id,
+      errorMessage: (error as Error).message,
+      errorStack: (error as Error).stack,
     });
     // Do not throw error - interview record is still saved
   }

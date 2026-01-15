@@ -96,6 +96,8 @@ function HistoryContent() {
                 score={interview.score}
                 duration={interview.duration}
                 createdAt={interview.createdAt}
+                jobDescriptionUrl={interview.jobDescriptionUrl}
+                jobDescription={interview.jobDescription}
                 onClick={() => handleViewInterview(interview.id)}
               />
             ))}

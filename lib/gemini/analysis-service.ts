@@ -291,10 +291,12 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
     transcriptCount: transcripts.length,
     language,
     hasJobDescription: !!jobDescriptionUrl,
+    jobDescriptionUrl: jobDescriptionUrl || 'none',
   });
 
   // Validate input
   if (transcripts.length === 0) {
+    logger.error('Cannot analyze empty transcript', undefined, logContext);
     throw new Error('Cannot analyze empty transcript');
   }
 
@@ -304,13 +306,20 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
     throw new Error('Gemini API key not configured');
   }
 
+  logger.info('API key present, proceeding with analysis', {
+    ...logContext,
+    apiKeyPresent: true,
+    apiKeyLength: apiKey.length,
+  });
+
   try {
     // Step 1: Call Gemini API for analysis
     const prompt = buildAnalysisPrompt(transcripts, jobDescriptionUrl, language);
 
-    logger.debug('Calling Gemini API for analysis', {
+    logger.info('Calling Gemini API for analysis', {
       ...logContext,
       promptLength: prompt.length,
+      endpoint: GEMINI_API_ENDPOINT,
     });
 
     const controller = new AbortController();
@@ -347,6 +356,12 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
 
     clearTimeout(timeoutId);
 
+    logger.info('Received response from Gemini API', {
+      ...logContext,
+      status: response.status,
+      statusText: response.statusText,
+    });
+
     if (!response.ok) {
       const errorText = await response.text();
       logger.error('Gemini API error', undefined, {
@@ -368,9 +383,10 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
       throw new Error('No text content in Gemini API response');
     }
 
-    logger.debug('Received analysis response', {
+    logger.info('Received analysis response from Gemini', {
       ...logContext,
       responseLength: responseText.length,
+      responsePreview: responseText.slice(0, 200),
     });
 
     // Step 2: Parse JSON response

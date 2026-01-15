@@ -252,9 +252,12 @@
       "emptyTranscript": "No transcript available"
     },
     "jobPosition": "Job Position",
+    "viewOriginalJob": "View Original Job",
     "yourAnswer": "Your Answer",
     "modelAnswer": "Model Answer",
     "transcriptTabs": "Transcript Tabs",
+    "strengths": "Strengths",
+    "improvements": "Improvements",
     "audio": {
       "play": "Play",
       "pause": "Pause",

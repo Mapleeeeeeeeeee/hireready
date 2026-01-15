@@ -25,6 +25,7 @@ interface InterviewDetailResponse {
   strengths: string[];
   improvements: string[];
   jobDescriptionUrl: string | null;
+  jobDescription: unknown;
   modelAnswer: unknown;
   createdAt: string;
   updatedAt: string;
@@ -59,6 +60,7 @@ async function handleGetInterview(
       strengths: true,
       improvements: true,
       jobDescriptionUrl: true,
+      jobDescription: true,
       modelAnswer: true,
       createdAt: true,
       updatedAt: true,
@@ -78,6 +80,7 @@ async function handleGetInterview(
     strengths: interview.strengths,
     improvements: interview.improvements,
     jobDescriptionUrl: interview.jobDescriptionUrl,
+    jobDescription: interview.jobDescription,
     modelAnswer: interview.modelAnswer,
     createdAt: interview.createdAt.toISOString(),
     updatedAt: interview.updatedAt.toISOString(),
