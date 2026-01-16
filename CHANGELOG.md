@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.2.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.1.2...v2.2.0) (2026-01-16)
+
+
+### Features
+
+* improve unauthenticated user flow and UI accuracy ([#22](https://github.com/Mapleeeeeeeeeee/hireready/issues/22)) ([7522d1f](https://github.com/Mapleeeeeeeeeee/hireready/commit/7522d1f9a3ca8049a0d182c841a1989a12634a31))
+* refresh interview UX and docs ([#23](https://github.com/Mapleeeeeeeeeee/hireready/issues/23)) ([3b4f8ea](https://github.com/Mapleeeeeeeeeee/hireready/commit/3b4f8ea0b8d8cfa69963cad5bf76e75ca937c996))
+
+
+### Bug Fixes
+
+* add datasource url to prisma schema for production deployment ([3eb3027](https://github.com/Mapleeeeeeeeeee/hireready/commit/3eb3027120a8eb180eb5f94d419827f98123e955))
+* unblock zeabur deploy ([#21](https://github.com/Mapleeeeeeeeeee/hireready/issues/21)) ([079c8e7](https://github.com/Mapleeeeeeeeeee/hireready/commit/079c8e7fd2bcde83ede9d6e566f7df0b22eb03fb))
+
 ## [2.1.2](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.1.1...v2.1.2) (2026-01-16)
 
 ### Bug Fixes
