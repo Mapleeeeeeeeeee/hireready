@@ -20,16 +20,6 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-// Mock date-format utilities
-vi.mock('@/lib/utils/date-format', () => ({
-  formatTimestamp: (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  },
-}));
-
 describe('TranscriptViewer', () => {
   const sampleTranscript: TranscriptEntry[] = [
     {
@@ -100,28 +90,9 @@ describe('TranscriptViewer', () => {
       expect(screen.getAllByText('AI Interviewer').length).toBeGreaterThan(0);
     });
 
-    it('should render timestamps when provided', () => {
+    it('should not render timestamps even when provided', () => {
       render(<TranscriptViewer transcript={sampleTranscript} />);
 
-      expect(screen.getByText('00:00')).toBeInTheDocument();
-      expect(screen.getByText('00:05')).toBeInTheDocument();
-      expect(screen.getByText('00:10')).toBeInTheDocument();
-    });
-  });
-
-  describe('message without timestamp', () => {
-    it('should render message without timestamp when not provided', () => {
-      const transcriptWithoutTimestamp: TranscriptEntry[] = [
-        {
-          role: 'user',
-          text: 'Message without timestamp',
-        },
-      ];
-
-      render(<TranscriptViewer transcript={transcriptWithoutTimestamp} />);
-
-      expect(screen.getByText('Message without timestamp')).toBeInTheDocument();
-      // Should not have any timestamp formatted as MM:SS
       expect(screen.queryByText(/^\d{2}:\d{2}$/)).not.toBeInTheDocument();
     });
   });
