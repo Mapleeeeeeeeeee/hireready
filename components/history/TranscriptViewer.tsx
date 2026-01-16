@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
 import { User, Bot, MessageSquare } from 'lucide-react';
+import { formatTimestamp } from '@/lib/utils/date-format';
 
 // ============================================================
 // Types
@@ -49,6 +50,9 @@ function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
         {/* Speaker label */}
         <div className="text-charcoal/50 flex items-center gap-2 text-xs">
           <span>{isUser ? tVideo('you') : tAi('name')}</span>
+          {typeof entry.timestamp === 'number' && (
+            <span className="text-charcoal/40">{formatTimestamp(entry.timestamp)}</span>
+          )}
         </div>
 
         {/* Message content */}
