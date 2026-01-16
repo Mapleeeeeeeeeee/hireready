@@ -7,7 +7,7 @@ import { Worker, type Job, type ConnectionOptions } from 'bullmq';
 
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/utils/logger';
-import { analyzeInterview } from '@/lib/gemini/analysis-service';
+import { analyzeInterviewFeedback, generateModelAnswer } from '@/lib/gemini/analysis-service';
 import { getRedisConnection } from '../connection';
 import { QUEUE_NAMES, type InterviewAnalysisJobData } from '../types';
 import { updateTaskStatus } from '../worker-utils';
@@ -124,15 +124,15 @@ async function processInterviewAnalysisJob(
     // Update progress
     await updateTaskStatus(taskId, 'processing', { progress: 20 });
 
-    // Perform AI analysis
-    logger.info('Starting AI analysis', {
+    // Perform AI analysis - Stage 1: Feedback
+    logger.info('Starting AI analysis (Stage 1: Feedback)', {
       ...logContext,
       transcriptCount: transcripts.length,
       hasJdContext: !!jobDescription,
       hasResumeContext: !!resumeContent,
     });
 
-    const analysis = await analyzeInterview({
+    const feedback = await analyzeInterviewFeedback({
       transcripts,
       jobDescription,
       resume: resumeContent,
@@ -140,26 +140,50 @@ async function processInterviewAnalysisJob(
     });
 
     // Update progress
-    await updateTaskStatus(taskId, 'processing', { progress: 70 });
+    await updateTaskStatus(taskId, 'processing', { progress: 40 });
 
-    logger.info('AI analysis completed', {
+    logger.info('AI feedback analysis completed', {
       ...logContext,
-      score: analysis.score,
-      strengthsCount: analysis.strengths.length,
-      improvementsCount: analysis.improvements.length,
+      score: feedback.score,
+      strengthsCount: feedback.strengths.length,
+      improvementsCount: feedback.improvements.length,
+    });
+
+    // Update interview with feedback results FIRST
+    await prisma.interview.update({
+      where: { id: interviewId },
+      data: {
+        score: feedback.score,
+        strengths: feedback.strengths,
+        improvements: feedback.improvements,
+      },
+    });
+
+    // Perform AI analysis - Stage 2: Model Answer
+    logger.info('Starting AI analysis (Stage 2: Model Answer)', {
+      ...logContext,
+    });
+
+    const modelAnswerResult = await generateModelAnswer({
+      transcripts,
+      jobDescription,
+      resume: resumeContent,
+      language,
     });
 
     // Update progress
     await updateTaskStatus(taskId, 'processing', { progress: 90 });
 
-    // Update interview with analysis results
+    logger.info('AI model answer generation completed', {
+      ...logContext,
+      modelTranscriptCount: modelAnswerResult.modelAnswer.transcript.length,
+    });
+
+    // Update interview with model answer
     await prisma.interview.update({
       where: { id: interviewId },
       data: {
-        score: analysis.score,
-        strengths: analysis.strengths,
-        improvements: analysis.improvements,
-        modelAnswer: analysis.modelAnswer as unknown as Parameters<
+        modelAnswer: modelAnswerResult.modelAnswer as unknown as Parameters<
           typeof prisma.interview.update
         >[0]['data']['modelAnswer'],
       },
@@ -167,9 +191,9 @@ async function processInterviewAnalysisJob(
 
     // Create result
     const result: InterviewAnalysisResult = {
-      score: analysis.score,
-      strengths: analysis.strengths,
-      improvements: analysis.improvements,
+      score: feedback.score,
+      strengths: feedback.strengths,
+      improvements: feedback.improvements,
     };
 
     // Update task to completed
@@ -180,7 +204,7 @@ async function processInterviewAnalysisJob(
 
     logger.info('Interview analysis completed', {
       ...logContext,
-      score: analysis.score,
+      score: feedback.score,
     });
 
     return result;
