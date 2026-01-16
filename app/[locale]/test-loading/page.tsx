@@ -1,34 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AnalysisLoading } from '@/components/history/AnalysisLoading';
 import { SaveConfirmDialog } from '@/components/interview/SaveConfirmDialog';
 import { Button } from '@heroui/react';
-import { RefreshCw, Save } from 'lucide-react';
+import { RefreshCw, Save, Check } from 'lucide-react';
 
 export default function TestLoadingPage() {
-  const [progress, setProgress] = useState(0);
   const [key, setKey] = useState(0); // To force re-render for restart
+  const [isComplete, setIsComplete] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 0.5; // Slow enough to see the animation
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [key]);
-
   const handleRestart = () => {
-    setProgress(0);
+    setIsComplete(false);
     setKey((prev) => prev + 1);
+  };
+
+  const handleComplete = () => {
+    setIsComplete(true);
   };
 
   const handleSave = () => {
@@ -47,7 +37,7 @@ export default function TestLoadingPage() {
           Loading Effect Preview
         </h1>
 
-        <AnalysisLoading progress={progress} />
+        <AnalysisLoading key={key} isComplete={isComplete} />
 
         <div className="mt-12 flex w-full flex-wrap justify-center gap-4">
           <Button
@@ -57,6 +47,14 @@ export default function TestLoadingPage() {
             startContent={<RefreshCw className="h-4 w-4" />}
           >
             Restart Animation
+          </Button>
+          <Button
+            onPress={handleComplete}
+            color="success"
+            variant="flat"
+            startContent={<Check className="h-4 w-4" />}
+          >
+            Mark Complete
           </Button>
           <Button
             onPress={() => setIsModalOpen(true)}

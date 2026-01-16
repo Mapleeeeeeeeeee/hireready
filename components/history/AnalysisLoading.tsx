@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Brain, FileText } from 'lucide-react';
 import { Progress } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 
 interface AnalysisLoadingProps {
-  progress: number;
+  /** When true, progress jumps to 100% and completes */
+  isComplete?: boolean;
 }
 
 const LOADING_STEPS = [
@@ -15,13 +17,32 @@ const LOADING_STEPS = [
   { icon: Sparkles, key: 'step3' },
 ];
 
-export function AnalysisLoading({ progress }: AnalysisLoadingProps) {
+export function AnalysisLoading({ isComplete = false }: AnalysisLoadingProps) {
   const t = useTranslations('history.analyzing');
-  // We can treat progress 0-33 as step 1, 34-66 as step 2, 67-100 as step 3
-  // We can treat progress 0-33 as step 1, 34-66 as step 2, 67-100 as step 3
+  const [progress, setProgress] = useState(0);
+  const displayProgress = isComplete ? 100 : progress;
+
+  // Animate progress from 0 to 99, then cap at 99 until isComplete
+  useEffect(() => {
+    if (isComplete) return;
+
+    // Fast initial progress, then slow down asymptotically to 99
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 99) return 99;
+        // Slow down as we approach 99
+        const increment = Math.max(0.5, (99 - prev) * 0.08);
+        return Math.min(99, prev + increment);
+      });
+    }, 200);
+
+    return () => clearInterval(timer);
+  }, [isComplete]);
+
+  // Determine current step based on progress
   let currentStepIndex = 0;
-  if (progress < 30) currentStepIndex = 0;
-  else if (progress < 70) currentStepIndex = 1;
+  if (displayProgress < 30) currentStepIndex = 0;
+  else if (displayProgress < 70) currentStepIndex = 1;
   else currentStepIndex = 2;
 
   const CurrentIcon = LOADING_STEPS[currentStepIndex].icon;
@@ -86,12 +107,12 @@ export function AnalysisLoading({ progress }: AnalysisLoadingProps) {
           <div className="w-full max-w-md space-y-3">
             <div className="text-charcoal/50 flex justify-between text-xs font-medium tracking-wider uppercase">
               <span>{t('status')}</span>
-              <span>{Math.round(progress)}%</span>
+              <span>{Math.round(displayProgress)}%</span>
             </div>
 
             <Progress
               aria-label="Analysis progress"
-              value={progress}
+              value={displayProgress}
               classNames={{
                 base: 'max-w-md',
                 track: 'bg-warm-gray/20 h-2',

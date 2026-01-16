@@ -118,6 +118,12 @@ async function handleSaveInterview(
   const { transcripts, duration, feedback, language, jobDescriptionUrl, jobDescription } =
     validationResult.value;
 
+  // Ensure language is included in jobDescription for analysis worker
+  const jobDescriptionWithLanguage = {
+    ...(jobDescription as Record<string, unknown> | undefined),
+    language,
+  };
+
   // Step 1: Save basic interview record first
   const interview = await prisma.interview.create({
     data: {
@@ -126,7 +132,7 @@ async function handleSaveInterview(
       duration,
       feedback,
       jobDescriptionUrl,
-      jobDescription: jobDescription as unknown as Parameters<
+      jobDescription: jobDescriptionWithLanguage as unknown as Parameters<
         typeof prisma.interview.create
       >[0]['data']['jobDescription'],
       transcript: transcripts as unknown as Parameters<

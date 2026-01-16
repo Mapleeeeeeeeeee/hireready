@@ -77,6 +77,7 @@ export function InterviewRoom() {
   const jobDescription = useInterviewStore((state) => state.jobDescription);
   const setResumeContent = useInterviewStore((state) => state.setResumeContent);
   const storeLanguage = useInterviewStore((state) => state.language); // User selected language from setup
+  const interviewLanguage = storeLanguage || locale;
 
   // Use the Live API hook
   const {
@@ -90,7 +91,7 @@ export function InterviewRoom() {
     connect,
     disconnect,
     toggleMic,
-  } = useLiveApi({ language: storeLanguage || locale });
+  } = useLiveApi({ language: interviewLanguage });
 
   // Use the Video Preview hook for self-viewing
   const { isVideoOn, stream: videoStream, toggleVideo, error: videoError } = useVideoPreview();
@@ -223,7 +224,7 @@ export function InterviewRoom() {
       const response = await apiClient.post<SaveInterviewResponse>('/api/interview/save', {
         transcripts,
         duration: elapsedSeconds,
-        language: locale as 'en' | 'zh-TW',
+        language: interviewLanguage,
         jobDescriptionUrl: jobDescription?.url,
         jobDescription: jobDescription,
       });
@@ -268,7 +269,15 @@ export function InterviewRoom() {
 
       setIsSaving(false);
     }
-  }, [transcripts, elapsedSeconds, locale, jobDescription, router, t, getLocalizedError]);
+  }, [
+    transcripts,
+    elapsedSeconds,
+    interviewLanguage,
+    jobDescription,
+    router,
+    t,
+    getLocalizedError,
+  ]);
 
   // Handle discard interview
   const handleDiscard = useCallback(() => {

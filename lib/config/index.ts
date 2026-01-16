@@ -15,7 +15,7 @@ export const appConfig = {
 export const geminiConfig = {
   model: 'gemini-3-flash-preview' as const,
   timeouts: {
-    analysis: 60000, // 60 seconds
+    analysis: 90000, // 90 seconds
   },
 } as const;
 

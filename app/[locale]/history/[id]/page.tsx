@@ -100,7 +100,7 @@ function HistoryDetailContent() {
   const [activeTranscript, setActiveTranscript] = useState<'user' | 'model' | null>(null);
 
   // Task polling for analysis progress
-  const { progress: analysisProgress, status: analysisStatus } = useTaskPolling({
+  const { status: analysisStatus } = useTaskPolling({
     taskId: isAnalyzing ? analysisTaskId : null,
     onComplete: useCallback(() => {
       logger.info('Interview analysis completed', {
@@ -289,7 +289,7 @@ function HistoryDetailContent() {
           {/* Analysis In Progress */}
           {shouldShowAnalyzing && (
             <div className="py-6">
-              <AnalysisLoading progress={analysisProgress} />
+              <AnalysisLoading />
             </div>
           )}
 

@@ -1,113 +1,146 @@
 # HireReady
 
-**AI 驅動的語音面試模擬平台** - 幫助你練習行為面試，提升錄取機會！
+**English** | [繁體中文](./README.zh-TW.md)
+
+**AI-Powered Voice Interview Platform** - Master your interviews with real-time, voice-based practice!
 
 [![CI](https://github.com/Mapleeeeeeeeeee/hireready/actions/workflows/ci.yml/badge.svg)](https://github.com/Mapleeeeeeeeeee/hireready/actions/workflows/ci.yml)
 [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
 
-## ✨ 功能特色
+---
 
-- 🎙️ **即時語音對話** - 使用 Google Gemini Live API 進行真實對話
-- 🤖 **AI 面試官** - 模擬各種面試情境和風格
-- 🌍 **多語言支援** - 繁體中文、英文
-- 📊 **面試回饋** - 即時分析你的表現
+## 🏆 About The Project
 
-## 🛠️ 技術棧
+This project was built for the **Zeabur "Ship It" Hackathon** (Track 2: Full-Stack Deployment). We leveraged Next.js 16 and the Google Gemini Live API to create an immersive, full-duplex voice interview simulation platform, deployed seamlessly via Zeabur.
 
-- **Frontend**: Next.js 16 + React 19 + TypeScript
-- **UI**: HeroUI + Tailwind CSS v4
-- **AI**: Google Gemini Live API
-- **Auth**: Better Auth (Google OAuth)
-- **Database**: PostgreSQL + Prisma
-- **Testing**: Vitest + Playwright
-- **Deployment**: Zeabur
+- **Live Demo**: [https://hireready.zeabur.app](https://hireready.zeabur.app) (Hosted on Zeabur)
 
-## 🚀 部署 (Deployment)
+## ✨ Key Features
 
-此專案已針對 Zeabur 部署進行優化，包含完整的 `zeabur.yaml` 配置。
+- 🎙️ **Real-time Voice Conversation**: Powered by Google Gemini Live API (WebSocket) for low-latency, natural interactions without push-to-talk.
+- 🤖 **AI Interviewer Persona**: Simulates realistic interviewer tones and follow-up questions. Supports custom Job Descriptions (JD) for targeted practice.
+- 🌍 **Multi-language Support**: Fully supports English (en) and Traditional Chinese (zh-TW) for both UI and conversation.
+- 📊 **Instant Feedback**: Receive detailed analysis on your content, communication style, and scores immediately after the interview.
+- 🔐 **Secure Authentication**: Integrated with Better Auth and Google OAuth for secure user management.
+- 📱 **Responsive Design**: Built with HeroUI + Tailwind CSS v4, ensuring a premium experience on desktop and mobile.
 
-## 🏁 Hackathon Submission (Zeabur)
+## 🛠️ Tech Stack
 
-- Live URL: https://hireready.zeabur.app
-- Zeabur usage: Managed PostgreSQL + Redis, one-click deploy via `zeabur.yaml`, service linking for `DATABASE_URL` and `REDIS_URL`.
+- **Frontend Framework**: Next.js 16 (App Router, Turbopack)
+- **Language**: TypeScript
+- **UI Library**: HeroUI (NextUI) + Tailwind CSS v4
+- **AI Model**: Google Gemini Live API (Gemini 2.5 Flash via WebSocket)
+- **Authentication**: Better Auth (Google OAuth)
+- **Database**: PostgreSQL (Managed by Zeabur)
+- **ORM**: Prisma
+- **Queue/Cache**: Redis (Managed by Zeabur)
+- **Testing**: Vitest (Unit) + Playwright (E2E)
+- **Deployment**: Zeabur (Serverless + Docker)
 
-[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
+## ⚡ Zeabur Highlights
 
-### Zeabur 一鍵部署
+We maximized Zeabur's native features for optimal performance and developer experience:
 
-1. 點擊上方的 **Deploy on Zeabur** 按鈕。
-2. 綁定 GitHub 帳號並授權。
-3. Zeabur 會自動偵測 `zeabur.yaml` 並建立以下服務：
-   - **Web App** (Next.js)
-   - **PostgreSQL** (Database)
-   - **Redis** (Queue/Cache)
-4. 在 Zeabur Dashboard 中設定必要的環境變數 (如 `GOOGLE_CLIENT_ID`, `GEMINI_API_KEY` 等)。
-5. 等待部署完成即可使用！
+- **Declarative Configuration**: utilized `zeabur.yaml` to define the entire microservices architecture (Next.js + Postgres + Redis) as Infrastructure as Code.
+- **Private Networking**: Leveraged Zeabur's internal service linking to connect Next.js securely to Postgres and Redis via private endpoints, ensuring low latency and high security.
+- **Automatic CI/CD**: Seamless automated builds and deployments triggered by every GitHub push.
 
-### 手動部署
+## 🚀 Deployment
 
-1. 在 [Zeabur](https://zeabur.com) 建立新專案。
-2. 選擇 "Deploy New Service" -> "GitHub"。
-3. 選擇此 Repository。
-4. Zeabur 會自動識別 Dockerfile 與設定。
+The project is optimized for **Zeabur**, offering a hassle-free deployment experience.
 
-## 🚀 快速開始
+### Option 1: One-Click Deploy (Recommended)
 
-### 環境需求
+1. Click the **Deploy on Zeabur** button below:
+
+   [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
+
+2. Log in to Zeabur and authorize GitHub access.
+3. Zeabur will automatically detect the `zeabur.yaml` configuration and create three services:
+   - **User Service**: The Next.js application (Dockerized).
+   - **PostgreSQL**: Managed database service.
+   - **Redis**: Managed cache/queue service.
+4. **Configure Environment Variables**: In the Zeabur Dashboard (User Service), set the following:
+   - `GOOGLE_CLIENT_ID`: Google OAuth Client ID
+   - `GOOGLE_CLIENT_SECRET`: Google OAuth Client Secret
+   - `GEMINI_API_KEY`: Google Gemini API Key
+   - `BETTER_AUTH_SECRET`: Generate a random string
+   - `BETTER_AUTH_URL`: Your Zeabur domain (e.g., `https://your-app.zeabur.app`)
+   - `NEXT_PUBLIC_APP_URL`: Same as above
+     _Note: `DATABASE_URL` and `REDIS_URL` are automatically injected by Zeabur Service Linking._
+5. Wait for the deployment to finish and you are ready to go!
+
+### Option 2: Manual Deployment
+
+1. Create a new project in the [Zeabur Dashboard](https://dash.zeabur.com).
+2. Create PostgreSQL and Redis services from the marketplace.
+3. Create a new Service, select "Git", and connect this repository.
+4. Set the environment variables mentioned above and connect your database/Redis using Service Linking (this will automatically inject `DATABASE_URL` and `REDIS_URL`).
+
+## 💻 Local Development
+
+### Prerequisites
 
 - Node.js 22+
 - pnpm 10+
 
-### 安裝
+### Installation
 
-```bash
-# Clone 專案
-git clone https://github.com/YOUR_USERNAME/hireready.git
-cd hireready
+1. **Clone the repository**
 
-# 安裝依賴
-pnpm install
+   ```bash
+   git clone https://github.com/Mapleeeeeeeeeee/hireready.git
+   cd hireready
+   ```
 
-# 設定環境變數
-cp .env.example .env.local
-# 編輯 .env.local 填入你的 API keys
+2. **Install dependencies**
 
-# 啟動開發伺服器
-pnpm dev
-```
+   ```bash
+   pnpm install
+   ```
 
-打開 [http://localhost:5555](http://localhost:5555) 查看結果。
+3. **Configure environment variables**
+   Copy `.env.example` to `.env.local` and fill in your keys:
 
-### 常用指令
+   ```bash
+   cp .env.example .env.local
+   ```
 
-| 指令              | 說明                       |
-| ----------------- | -------------------------- |
-| `pnpm dev`        | 啟動開發伺服器 (port 5555) |
-| `pnpm build`      | 建置生產版本               |
-| `pnpm lint`       | 執行 ESLint                |
-| `pnpm format`     | 格式化程式碼               |
-| `pnpm type-check` | TypeScript 類型檢查        |
-| `pnpm test`       | 執行單元測試               |
-| `pnpm test:e2e`   | 執行 E2E 測試              |
+4. **Start Database (Optional)**
+   If you don't have a local Postgres instance, you can use Docker:
 
-## 📁 專案結構
+   ```bash
+   docker-compose up -d
+   ```
+
+5. **Initialize Database**
+
+   ```bash
+   pnpm prisma migrate dev
+   ```
+
+6. **Start Development Server**
+   ```bash
+   pnpm dev
+   ```
+   Open [http://localhost:5555](http://localhost:5555) in your browser.
+
+## 📁 Project Structure
 
 ```
 hireready/
-├── app/                  # Next.js App Router
-│   └── [locale]/         # i18n 路由
-├── components/           # React 元件
-├── lib/                  # 工具函數和設定
-├── messages/             # i18n 翻譯檔案
-├── tests/                # 測試檔案
-└── docs/                 # 文檔
+├── app/                  # Next.js App Router pages & API
+├── components/           # React UI components (HeroUI)
+├── lib/
+│   ├── gemini/           # Gemini Live API logic
+│   ├── stores/           # Zustand state management
+│   └── prisma/           # Database connection
+├── messages/             # i18n translation files
+├── prisma/               # Database Schema
+├── public/               # Static assets
+└── zeabur.yaml           # Zeabur deployment config
 ```
 
-## 📝 開發規範
+## 📝 License
 
-- Commit 訊息遵循 [Conventional Commits](https://www.conventionalcommits.org/)
-- 詳見 [CLAUDE.md](./CLAUDE.md) 了解完整開發規範
-
-## 📄 License
-
-MIT License
+Distributed under the MIT License. See `LICENSE` for more information.

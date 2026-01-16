@@ -198,21 +198,27 @@ export async function generateModelAnswer(
   try {
     const prompt = buildModelAnswerPrompt(transcripts, jobDescription, resume, language);
 
-    const responseText = await callGeminiApi(apiKey, prompt, logContext, {
-      modelTranscript: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            role: { type: 'string', enum: ['interviewer', 'candidate'] },
-            text: { type: 'string' },
-            timestamp: { type: 'number' },
-            isFinal: { type: 'boolean' },
+    const responseText = await callGeminiApi(
+      apiKey,
+      prompt,
+      logContext,
+      {
+        modelTranscript: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              role: { type: 'string', enum: ['interviewer', 'candidate'] },
+              text: { type: 'string' },
+              timestamp: { type: 'number' },
+              isFinal: { type: 'boolean' },
+            },
+            required: ['role', 'text', 'timestamp', 'isFinal'],
           },
-          required: ['role', 'text', 'timestamp', 'isFinal'],
         },
       },
-    });
+      { temperature: 0.1 }
+    );
 
     const analysisData = parseGeminiJSONResponse<{
       modelTranscript: GeminiAnalysisResponse['modelTranscript'];
@@ -259,15 +265,18 @@ async function callGeminiApi(
   apiKey: string,
   prompt: string,
   logContext: { module: string; action: string; [key: string]: unknown },
-  responseSchemaProperties: Record<string, unknown>
+  responseSchemaProperties: Record<string, unknown>,
+  options: { temperature?: number } = {}
 ): Promise<string> {
   const MAX_RETRIES = 3;
   const INITIAL_DELAY_MS = 1000;
+  const temperature = options.temperature ?? 0.3;
 
   logger.info('Calling Gemini API', {
     ...logContext,
     promptLength: prompt.length,
     endpoint: GEMINI_API_ENDPOINT,
+    temperature,
   });
 
   let lastError: Error | null = null;
@@ -291,7 +300,7 @@ async function callGeminiApi(
             },
           ],
           generationConfig: {
-            temperature: 0.7,
+            temperature,
             maxOutputTokens: 8192,
             responseMimeType: 'application/json',
             responseSchema: {
@@ -458,6 +467,7 @@ ${formatTranscripts(transcripts)}
 - modelTranscript: A generated transcript that mirrors the input transcript structure EXACTLY.
   - STRICTLY maintain the same number of turns and order as the input transcript.
   - For role "interviewer": COPY the text EXACTLY from the input transcript. Do NOT rephrase.
+  - CRITICAL: Do NOT split a single interviewer turn into multiple turns. Even if the interviewer asks multiple questions in one block, keep them in a SINGLE "interviewer" entry.
   - For role "candidate": Generate a concise, ideal response to the preceding question.
   - Do NOT extend the interview. Do NOT add new questions.
   - ${modelAnswerInstruction}
