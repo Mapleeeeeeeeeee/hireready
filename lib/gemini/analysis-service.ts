@@ -358,8 +358,8 @@ ${formatTranscripts(transcripts)}
 
 ${
   isZhTW
-    ? 'Output all text content in Traditional Chinese (繁體中文). Use Markdown for lists (e.g., - Point 1).'
-    : 'Output all text content in English. Use Markdown for lists (e.g., - Point 1).'
+    ? 'Output all text content in Traditional Chinese (繁體中文).'
+    : 'Output all text content in English.'
 }`;
 }
 
