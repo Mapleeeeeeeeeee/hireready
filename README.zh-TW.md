@@ -5,13 +5,12 @@
 **AI 驅動的語音面試模擬平台** - 幫助你練習面試，透過真實對話提升錄取機會！
 
 [![CI](https://github.com/Mapleeeeeeeeeee/hireready/actions/workflows/ci.yml/badge.svg)](https://github.com/Mapleeeeeeeeeee/hireready/actions/workflows/ci.yml)
-[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
 
 ---
 
 ## 🏆 關於專案
 
-本專案是為 **Zeabur "Ship It" Hackathon** (Track 2: Full-Stack Deployment) 所開發的作品。我們利用 Next.js 16 與 Google Gemini Live API，打造了一個能進行「全語音即時對話」的模擬面試平台，並透過 Zeabur 實現一鍵部署與自動化維運。
+本專案是為 **Zeabur "Ship It" Hackathon** (Track 2: Full-Stack Deployment) 所開發的作品。我們利用 Next.js 16 與 Google Gemini Live API，打造了一個能進行「全語音即時對話」的模擬面試平台，並透過 Zeabur 進行部署與自動化維運。
 
 - **Live Demo**: [https://hireready.zeabur.app](https://hireready.zeabur.app) (Host on Zeabur)
 
@@ -47,19 +46,13 @@
 
 ## 🚀 部署教學 (Deployment)
 
-本專案已針對 **Zeabur** 進行深度優化，只需簡單幾步即可擁有自己的面試練習平台。
+本專案已針對 **Zeabur** 進行深度優化，可依下列步驟部署。
 
-### 方式一：Zeabur 一鍵部署 (推薦)
+### 手動部署
 
-1. 點擊下方的 **Deploy on Zeabur** 按鈕：
-
-   [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
-
-2. 登入 Zeabur 並授權 GitHub 存取。
-3. Zeabur 會自動根據 `zeabur.yaml` 建立三個服務：
-   - **User Service**: 使用 Docker 部署 Next.js 應用程式。
-   - **PostgreSQL**: 資料庫服務。
-   - **Redis**: 快取與隊列服務。
+1. 在 [Zeabur Dashboard](https://dash.zeabur.com) 建立新專案。
+2. 建立 PostgreSQL 與 Redis 服務。
+3. 建立 Service，選擇 "Git"，連結此儲存庫，並透過 Service Linking 連結資料庫與 Redis。
 4. **設定環境變數**：在 Zeabur Dashboard 的 User Service 中設定以下變數：
    - `GOOGLE_CLIENT_ID`: Google OAuth Client ID
    - `GOOGLE_CLIENT_SECRET`: Google OAuth Client Secret
@@ -69,13 +62,6 @@
    - `NEXT_PUBLIC_APP_URL`: 同上
      _註：`DATABASE_URL` 與 `REDIS_URL` 會由 Zeabur Service Linking 自動注入，無需手動設定。_
 5. 等待部署完成，即可開始使用！
-
-### 方式二：手動部署
-
-1. 在 [Zeabur Dashboard](https://dash.zeabur.com) 建立新專案。
-2. 建立 PostgreSQL 與 Redis 服務。
-3. 建立 Service，選擇 "Git"，連結此儲存庫。
-4. 設定上述環境變數，並透過 Service Linking 連結資料庫與 Redis (這會自動設定 `DATABASE_URL` 與 `REDIS_URL`)。
 
 ## 💻 本地開發 (Local Development)
 
