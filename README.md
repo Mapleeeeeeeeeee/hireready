@@ -26,6 +26,11 @@
 
 此專案已針對 Zeabur 部署進行優化，包含完整的 `zeabur.yaml` 配置。
 
+## 🏁 Hackathon Submission (Zeabur)
+
+- Live URL: https://hireready.zeabur.app
+- Zeabur usage: Managed PostgreSQL + Redis, one-click deploy via `zeabur.yaml`, service linking for `DATABASE_URL` and `REDIS_URL`.
+
 [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
 
 ### Zeabur 一鍵部署

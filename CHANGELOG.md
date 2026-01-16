@@ -2,41 +2,36 @@
 
 ## [2.1.2](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.1.1...v2.1.2) (2026-01-16)
 
-
 ### Bug Fixes
 
-* add tsconfig.json to Dockerfile runner stage for tsx path alias resolution ([ca8eb76](https://github.com/Mapleeeeeeeeeee/hireready/commit/ca8eb76daf58afc8fbdaf82262ded621a1f50d63))
+- add tsconfig.json to Dockerfile runner stage for tsx path alias resolution ([ca8eb76](https://github.com/Mapleeeeeeeeeee/hireready/commit/ca8eb76daf58afc8fbdaf82262ded621a1f50d63))
 
 ## [2.1.1](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.1.0...v2.1.1) (2026-01-16)
 
-
 ### Bug Fixes
 
-* Remove Markdown Instruction ([#17](https://github.com/Mapleeeeeeeeeee/hireready/issues/17)) ([133788c](https://github.com/Mapleeeeeeeeeee/hireready/commit/133788c5aa1196f5f4c745bb21d944dca9923936))
+- Remove Markdown Instruction ([#17](https://github.com/Mapleeeeeeeeeee/hireready/issues/17)) ([133788c](https://github.com/Mapleeeeeeeeeee/hireready/commit/133788c5aa1196f5f4c745bb21d944dca9923936))
 
 ## [2.1.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.0.0...v2.1.0) (2026-01-16)
 
-
 ### Features
 
-* add background task queue for async resume parsing ([#14](https://github.com/Mapleeeeeeeeeee/hireready/issues/14)) ([befeb26](https://github.com/Mapleeeeeeeeeee/hireready/commit/befeb2628555c28f5559da3113ed1cab747d613e))
+- add background task queue for async resume parsing ([#14](https://github.com/Mapleeeeeeeeeee/hireready/issues/14)) ([befeb26](https://github.com/Mapleeeeeeeeeee/hireready/commit/befeb2628555c28f5559da3113ed1cab747d613e))
 
 ## [2.0.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.2.2...v2.0.0) (2026-01-15)
 
-
 ### ⚠ BREAKING CHANGES
 
-* Removed scenario field from database and all related code
+- Removed scenario field from database and all related code
 
 ### Features
 
-* add resume upload and interview history improvements ([#11](https://github.com/Mapleeeeeeeeeee/hireready/issues/11)) ([e8c5405](https://github.com/Mapleeeeeeeeeee/hireready/commit/e8c5405a1f037a5d413ae68820ef8641fc768b03))
-
+- add resume upload and interview history improvements ([#11](https://github.com/Mapleeeeeeeeeee/hireready/issues/11)) ([e8c5405](https://github.com/Mapleeeeeeeeeee/hireready/commit/e8c5405a1f037a5d413ae68820ef8641fc768b03))
 
 ### Bug Fixes
 
-* auto-fix lint and type errors ([6d7f1e3](https://github.com/Mapleeeeeeeeeee/hireready/commit/6d7f1e32b7e5076dcdf0ec20cd8dce26b6865508))
-* auto-fix lint and type errors ([6b681df](https://github.com/Mapleeeeeeeeeee/hireready/commit/6b681dfd6c7188934df9d9eb39c754b1e97b31fa))
+- auto-fix lint and type errors ([6d7f1e3](https://github.com/Mapleeeeeeeeeee/hireready/commit/6d7f1e32b7e5076dcdf0ec20cd8dce26b6865508))
+- auto-fix lint and type errors ([6b681df](https://github.com/Mapleeeeeeeeeee/hireready/commit/6b681dfd6c7188934df9d9eb39c754b1e97b31fa))
 
 ## [1.2.2](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.2.1...v1.2.2) (2026-01-15)
 

@@ -8,6 +8,11 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { SaveConfirmDialog } from './SaveConfirmDialog';
+// Mock useGoogleLogin
+const mockGoogleLogin = vi.fn();
+vi.mock('@/lib/auth/hooks', () => ({
+  useGoogleLogin: () => mockGoogleLogin,
+}));
 
 // ============================================================
 // Mock Messages
@@ -28,6 +33,9 @@ const messages = {
       errorTitle: 'Save Failed',
       errorRetry: 'Please try again or contact support.',
       errorOccurred: 'An error occurred',
+      loginRequiredTitle: 'Login Required',
+      loginRequiredMessage: 'Please login to save your interview.',
+      loginAndSave: 'Login & Save',
     },
   },
 };
@@ -156,8 +164,7 @@ describe('SaveConfirmDialog', () => {
     it('should show loading state on Save button when saving', () => {
       renderWithIntl(<SaveConfirmDialog {...defaultProps} isSaving={true} />);
 
-      // When loading, the button name becomes "Loading Save"
-      const saveButton = screen.getByRole('button', { name: 'Loading Save' });
+      const saveButton = screen.getByRole('button', { name: 'Save' });
       expect(saveButton).toBeInTheDocument();
       expect(saveButton).toBeDisabled();
     });
@@ -242,6 +249,26 @@ describe('SaveConfirmDialog', () => {
       renderWithIntl(<SaveConfirmDialog {...defaultProps} errorMessage="" />);
 
       expect(screen.queryByText('Save Failed')).not.toBeInTheDocument();
+    });
+
+    it('should display login prompt when unauthorized', async () => {
+      const user = userEvent.setup();
+      renderWithIntl(<SaveConfirmDialog {...defaultProps} isUnauthorized={true} />);
+
+      // Should show login message
+      expect(screen.getByText('Login Required')).toBeInTheDocument();
+      expect(screen.getByText('Please login to save your interview.')).toBeInTheDocument();
+
+      // Should show Login & Save button
+      const loginButton = screen.getByRole('button', { name: 'Login & Save' });
+      expect(loginButton).toBeInTheDocument();
+
+      // Should not show Save button
+      expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+
+      // Click login should call google login
+      await user.click(loginButton);
+      expect(mockGoogleLogin).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -150,7 +150,7 @@ describe('Gemini Utilities', () => {
       });
 
       it('should throw error for empty string', () => {
-        expect(() => parseGeminiJSONResponse('')).toThrow('Invalid JSON response from Gemini API');
+        expect(() => parseGeminiJSONResponse('')).toThrow('Empty response from Gemini API');
       });
 
       it('should parse array JSON and return it as-is', () => {
