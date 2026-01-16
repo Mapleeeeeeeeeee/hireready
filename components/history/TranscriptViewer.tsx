@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { Card, CardBody, CardHeader, Divider, ScrollShadow } from '@heroui/react';
 import { User, Bot, MessageSquare } from 'lucide-react';
-import { formatTimestamp } from '@/lib/utils/date-format';
 
 // ============================================================
 // Types
@@ -45,12 +44,9 @@ function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
 
       {/* Message bubble */}
       <div className={`flex max-w-[80%] flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
-        {/* Speaker label and timestamp */}
-        <div className="text-charcoal/50 flex items-center gap-2 text-xs">
+        {/* Speaker label */}
+        <div className="text-charcoal/50 text-xs">
           <span>{isUser ? tVideo('you') : tAi('name')}</span>
-          {entry.timestamp !== undefined && (
-            <span className="text-charcoal/30">{formatTimestamp(entry.timestamp)}</span>
-          )}
         </div>
 
         {/* Message content */}

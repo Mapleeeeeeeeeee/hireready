@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Button, Card, CardBody, Tabs, Tab, Tooltip, Progress } from '@heroui/react';
+import { Button, Card, CardBody, Tabs, Tab, Tooltip } from '@heroui/react';
 import {
   ArrowLeft,
   Calendar,
@@ -14,12 +14,11 @@ import {
   AlertCircle,
   Trash2,
   RefreshCw,
-  Loader2,
 } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, StatusChip } from '@/components/common';
 import { TranscriptViewer, type TranscriptEntry } from '@/components/history/TranscriptViewer';
-import { DeleteConfirmDialog } from '@/components/history';
+import { DeleteConfirmDialog, AnalysisLoading } from '@/components/history';
 import { useUserStore } from '@/lib/stores/user-store';
 import { useInterviewStore } from '@/lib/stores/interview-store';
 import { useTaskPolling } from '@/lib/hooks/use-task-polling';
@@ -260,22 +259,8 @@ function HistoryDetailContent() {
 
           {/* Analysis In Progress */}
           {shouldShowAnalyzing && (
-            <div className="bg-terracotta/5 border-terracotta/10 rounded-xl border p-6">
-              <div className="flex flex-col items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="text-terracotta h-6 w-6 animate-spin" />
-                  <span className="text-charcoal font-medium">{t('analyzingInterview')}</span>
-                </div>
-                <Progress
-                  aria-label={t('analysisProgress')}
-                  value={analysisProgress}
-                  className="max-w-md"
-                  color="primary"
-                  size="md"
-                  showValueLabel
-                />
-                <p className="text-charcoal/60 text-sm">{t('analysisDescription')}</p>
-              </div>
+            <div className="py-6">
+              <AnalysisLoading progress={analysisProgress} />
             </div>
           )}
 

@@ -58,9 +58,16 @@ async function processInterviewAnalysisJob(
     // Update task to processing
     await updateTaskStatus(taskId, 'processing', { progress: 10 });
 
-    // Get the interview record
+    // Get the interview record with user (for resume)
     const interview = await prisma.interview.findUnique({
       where: { id: interviewId },
+      include: {
+        user: {
+          select: {
+            resumeContent: true,
+          },
+        },
+      },
     });
 
     if (!interview) {
@@ -81,13 +88,33 @@ async function processInterviewAnalysisJob(
     const transcripts = interview.transcript as unknown as TranscriptEntry[];
     const language =
       ((interview.jobDescription as { language?: string })?.language as 'en' | 'zh-TW') || 'zh-TW';
-    const jobDescriptionUrl = interview.jobDescriptionUrl || undefined;
+
+    // Get full job description object
+    const jobDescription = interview.jobDescription as
+      | import('@/lib/jd/types').JobDescription
+      | null;
+
+    // Parse user resume content
+    let resumeContent: import('@/lib/resume/types').ResumeContent | null = null;
+    if (interview.user?.resumeContent) {
+      try {
+        resumeContent = JSON.parse(interview.user.resumeContent);
+      } catch {
+        logger.warn('Failed to parse resume content', {
+          ...logContext,
+          resumeContentLength: interview.user.resumeContent.length,
+        });
+      }
+    }
 
     logger.info('Found interview record', {
       ...logContext,
       transcriptCount: transcripts?.length || 0,
       language,
-      hasJobDescription: !!jobDescriptionUrl,
+      hasJobDescription: !!jobDescription,
+      jdTitle: jobDescription?.title,
+      hasResume: !!resumeContent,
+      resumeName: resumeContent?.name,
     });
 
     if (!transcripts || transcripts.length === 0) {
@@ -101,11 +128,14 @@ async function processInterviewAnalysisJob(
     logger.info('Starting AI analysis', {
       ...logContext,
       transcriptCount: transcripts.length,
+      hasJdContext: !!jobDescription,
+      hasResumeContext: !!resumeContent,
     });
 
     const analysis = await analyzeInterview({
       transcripts,
-      jobDescriptionUrl,
+      jobDescription,
+      resume: resumeContent,
       language,
     });
 
