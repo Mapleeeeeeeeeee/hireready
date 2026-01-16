@@ -2,7 +2,8 @@
 
 **AI 驅動的語音面試模擬平台** - 幫助你練習行為面試，提升錄取機會！
 
-[![CI](https://github.com/YOUR_USERNAME/hireready/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/hireready/actions/workflows/ci.yml)
+[![CI](https://github.com/Mapleeeeeeeeeee/hireready/actions/workflows/ci.yml/badge.svg)](https://github.com/Mapleeeeeeeeeee/hireready/actions/workflows/ci.yml)
+[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
 
 ## ✨ 功能特色
 
@@ -20,6 +21,30 @@
 - **Database**: PostgreSQL + Prisma
 - **Testing**: Vitest + Playwright
 - **Deployment**: Zeabur
+
+## 🚀 部署 (Deployment)
+
+此專案已針對 Zeabur 部署進行優化，包含完整的 `zeabur.yaml` 配置。
+
+[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
+
+### Zeabur 一鍵部署
+
+1. 點擊上方的 **Deploy on Zeabur** 按鈕。
+2. 綁定 GitHub 帳號並授權。
+3. Zeabur 會自動偵測 `zeabur.yaml` 並建立以下服務：
+   - **Web App** (Next.js)
+   - **PostgreSQL** (Database)
+   - **Redis** (Queue/Cache)
+4. 在 Zeabur Dashboard 中設定必要的環境變數 (如 `GOOGLE_CLIENT_ID`, `GEMINI_API_KEY` 等)。
+5. 等待部署完成即可使用！
+
+### 手動部署
+
+1. 在 [Zeabur](https://zeabur.com) 建立新專案。
+2. 選擇 "Deploy New Service" -> "GitHub"。
+3. 選擇此 Repository。
+4. Zeabur 會自動識別 Dockerfile 與設定。
 
 ## 🚀 快速開始
 
