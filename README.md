@@ -5,7 +5,6 @@
 **AI-Powered Voice Interview Platform** - Master your interviews with real-time, voice-based practice!
 
 [![CI](https://github.com/Mapleeeeeeeeeee/hireready/actions/workflows/ci.yml/badge.svg)](https://github.com/Mapleeeeeeeeeee/hireready/actions/workflows/ci.yml)
-[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
 
 ---
 
@@ -49,17 +48,11 @@ We maximized Zeabur's native features for optimal performance and developer expe
 
 The project is optimized for **Zeabur**, offering a hassle-free deployment experience.
 
-### Option 1: One-Click Deploy (Recommended)
+### Manual Deployment
 
-1. Click the **Deploy on Zeabur** button below:
-
-   [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/https://github.com/Mapleeeeeeeeeee/hireready)
-
-2. Log in to Zeabur and authorize GitHub access.
-3. Zeabur will automatically detect the `zeabur.yaml` configuration and create three services:
-   - **User Service**: The Next.js application (Dockerized).
-   - **PostgreSQL**: Managed database service.
-   - **Redis**: Managed cache/queue service.
+1. Create a new project in the [Zeabur Dashboard](https://dash.zeabur.com).
+2. Create PostgreSQL and Redis services from the marketplace.
+3. Create a new Service, select "Git", connect this repository, and link the database/Redis via Service Linking.
 4. **Configure Environment Variables**: In the Zeabur Dashboard (User Service), set the following:
    - `GOOGLE_CLIENT_ID`: Google OAuth Client ID
    - `GOOGLE_CLIENT_SECRET`: Google OAuth Client Secret
@@ -69,13 +62,6 @@ The project is optimized for **Zeabur**, offering a hassle-free deployment exper
    - `NEXT_PUBLIC_APP_URL`: Same as above
      _Note: `DATABASE_URL` and `REDIS_URL` are automatically injected by Zeabur Service Linking._
 5. Wait for the deployment to finish and you are ready to go!
-
-### Option 2: Manual Deployment
-
-1. Create a new project in the [Zeabur Dashboard](https://dash.zeabur.com).
-2. Create PostgreSQL and Redis services from the marketplace.
-3. Create a new Service, select "Git", and connect this repository.
-4. Set the environment variables mentioned above and connect your database/Redis using Service Linking (this will automatically inject `DATABASE_URL` and `REDIS_URL`).
 
 ## 💻 Local Development
 
