@@ -179,11 +179,17 @@ app.prepare().then(() => {
                             voiceName: message.config.voiceName,
                           },
                         },
+                        // Force language based on voice selection (Puck = Chinese, Aoede = English)
+                        languageCode: message.config.voiceName === 'Puck' ? 'cmn-TW' : 'en-US',
                       }
                     : undefined,
                   // Enable transcription for both input and output audio
                   inputAudioTranscription: {},
                   outputAudioTranscription: {},
+                  // Generation config for temperature
+                  generationConfig: {
+                    temperature: 0.8,
+                  },
                 },
               });
 
