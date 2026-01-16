@@ -41,6 +41,7 @@ export function SaveConfirmDialog({
   return (
     <Modal
       isOpen={isOpen}
+      placement="center"
       onClose={isSaving ? undefined : onDiscard}
       isDismissable={!isSaving}
       hideCloseButton={isSaving}

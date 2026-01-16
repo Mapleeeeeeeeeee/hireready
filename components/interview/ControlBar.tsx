@@ -37,21 +37,21 @@ export function ControlBar({
     <motion.div
       initial={{ y: 50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="border-warm-gray/20 flex items-center gap-6 rounded-2xl border bg-white/80 px-8 py-4 shadow-sm backdrop-blur-md"
+      className="border-warm-gray/20 flex items-center gap-3 rounded-2xl border bg-white/80 px-4 py-2 shadow-sm backdrop-blur-md md:gap-6 md:px-8 md:py-4"
     >
       <ControlIconButton
         isActive={isMicOn}
         onClick={onToggleMic}
-        activeIcon={<Mic className="h-5 w-5" />}
-        inactiveIcon={<MicOff className="h-5 w-5" />}
+        activeIcon={<Mic className="h-4 w-4 md:h-5 md:w-5" />}
+        inactiveIcon={<MicOff className="h-4 w-4 md:h-5 md:w-5" />}
         label={isMicOn ? labels.muteMic : labels.unmuteMic}
       />
 
       <ControlIconButton
         isActive={isVideoOn}
         onClick={onToggleVideo}
-        activeIcon={<Video className="h-5 w-5" />}
-        inactiveIcon={<VideoOff className="h-5 w-5" />}
+        activeIcon={<Video className="h-4 w-4 md:h-5 md:w-5" />}
+        inactiveIcon={<VideoOff className="h-4 w-4 md:h-5 md:w-5" />}
         label={isVideoOn ? labels.turnOffCamera : labels.turnOnCamera}
       />
 
@@ -63,10 +63,10 @@ export function ControlBar({
         <Button
           isIconOnly
           size="lg"
-          className="bg-terracotta/10 text-terracotta hover:bg-terracotta h-12 w-12 rounded-xl shadow-none transition-all hover:text-white"
+          className="bg-terracotta/10 text-terracotta hover:bg-terracotta h-10 w-10 rounded-xl shadow-none transition-all hover:text-white md:h-12 md:w-12"
           onPress={onEndCall}
         >
-          <PhoneOff className="h-5 w-5" />
+          <PhoneOff className="h-4 w-4 md:h-5 md:w-5" />
         </Button>
       </Tooltip>
     </motion.div>
@@ -92,7 +92,7 @@ function ControlIconButton({
         isIconOnly
         size="lg"
         variant="light"
-        className={`h-12 w-12 rounded-xl border transition-all ${
+        className={`h-10 w-10 rounded-xl border transition-all md:h-12 md:w-12 ${
           isActive
             ? 'bg-soft-clay/50 text-charcoal hover:bg-soft-clay border-transparent'
             : 'border-warm-gray/30 text-charcoal/50 hover:bg-soft-clay/30 hover:text-charcoal bg-transparent'

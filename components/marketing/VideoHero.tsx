@@ -119,32 +119,32 @@ export const VideoHero = () => {
 
           {/* Bottom Controls Bar - EXACT MATCH to ControlBar.tsx design */}
           <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2">
-            <div className="border-warm-gray/20 flex items-center gap-6 rounded-2xl border bg-white/90 px-8 py-4 shadow-sm backdrop-blur-md">
+            <div className="border-warm-gray/20 flex items-center gap-3 rounded-2xl border bg-white/90 px-4 py-2 shadow-sm backdrop-blur-md md:gap-6 md:px-8 md:py-4">
               {/* Mic */}
               <button
                 type="button"
-                className="border-warm-gray/30 text-charcoal/50 hover:bg-charcoal/5 hover:border-charcoal/40 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border transition-all"
+                className="border-warm-gray/30 text-charcoal/50 hover:bg-charcoal/5 hover:border-charcoal/40 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border transition-all md:h-12 md:w-12"
                 aria-label="Toggle microphone"
               >
-                <MicOff className="h-5 w-5" />
+                <MicOff className="h-4 w-4 md:h-5 md:w-5" />
               </button>
 
               {/* Camera */}
               <button
                 type="button"
-                className="border-warm-gray/30 text-charcoal/50 hover:bg-charcoal/5 hover:border-charcoal/40 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border transition-all"
+                className="border-warm-gray/30 text-charcoal/50 hover:bg-charcoal/5 hover:border-charcoal/40 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border transition-all md:h-12 md:w-12"
                 aria-label="Toggle camera"
               >
-                <VideoOff className="h-5 w-5" />
+                <VideoOff className="h-4 w-4 md:h-5 md:w-5" />
               </button>
 
               {/* Caption */}
               <button
                 type="button"
-                className="border-warm-gray/30 text-charcoal/50 hover:bg-charcoal/5 hover:border-charcoal/40 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border transition-all"
+                className="border-warm-gray/30 text-charcoal/50 hover:bg-charcoal/5 hover:border-charcoal/40 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border transition-all md:h-12 md:w-12"
                 aria-label="Toggle subtitles"
               >
-                <Subtitles className="h-5 w-5" />
+                <Subtitles className="h-4 w-4 md:h-5 md:w-5" />
               </button>
 
               <div className="bg-warm-gray/20 h-6 w-px" />
@@ -152,10 +152,10 @@ export const VideoHero = () => {
               {/* End Call */}
               <button
                 type="button"
-                className="bg-terracotta/10 text-terracotta hover:bg-terracotta/20 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl transition-all"
+                className="bg-terracotta/10 text-terracotta hover:bg-terracotta/20 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl transition-all md:h-12 md:w-12"
                 aria-label="End call"
               >
-                <PhoneOff className="h-5 w-5" />
+                <PhoneOff className="h-4 w-4 md:h-5 md:w-5" />
               </button>
             </div>
           </div>

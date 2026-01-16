@@ -138,13 +138,13 @@ export function VideoPreview({
             exit={{ opacity: 0 }}
             className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900"
           >
-            <div className="mb-4 rounded-full bg-gray-700/50 p-8">
+            <div className="mb-4 rounded-full bg-gray-700/50 p-4 md:p-8">
               {error ? (
-                <AlertCircle className="h-20 w-20 text-red-400" />
+                <AlertCircle className="h-8 w-8 text-red-400 md:h-20 md:w-20" />
               ) : isVideoOn ? (
-                <User className="h-20 w-20 text-gray-400" />
+                <User className="h-8 w-8 text-gray-400 md:h-20 md:w-20" />
               ) : (
-                <VideoOff className="h-20 w-20 text-gray-400" />
+                <VideoOff className="h-8 w-8 text-gray-400 md:h-20 md:w-20" />
               )}
             </div>
             <span className="text-lg font-medium text-gray-400">
