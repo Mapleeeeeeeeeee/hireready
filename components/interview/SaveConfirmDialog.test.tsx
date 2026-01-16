@@ -36,6 +36,8 @@ const messages = {
       loginRequiredTitle: 'Login Required',
       loginRequiredMessage: 'Please login to save your interview.',
       loginAndSave: 'Login & Save',
+      cannotSaveTitle: 'Cannot Save',
+      cannotSaveMessage: 'You must be logged in to save. This record cannot be saved.',
     },
   },
 };
@@ -251,24 +253,18 @@ describe('SaveConfirmDialog', () => {
       expect(screen.queryByText('Save Failed')).not.toBeInTheDocument();
     });
 
-    it('should display login prompt when unauthorized', async () => {
-      const user = userEvent.setup();
+    it('should display cannot save message when unauthorized', async () => {
       renderWithIntl(<SaveConfirmDialog {...defaultProps} isUnauthorized={true} />);
 
-      // Should show login message
-      expect(screen.getByText('Login Required')).toBeInTheDocument();
-      expect(screen.getByText('Please login to save your interview.')).toBeInTheDocument();
+      // Should show cannot save message
+      expect(screen.getByText('Cannot Save')).toBeInTheDocument();
+      expect(
+        screen.getByText('You must be logged in to save. This record cannot be saved.')
+      ).toBeInTheDocument();
 
-      // Should show Login & Save button
-      const loginButton = screen.getByRole('button', { name: 'Login & Save' });
-      expect(loginButton).toBeInTheDocument();
-
-      // Should not show Save button
+      // Should only show Discard button, not Save button
+      expect(screen.getByRole('button', { name: 'Discard' })).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
-
-      // Click login should call google login
-      await user.click(loginButton);
-      expect(mockGoogleLogin).toHaveBeenCalledTimes(1);
     });
   });
 

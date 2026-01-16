@@ -338,6 +338,13 @@ function HistoryDetailContent() {
         </Card>
       )}
 
+      {/* Transcription Disclaimer */}
+      {(interview.strengths?.length > 0 || interview.improvements?.length > 0) && (
+        <div className="bg-warm-gray/5 border-warm-gray/20 rounded-lg border px-4 py-3">
+          <p className="text-charcoal/60 text-xs">{t('transcriptionDisclaimer')}</p>
+        </div>
+      )}
+
       {/* Strengths Section */}
       {interview.strengths &&
         Array.isArray(interview.strengths) &&

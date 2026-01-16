@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
 import { User, Bot, MessageSquare } from 'lucide-react';
-import { formatTimestamp } from '@/lib/utils/date-format';
 
 // ============================================================
 // Types
@@ -33,7 +32,6 @@ function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
   const tAi = useTranslations('interview.room.ai');
   const tVideo = useTranslations('interview.room.video');
   const isUser = entry.role === 'user';
-  const timestampLabel = entry.timestamp != null ? formatTimestamp(entry.timestamp) : null;
 
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -51,7 +49,6 @@ function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
         {/* Speaker label */}
         <div className="text-charcoal/50 flex items-center gap-2 text-xs">
           <span>{isUser ? tVideo('you') : tAi('name')}</span>
-          {timestampLabel && <span className="tabular-nums">{timestampLabel}</span>}
         </div>
 
         {/* Message content */}

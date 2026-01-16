@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Mic, Brain } from 'lucide-react';
+import { Sparkles, FileText, CheckCircle, TrendingUp } from 'lucide-react';
 import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -33,22 +33,6 @@ const AnalysisCard = ({
   </motion.div>
 );
 
-// Pre-defined bar heights and durations to avoid Math.random() in render
-const BAR_CONFIGS = [
-  { height: 60, duration: 0.7 },
-  { height: 85, duration: 0.55 },
-  { height: 45, duration: 0.8 },
-  { height: 90, duration: 0.6 },
-  { height: 50, duration: 0.75 },
-  { height: 75, duration: 0.65 },
-  { height: 55, duration: 0.9 },
-  { height: 80, duration: 0.5 },
-  { height: 65, duration: 0.85 },
-  { height: 70, duration: 0.58 },
-  { height: 40, duration: 0.72 },
-  { height: 95, duration: 0.62 },
-];
-
 export const AnalysisGrid = () => {
   const t = useTranslations('marketing.analysis');
 
@@ -64,45 +48,93 @@ export const AnalysisGrid = () => {
 
       {/* Grid: Centered 2 columns */}
       <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-        {/* Card 1: Tone & Pitch */}
+        {/* Card 1: AI Feedback */}
         <AnalysisCard
           title={t('cards.tone.title')}
           description={t('cards.tone.description')}
-          icon={<Mic className="h-6 w-6" />}
+          icon={<Sparkles className="h-6 w-6" />}
         >
-          <div className="bg-warm-paper/50 border-charcoal/5 flex h-32 items-end justify-center gap-1 overflow-hidden rounded-xl border p-4">
-            {BAR_CONFIGS.map((config, i) => (
-              <motion.div
-                key={i}
-                className="bg-terracotta/60 w-2 rounded-t-sm"
-                animate={{ height: ['20%', `${config.height}%`, '20%'] }}
-                transition={{ duration: config.duration, repeat: Infinity }}
-              />
-            ))}
+          <div className="bg-warm-paper/50 border-charcoal/5 flex h-32 items-center justify-center gap-6 overflow-hidden rounded-xl border p-4">
+            {/* Score circle */}
+            <div className="relative flex h-16 w-16 items-center justify-center">
+              <svg className="h-16 w-16 -rotate-90">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="#e0d5c9" strokeWidth="4" />
+                <motion.circle
+                  cx="32"
+                  cy="32"
+                  r="28"
+                  fill="none"
+                  stroke="#C17F5E"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray="176"
+                  initial={{ strokeDashoffset: 176 }}
+                  animate={{ strokeDashoffset: 35 }}
+                  transition={{ duration: 1.5, ease: 'easeOut' }}
+                />
+              </svg>
+              <span className="text-terracotta absolute text-lg font-bold">80</span>
+            </div>
+            {/* Strengths/Improvements */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="text-terracotta h-4 w-4" />
+                <div className="bg-terracotta/20 h-2 w-16 rounded-full" />
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="text-terracotta h-4 w-4" />
+                <div className="bg-terracotta/20 h-2 w-12 rounded-full" />
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="text-charcoal/40 h-4 w-4" />
+                <div className="bg-charcoal/10 h-2 w-14 rounded-full" />
+              </div>
+            </div>
           </div>
         </AnalysisCard>
 
-        {/* Card 2: Context */}
+        {/* Card 2: Model Answer */}
         <AnalysisCard
           title={t('cards.context.title')}
           description={t('cards.context.description')}
-          icon={<Brain className="h-6 w-6" />}
+          icon={<FileText className="h-6 w-6" />}
         >
           <div className="bg-warm-paper/50 border-charcoal/5 relative h-32 overflow-hidden rounded-xl border p-4">
             <div className="space-y-2">
-              <div className="bg-charcoal/10 h-2 w-3/4 rounded-full" />
-              <div className="bg-charcoal/10 h-2 w-full rounded-full" />
-              <div className="bg-charcoal/10 h-2 w-5/6 rounded-full" />
-              <div className="bg-charcoal/10 h-2 w-1/2 rounded-full" />
+              <motion.div
+                className="bg-terracotta/30 h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: '75%' }}
+                transition={{ duration: 1, ease: 'easeOut' }}
+              />
+              <motion.div
+                className="bg-terracotta/30 h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
+              />
+              <motion.div
+                className="bg-terracotta/30 h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: '85%' }}
+                transition={{ duration: 1.1, ease: 'easeOut', delay: 0.4 }}
+              />
+              <motion.div
+                className="bg-terracotta/30 h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: '50%' }}
+                transition={{ duration: 0.9, ease: 'easeOut', delay: 0.6 }}
+              />
             </div>
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"
-              animate={{ translateX: ['-100%', '100%'] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-            />
-            <div className="text-terracotta absolute right-2 bottom-2 rounded bg-white px-2 py-1 text-xs font-bold shadow-sm">
-              {t('cards.context.matchLabel', { percent: '92' })}
-            </div>
+              className="text-terracotta absolute right-2 bottom-2 flex items-center gap-1 rounded bg-white px-2 py-1 text-xs font-medium shadow-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
+              <Sparkles className="h-3 w-3" />
+              AI Generated
+            </motion.div>
           </div>
         </AnalysisCard>
       </div>

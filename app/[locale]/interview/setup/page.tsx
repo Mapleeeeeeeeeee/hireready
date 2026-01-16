@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import {
@@ -12,8 +12,21 @@ import {
   VisuallyHidden,
   RadioProps,
   Spinner,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from '@heroui/react';
-import { ArrowRight, Languages, FileText, Sparkles, FileUser, Upload } from 'lucide-react';
+import {
+  ArrowRight,
+  Languages,
+  FileText,
+  Sparkles,
+  FileUser,
+  Upload,
+  AlertTriangle,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { JdInput } from '@/components/interview/JdInput';
 import { JdPreview } from '@/components/interview/JdPreview';
@@ -71,6 +84,9 @@ export default function InterviewSetupPage() {
   const { data: session } = useSession();
   const isAuthenticated = !!session?.user;
 
+  // Guest warning modal state
+  const [isGuestWarningOpen, setIsGuestWarningOpen] = useState(false);
+
   // Store state and actions
   const language = useInterviewStore((state) => state.language);
   const setLanguage = useInterviewStore((state) => state.setLanguage);
@@ -116,8 +132,8 @@ export default function InterviewSetupPage() {
     [setLanguage]
   );
 
-  // Handle start interview
-  const handleStartInterview = useCallback(() => {
+  // Proceed to interview (called directly or after confirming guest warning)
+  const proceedToInterview = useCallback(() => {
     // Only pass resumeTaskId if the resume parsing is still in progress
     // (taskId exists but content has not been parsed yet).
     // If content already exists, parsing is complete and we don't need to wait.
@@ -127,6 +143,28 @@ export default function InterviewSetupPage() {
       : `/${locale}/interview`;
     router.push(url);
   }, [router, locale, resume]);
+
+  // Handle start interview
+  const handleStartInterview = useCallback(() => {
+    // If not authenticated, show warning modal
+    if (!isAuthenticated) {
+      setIsGuestWarningOpen(true);
+      return;
+    }
+    proceedToInterview();
+  }, [isAuthenticated, proceedToInterview]);
+
+  // Handle guest warning confirm
+  const handleGuestContinue = useCallback(() => {
+    setIsGuestWarningOpen(false);
+    proceedToInterview();
+  }, [proceedToInterview]);
+
+  // Handle guest warning login
+  const handleGuestLogin = useCallback(() => {
+    setIsGuestWarningOpen(false);
+    router.push(`/${locale}/login`);
+  }, [router, locale]);
 
   return (
     <div className="bg-warm-paper text-charcoal min-h-screen">
@@ -298,6 +336,49 @@ export default function InterviewSetupPage() {
           </motion.div>
         </div>
       </main>
+
+      {/* Guest Warning Modal */}
+      <Modal
+        isOpen={isGuestWarningOpen}
+        onClose={() => setIsGuestWarningOpen(false)}
+        placement="center"
+        size="sm"
+        classNames={{
+          base: 'bg-warm-paper',
+          header: 'border-b-0 pb-0 pt-6',
+          body: 'py-4 px-6',
+          footer: 'border-t-0 pt-0 pb-6 px-6',
+        }}
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col items-center gap-2 text-center">
+            <div className="bg-terracotta/10 mb-2 flex h-10 w-10 items-center justify-center rounded-full">
+              <AlertTriangle className="text-terracotta h-5 w-5" />
+            </div>
+            <h3 className="text-charcoal text-lg font-semibold">{t('guestWarning.title')}</h3>
+          </ModalHeader>
+          <ModalBody>
+            <p className="text-charcoal/70 text-center text-sm">{t('guestWarning.message')}</p>
+          </ModalBody>
+          <ModalFooter className="flex-col gap-2">
+            <Button
+              size="md"
+              onPress={handleGuestContinue}
+              className="bg-terracotta hover:bg-terracotta/90 w-full text-white"
+            >
+              {t('guestWarning.continueAsGuest')}
+            </Button>
+            <Button
+              size="md"
+              variant="bordered"
+              onPress={handleGuestLogin}
+              className="border-terracotta text-terracotta hover:bg-terracotta/10 w-full"
+            >
+              {t('guestWarning.loginFirst')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

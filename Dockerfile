@@ -47,6 +47,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/server.ts ./
 COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 # Copy tsconfig.json for tsx to resolve path aliases (@/)
 COPY --from=builder /app/tsconfig.json ./
 
