@@ -41,6 +41,7 @@ export function SaveConfirmDialog({
   return (
     <Modal
       isOpen={isOpen}
+      placement="center"
       onClose={isSaving ? undefined : onDiscard}
       isDismissable={!isSaving}
       hideCloseButton={isSaving}
@@ -168,23 +169,13 @@ export function SaveConfirmDialog({
             )}
 
             {/* AI Analysis Notice */}
-            <div
-              className={`rounded-xl p-4 transition-colors ${
-                isSaving ? 'bg-terracotta/5 ring-terracotta/20 ring-1' : 'bg-soft-clay/30'
-              }`}
-            >
+            <div className="bg-soft-clay/30 rounded-xl p-4 transition-colors">
               <div className="flex items-start gap-3">
                 <div className="mt-1">
-                  {isSaving ? (
-                    <div className="border-terracotta h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-                  ) : (
-                    <div className="bg-terracotta/20 ring-terracotta/10 h-4 w-4 rounded-full ring-4" />
-                  )}
+                  <div className="bg-terracotta/20 ring-terracotta/10 h-4 w-4 rounded-full ring-4" />
                 </div>
                 <div>
-                  <p className="text-charcoal/90 text-sm font-medium">
-                    {isSaving ? t('savingNotice') : t('analysisNotice')}
-                  </p>
+                  <p className="text-charcoal/90 text-sm font-medium">{t('analysisNotice')}</p>
                 </div>
               </div>
             </div>
@@ -204,10 +195,14 @@ export function SaveConfirmDialog({
             size="lg"
             color="primary"
             onPress={onSave}
-            isLoading={isSaving}
-            className="bg-terracotta hover:bg-terracotta/90 shadow-terracotta/20 w-full px-8 font-medium text-white shadow-lg sm:w-auto"
+            isDisabled={isSaving}
+            className="bg-terracotta hover:bg-terracotta/90 shadow-terracotta/20 w-full justify-center px-8 font-medium text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-70 data-[disabled=true]:opacity-70 sm:w-[100px]"
           >
-            {t('save')}
+            {isSaving ? (
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              t('save')
+            )}
           </Button>
         </ModalFooter>
       </ModalContent>

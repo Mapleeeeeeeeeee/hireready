@@ -3,8 +3,8 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Pagination } from '@heroui/react';
-import { ClipboardList } from 'lucide-react';
+import { Pagination, PaginationItemType, PaginationItemRenderProps } from '@heroui/react';
+import { ClipboardList, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, PageErrorState, EmptyState } from '@/components/common';
 import { InterviewCard, DeleteConfirmDialog } from '@/components/history';
@@ -151,6 +151,56 @@ function HistoryContent() {
                 isDisabled={isLoadingInterviews}
                 classNames={{
                   cursor: 'bg-terracotta',
+                }}
+                renderItem={(props: PaginationItemRenderProps) => {
+                  const { ref, key, value, isActive, onPrevious, onNext, setPage, className } =
+                    props;
+
+                  if (value === PaginationItemType.PREV) {
+                    return (
+                      <button
+                        key={key}
+                        ref={ref as React.Ref<HTMLButtonElement>}
+                        className={className}
+                        onClick={onPrevious}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                    );
+                  }
+
+                  if (value === PaginationItemType.NEXT) {
+                    return (
+                      <button
+                        key={key}
+                        ref={ref as React.Ref<HTMLButtonElement>}
+                        className={className}
+                        onClick={onNext}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    );
+                  }
+
+                  if (value === PaginationItemType.DOTS) {
+                    return (
+                      <span key={key} className={className}>
+                        ...
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={key}
+                      ref={ref as React.Ref<HTMLButtonElement>}
+                      className={className}
+                      onClick={() => setPage(value as number)}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      {value}
+                    </button>
+                  );
                 }}
               />
             </div>

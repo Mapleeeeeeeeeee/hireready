@@ -1,6 +1,8 @@
 export { InterviewCard } from './InterviewCard';
 export type { InterviewCardProps } from './InterviewCard';
 
+export { AnalysisLoading } from './AnalysisLoading';
+
 export { DeleteConfirmDialog } from './DeleteConfirmDialog';
 export type { DeleteConfirmDialogProps } from './DeleteConfirmDialog';
 

@@ -19,7 +19,7 @@ import {
   getInterviewStartInstruction,
   type SupportedLanguage,
 } from '@/lib/gemini/prompts';
-import { createTranscriptEntry, type SessionState } from '@/lib/gemini/types';
+import { createTranscriptEntry, type SessionState, LIVE_API_VOICES } from '@/lib/gemini/types';
 import { logger } from '@/lib/utils/logger';
 import { BadRequestError } from '@/lib/utils/errors';
 import { useInterviewTimer } from './use-interview-timer';
@@ -176,6 +176,17 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
     });
 
     client.on('turnComplete', () => {
+      // If there's a pending user transcript that hasn't been finalized, commit it now
+      // This happens when the user stops speaking and the model takes over before sending isFinal=true
+      const { interimUserTranscript } = useInterviewStore.getState();
+      if (interimUserTranscript.trim()) {
+        store.addTranscript(createTranscriptEntry('user', interimUserTranscript, true));
+        logger.info('Committed pending interim transcript on turnComplete', {
+          module: 'use-live-api',
+          action: 'turnComplete',
+          textLength: interimUserTranscript.length,
+        });
+      }
       store.clearInterimTranscripts();
     });
 
@@ -302,6 +313,9 @@ export function useLiveApi(options: UseLiveApiOptions = {}): UseLiveApiReturn {
         responseModalities: ['AUDIO'],
         inputAudioTranscription: true,
         outputAudioTranscription: true,
+        voiceConfig: {
+          voiceName: LIVE_API_VOICES[language] || 'Aoede',
+        },
       });
 
       if (!connectResult.ok) {

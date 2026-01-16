@@ -368,39 +368,19 @@ export class GeminiProxyClient {
       }
 
       // Handle output transcription (AI's speech)
-      // Gemini sends incremental transcripts - we emit complete sentences as they form
+      // Gemini sends incremental transcripts - we accumulate and emit the full text
       if (outputTranscription?.text) {
         // Accumulate transcript chunks
         this.outputTranscriptBuffer += outputTranscription.text;
 
-        // Clean the buffer first
+        // Clean the buffer
         const cleanedBuffer = this.cleanTranscript(this.outputTranscriptBuffer);
 
-        // Try to extract complete sentences
-        const { sentence, remaining } = this.extractLastSentence(cleanedBuffer);
-
-        if (sentence && sentence !== this.lastEmittedOutputSentence) {
-          // Emit the complete sentence for display
-          logger.debug('Emitting complete sentence', {
-            module: 'gemini-proxy-client',
-            action: 'outputTranscription-sentence',
-            sentenceLength: sentence.length,
-            sentence: sentence.slice(0, 80),
-          });
-          this.emit('outputTranscript', sentence, false);
-          this.lastEmittedOutputSentence = sentence;
-
-          // Accumulate to full transcript for final save
-          this.fullOutputTranscript += (this.fullOutputTranscript ? '' : '') + sentence;
-
-          // Keep only the remaining incomplete text in buffer
-          this.outputTranscriptBuffer = remaining;
-        } else if (!sentence && cleanedBuffer) {
-          // No complete sentence yet, show partial for immediate feedback
-          // Only emit if it's different from last emitted
-          if (cleanedBuffer !== this.lastEmittedOutputSentence) {
-            this.emit('outputTranscript', cleanedBuffer, false);
-          }
+        // Emit the full accumulated text for display
+        // We no longer extract sentences to prevent text from "disappearing" from the overlay
+        if (cleanedBuffer !== this.lastEmittedOutputSentence) {
+          this.emit('outputTranscript', cleanedBuffer, false);
+          this.lastEmittedOutputSentence = cleanedBuffer;
         }
       }
 
@@ -422,10 +402,8 @@ export class GeminiProxyClient {
           this.inputTranscriptBuffer = '';
         }
 
-        if (this.fullOutputTranscript || this.outputTranscriptBuffer) {
-          // Append any remaining incomplete text to full transcript
-          const remainingText = this.cleanTranscript(this.outputTranscriptBuffer);
-          const finalText = this.fullOutputTranscript + remainingText;
+        if (this.outputTranscriptBuffer) {
+          const finalText = this.cleanTranscript(this.outputTranscriptBuffer);
 
           if (finalText) {
             logger.info('Output transcription complete', {

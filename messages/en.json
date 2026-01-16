@@ -4,7 +4,8 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "retry": "Retry",
-    "startInterview": "Start Mock Interview"
+    "startInterview": "Start Mock Interview",
+    "close": "Close"
   },
   "marketing": {
     "hero": {
@@ -257,7 +258,9 @@
     "transcript": {
       "title": "Transcript",
       "messages": "messages",
-      "emptyTranscript": "No transcript available"
+      "emptyTranscript": "No transcript available",
+      "viewTranscript": "View Full Transcript",
+      "viewFullTranscriptDescription": "View main transcript and compare with model answers"
     },
     "jobPosition": "Job Position",
     "viewOriginalJob": "View Original Job",
@@ -284,11 +287,16 @@
     "untitledInterview": "Untitled Interview",
     "scoreLabel": "Score",
     "noScore": "No Score",
-    "analyzingInterview": "Analyzing your interview performance...",
-    "analysisProgress": "Analysis Progress",
-    "analysisDescription": "AI is evaluating your responses and generating scores and feedback",
-    "analysisFailed": "Analysis Failed",
-    "analysisFailedDescription": "Unable to complete interview analysis. Please try again later."
+    "analyzing": {
+      "title": "Analyzing your interview performance...",
+      "description": "AI is evaluating your responses and generating scores and feedback",
+      "status": "Analysis Progress",
+      "steps": {
+        "step1": "Voice & Tone Analysis",
+        "step2": "Content & Logic Evaluation",
+        "step3": "Generating Recommendations"
+      }
+    }
   },
   "profile": {
     "title": "Profile",

@@ -3,7 +3,18 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Button, Card, CardBody, Tabs, Tab, Tooltip, Progress } from '@heroui/react';
+import {
+  Button,
+  Card,
+  CardBody,
+  Tooltip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  Tabs,
+  Tab,
+} from '@heroui/react';
 import {
   ArrowLeft,
   Calendar,
@@ -14,12 +25,13 @@ import {
   AlertCircle,
   Trash2,
   RefreshCw,
-  Loader2,
+  MessageSquare,
+  X,
 } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, StatusChip } from '@/components/common';
 import { TranscriptViewer, type TranscriptEntry } from '@/components/history/TranscriptViewer';
-import { DeleteConfirmDialog } from '@/components/history';
+import { DeleteConfirmDialog, AnalysisLoading } from '@/components/history';
 import { useUserStore } from '@/lib/stores/user-store';
 import { useInterviewStore } from '@/lib/stores/interview-store';
 import { useTaskPolling } from '@/lib/hooks/use-task-polling';
@@ -85,6 +97,7 @@ function HistoryDetailContent() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(!!analysisTaskId);
+  const [activeTranscript, setActiveTranscript] = useState<'user' | 'model' | null>(null);
 
   // Task polling for analysis progress
   const { progress: analysisProgress, status: analysisStatus } = useTaskPolling({
@@ -205,7 +218,22 @@ function HistoryDetailContent() {
             <div className="space-y-1">
               <h1 className="text-charcoal font-serif text-2xl font-semibold">{t('title')}</h1>
             </div>
+
             <div className="flex items-center gap-3">
+              {/* View Transcript Button */}
+              {transcript.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="flat"
+                  color="primary"
+                  className="bg-terracotta/10 text-terracotta font-medium"
+                  startContent={<MessageSquare className="h-4 w-4" />}
+                  onPress={() => setActiveTranscript('user')}
+                >
+                  {t('transcript.viewTranscript')}
+                </Button>
+              )}
+
               {/* Actions */}
               {interview.jobDescription && (
                 <Tooltip content={t('retryInterview')}>
@@ -260,22 +288,8 @@ function HistoryDetailContent() {
 
           {/* Analysis In Progress */}
           {shouldShowAnalyzing && (
-            <div className="bg-terracotta/5 border-terracotta/10 rounded-xl border p-6">
-              <div className="flex flex-col items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="text-terracotta h-6 w-6 animate-spin" />
-                  <span className="text-charcoal font-medium">{t('analyzingInterview')}</span>
-                </div>
-                <Progress
-                  aria-label={t('analysisProgress')}
-                  value={analysisProgress}
-                  className="max-w-md"
-                  color="primary"
-                  size="md"
-                  showValueLabel
-                />
-                <p className="text-charcoal/60 text-sm">{t('analysisDescription')}</p>
-              </div>
+            <div className="py-6">
+              <AnalysisLoading progress={analysisProgress} />
             </div>
           )}
 
@@ -368,27 +382,67 @@ function HistoryDetailContent() {
           </Card>
         )}
 
-      {/* Transcript Comparison Section */}
-      {modelAnswer ? (
-        <Card className="border-warm-gray/10 border bg-white/50 shadow-none">
-          <CardBody className="p-6">
-            <Tabs aria-label={t('transcriptTabs')}>
-              {/* Your Answer Tab */}
-              <Tab key="user" title={t('yourAnswer')}>
-                <TranscriptViewer transcript={transcript} />
-              </Tab>
-
-              {/* Model Answer Tab */}
-              <Tab key="model" title={t('modelAnswer')}>
-                <TranscriptViewer transcript={modelAnswer.transcript as TranscriptEntry[]} />
-              </Tab>
-            </Tabs>
-          </CardBody>
-        </Card>
-      ) : (
-        /* If no model answer, just show the transcript directly */
-        <TranscriptViewer transcript={transcript} />
-      )}
+      {/* Transcript Modal with Tabs */}
+      <Modal
+        isOpen={!!activeTranscript}
+        onClose={() => setActiveTranscript(null)}
+        size="full"
+        scrollBehavior="inside"
+        classNames={{
+          base: 'h-[100dvh] max-h-[100dvh] bg-white sm:h-[90vh] sm:rounded-xl',
+          header: 'border-b border-warm-gray/10 shrink-0',
+          body: 'p-0 overflow-y-auto flex-1',
+          closeButton: 'hover:bg-warm-gray/10 active:bg-warm-gray/20 transition-colors',
+        }}
+        hideCloseButton
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 px-4 py-4 sm:px-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-charcoal font-serif text-xl font-semibold">
+                    {t('transcript.title')}
+                  </h2>
+                  <Button isIconOnly variant="light" onPress={onClose} size="sm">
+                    <X className="text-charcoal/60 h-6 w-6" />
+                  </Button>
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className="min-h-0 p-4 sm:p-6">
+                  <Tabs
+                    aria-label={t('transcriptTabs')}
+                    color="primary"
+                    variant="underlined"
+                    classNames={{
+                      tabList: 'gap-6 w-full relative rounded-none p-0',
+                      cursor: 'w-full bg-terracotta',
+                      tab: 'max-w-fit px-0 h-12',
+                      tabContent:
+                        'group-data-[selected=true]:text-terracotta text-charcoal/60 font-medium',
+                    }}
+                  >
+                    <Tab key="user" title={t('yourAnswer')}>
+                      <div className="pt-4 pb-24">
+                        <TranscriptViewer transcript={transcript} hideHeader />
+                      </div>
+                    </Tab>
+                    <Tab key="model" title={t('modelAnswer')}>
+                      <div className="pt-4 pb-24">
+                        <TranscriptViewer
+                          transcript={(modelAnswer?.transcript as TranscriptEntry[]) || []}
+                          hideHeader
+                        />
+                      </div>
+                    </Tab>
+                  </Tabs>
+                </div>
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog

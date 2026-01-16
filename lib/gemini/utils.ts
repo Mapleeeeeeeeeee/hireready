@@ -31,27 +31,58 @@ export function parseGeminiJSONResponse<T>(
   responseText: string,
   context?: { module: string; action: string }
 ): T {
+  const logContext = {
+    module: context?.module ?? 'gemini-utils',
+    action: context?.action ?? 'parseGeminiJSONResponse',
+  };
+
+  // Check for empty response
+  if (!responseText || responseText.trim().length === 0) {
+    logger.error('Empty response from Gemini API', undefined, logContext);
+    throw new Error('Empty response from Gemini API');
+  }
+
   try {
     // Try to extract JSON from markdown code blocks first
     const markdownMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
     if (markdownMatch?.[1]) {
+      logger.debug('Parsing JSON from markdown code block', logContext);
       return JSON.parse(markdownMatch[1]) as T;
+    }
+
+    // Try direct JSON parsing first (most common with structured output)
+    try {
+      const trimmed = responseText.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        return JSON.parse(trimmed) as T;
+      }
+    } catch {
+      // Fall through to regex extraction
     }
 
     // Try to extract raw JSON object
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (jsonMatch?.[0]) {
+      logger.debug('Extracting JSON from response text', logContext);
       return JSON.parse(jsonMatch[0]) as T;
     }
 
     // Fallback: try parsing the whole text
     return JSON.parse(responseText) as T;
   } catch (error) {
+    // Log detailed error info for debugging
+    const firstChars = responseText.slice(0, 100);
+    const charCodes = Array.from(firstChars.slice(0, 20)).map((c) => c.charCodeAt(0));
+
     logger.error('Failed to parse Gemini JSON response', error as Error, {
-      module: context?.module ?? 'gemini-utils',
-      action: context?.action ?? 'parseGeminiJSONResponse',
-      responsePreview: responseText.slice(0, 200),
+      ...logContext,
+      responseLength: responseText.length,
+      responsePreview: responseText.slice(0, 500),
+      firstCharCodes: charCodes,
+      startsWithBrace: responseText.trim().startsWith('{'),
+      startsWithBracket: responseText.trim().startsWith('['),
     });
+
     throw new Error('Invalid JSON response from Gemini API');
   }
 }

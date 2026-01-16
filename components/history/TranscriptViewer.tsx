@@ -1,9 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Card, CardBody, CardHeader, Divider, ScrollShadow } from '@heroui/react';
+import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
 import { User, Bot, MessageSquare } from 'lucide-react';
-import { formatTimestamp } from '@/lib/utils/date-format';
 
 // ============================================================
 // Types
@@ -21,6 +20,8 @@ export interface TranscriptEntry {
 export interface TranscriptViewerProps {
   /** Array of transcript entries */
   transcript: TranscriptEntry[];
+  /** Whether to hide the header */
+  hideHeader?: boolean;
 }
 
 // ============================================================
@@ -45,12 +46,9 @@ function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
 
       {/* Message bubble */}
       <div className={`flex max-w-[80%] flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
-        {/* Speaker label and timestamp */}
-        <div className="text-charcoal/50 flex items-center gap-2 text-xs">
+        {/* Speaker label */}
+        <div className="text-charcoal/50 text-xs">
           <span>{isUser ? tVideo('you') : tAi('name')}</span>
-          {entry.timestamp !== undefined && (
-            <span className="text-charcoal/30">{formatTimestamp(entry.timestamp)}</span>
-          )}
         </div>
 
         {/* Message content */}
@@ -85,36 +83,38 @@ function EmptyState() {
 // Component
 // ============================================================
 
-export function TranscriptViewer({ transcript }: TranscriptViewerProps) {
+export function TranscriptViewer({ transcript, hideHeader = false }: TranscriptViewerProps) {
   const t = useTranslations('history.transcript');
 
   const isEmpty = transcript.length === 0;
 
   return (
     <Card className="border-warm-gray/10 border bg-white/50 shadow-none">
-      <CardHeader className="flex items-center gap-2 pb-2">
-        <MessageSquare className="text-terracotta h-5 w-5" />
-        <h3 className="text-charcoal text-lg font-semibold">{t('title')}</h3>
-        {!isEmpty && (
-          <span className="text-charcoal/40 text-sm">
-            ({transcript.length} {t('messages')})
-          </span>
-        )}
-      </CardHeader>
+      {!hideHeader && (
+        <>
+          <CardHeader className="flex items-center gap-2 pb-2">
+            <MessageSquare className="text-terracotta h-5 w-5" />
+            <h3 className="text-charcoal text-lg font-semibold">{t('title')}</h3>
+            {!isEmpty && (
+              <span className="text-charcoal/40 text-sm">
+                ({transcript.length} {t('messages')})
+              </span>
+            )}
+          </CardHeader>
 
-      <Divider className="bg-warm-gray/20" />
+          <Divider className="bg-warm-gray/20" />
+        </>
+      )}
 
       <CardBody className="p-0">
         {isEmpty ? (
           <EmptyState />
         ) : (
-          <ScrollShadow className="max-h-[500px]" hideScrollBar>
-            <div className="flex flex-col gap-4 p-4">
-              {transcript.map((entry, index) => (
-                <TranscriptMessage key={index} entry={entry} />
-              ))}
-            </div>
-          </ScrollShadow>
+          <div className="flex flex-col gap-4 p-4">
+            {transcript.map((entry, index) => (
+              <TranscriptMessage key={index} entry={entry} />
+            ))}
+          </div>
         )}
       </CardBody>
     </Card>

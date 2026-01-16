@@ -5,9 +5,6 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-  NavbarMenu,
-  NavbarMenuItem,
-  NavbarMenuToggle,
   Button,
   Avatar,
   Dropdown,
@@ -20,7 +17,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSession, signOut } from '@/lib/auth/auth-client';
 import { getRedirectUrl, clearRedirectUrl } from '@/lib/auth/utils';
 import { LanguageToggle } from './LanguageToggle';
@@ -30,7 +27,6 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending } = useSession();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -61,18 +57,11 @@ export function Navbar() {
 
   return (
     <HeroNavbar
-      isMenuOpen={isMenuOpen}
-      onMenuOpenChange={setIsMenuOpen}
       maxWidth="xl"
       className="bg-warm-paper/90 border-warm-gray/10 border-b py-4 backdrop-blur-md"
     >
-      {/* Brand and mobile toggle */}
+      {/* Brand */}
       <NavbarContent>
-        <NavbarMenuToggle
-          aria-label={isMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
-          className="text-charcoal/70 md:hidden"
-          srOnlyText={isMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
-        />
         <NavbarBrand>
           <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
             <div className="relative h-8 w-8 overflow-hidden rounded-lg shadow-sm">
@@ -115,8 +104,8 @@ export function Navbar() {
 
       {/* Auth section with Language toggle - Right aligned */}
       <NavbarContent justify="end" className="gap-4">
-        {/* Language toggle - Desktop */}
-        <NavbarItem className="hidden md:flex">
+        {/* Language toggle */}
+        <NavbarItem>
           <LanguageToggle />
         </NavbarItem>
 
@@ -197,70 +186,6 @@ export function Navbar() {
           </NavbarItem>
         )}
       </NavbarContent>
-
-      {/* Mobile menu */}
-      <NavbarMenu className="bg-warm-paper pt-8">
-        {menuItems.map((item) => (
-          <NavbarMenuItem key={item.key}>
-            <Link
-              className={`w-full py-3 font-serif text-xl ${
-                pathname === item.href ? 'text-terracotta' : 'text-charcoal'
-              }`}
-              href={item.href}
-            >
-              {item.label}
-            </Link>
-          </NavbarMenuItem>
-        ))}
-
-        {/* Language toggle - Mobile */}
-        <NavbarMenuItem>
-          <div className="border-warm-gray/10 mt-4 border-t py-4">
-            <LanguageToggle />
-          </div>
-        </NavbarMenuItem>
-
-        {session?.user && (
-          <>
-            <NavbarMenuItem>
-              <div className="border-warm-gray/10 mt-6 flex items-center gap-3 border-t py-6">
-                <Avatar
-                  size="sm"
-                  src={session.user.image || undefined}
-                  name={session.user.name || undefined}
-                />
-                <div className="flex flex-col">
-                  <span className="text-charcoal text-lg font-medium">{session.user.name}</span>
-                  <span className="text-charcoal/60 text-sm">{session.user.email}</span>
-                </div>
-              </div>
-            </NavbarMenuItem>
-
-            {userMenuItems.map((item) => (
-              <NavbarMenuItem key={item.key}>
-                <Link
-                  className={`w-full py-3 font-serif text-xl ${
-                    pathname === item.href ? 'text-terracotta' : 'text-charcoal'
-                  }`}
-                  href={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              </NavbarMenuItem>
-            ))}
-
-            <NavbarMenuItem>
-              <Button
-                className="border-terracotta/20 text-terracotta mt-4 w-full border bg-transparent text-lg"
-                onPress={handleLogout}
-              >
-                {t('nav.logout')}
-              </Button>
-            </NavbarMenuItem>
-          </>
-        )}
-      </NavbarMenu>
     </HeroNavbar>
   );
 }

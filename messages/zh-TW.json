@@ -4,7 +4,8 @@
     "loading": "載入中...",
     "error": "發生錯誤",
     "retry": "重試",
-    "startInterview": "開始面試"
+    "startInterview": "開始面試",
+    "close": "關閉"
   },
   "marketing": {
     "hero": {
@@ -204,7 +205,7 @@
       "duration": "面試時長",
       "transcriptCount": "對話數量",
       "jobDescription": "職缺資訊",
-      "analysisNotice": "AI 將分析你的回答並生成模範回答（需 10-20 秒）",
+      "analysisNotice": "AI 將在背景分析你的回答並生成建議",
       "save": "儲存",
       "discard": "放棄",
       "savingNotice": "AI 正在生成分析與模範回答...",
@@ -257,7 +258,9 @@
     "transcript": {
       "title": "對話記錄",
       "messages": "則訊息",
-      "emptyTranscript": "尚無對話記錄"
+      "emptyTranscript": "尚無對話記錄",
+      "viewTranscript": "查看完整對話",
+      "viewFullTranscriptDescription": "檢視您與面試官的完整對話內容並進行比較"
     },
     "jobPosition": "面試職缺",
     "viewOriginalJob": "查看原始職缺",
@@ -284,11 +287,16 @@
     "untitledInterview": "未命名面試",
     "scoreLabel": "分數",
     "noScore": "無分數",
-    "analyzingInterview": "正在分析您的面試表現...",
-    "analysisProgress": "分析進度",
-    "analysisDescription": "AI 正在評估您的回答並生成評分與建議",
-    "analysisFailed": "分析失敗",
-    "analysisFailedDescription": "無法完成面試分析，請稍後重試"
+    "analyzing": {
+      "title": "正在分析您的面試表現...",
+      "description": "AI 正在評估您的回答並生成評分與建議",
+      "status": "分析進度",
+      "steps": {
+        "step1": "語音與語氣分析",
+        "step2": "內容與邏輯評估",
+        "step3": "生成改善建議"
+      }
+    }
   },
   "profile": {
     "title": "個人資料",

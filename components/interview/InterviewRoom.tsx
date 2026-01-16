@@ -35,7 +35,24 @@ export function InterviewRoom() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations('interview.room');
+  const tErrors = useTranslations('errors');
   const locale = useLocale() as SupportedLanguage;
+
+  // Helper to get localized error message
+  const getLocalizedError = useCallback(
+    (error: { code?: string; message?: string }) => {
+      if (error.code) {
+        // Try to get translated message, fall back to raw message or generic error
+        const translated = tErrors(error.code as Parameters<typeof tErrors>[0]);
+        // If translation returns the key itself, it means no translation found
+        if (translated !== error.code) {
+          return translated;
+        }
+      }
+      return error.message || tErrors('UNKNOWN_ERROR');
+    },
+    [tErrors]
+  );
 
   // Get resumeTaskId from URL search params
   const resumeTaskId = searchParams.get('resumeTaskId');
@@ -54,19 +71,25 @@ export function InterviewRoom() {
   // Ready to start state - task completed but waiting for user to click start
   const [isReadyToStart, setIsReadyToStart] = useState(false);
 
+  // Interview data from store
+  const transcripts = useInterviewStore((state) => state.transcripts);
+  const jobDescription = useInterviewStore((state) => state.jobDescription);
+  const setResumeContent = useInterviewStore((state) => state.setResumeContent);
+  const storeLanguage = useInterviewStore((state) => state.language); // User selected language from setup
+
   // Use the Live API hook
   const {
     sessionState,
     isConnected,
     isMicOn,
-    visualizerVolume,
+    // visualizerVolume, // Unused
     elapsedSeconds,
     lastError,
     isSupported,
     connect,
     disconnect,
     toggleMic,
-  } = useLiveApi({ language: locale });
+  } = useLiveApi({ language: storeLanguage || locale });
 
   // Use the Video Preview hook for self-viewing
   const { isVideoOn, stream: videoStream, toggleVideo, error: videoError } = useVideoPreview();
@@ -77,9 +100,6 @@ export function InterviewRoom() {
   const interimAiTranscript = useInterviewStore((state) => state.interimAiTranscript);
 
   // Interview data from store
-  const transcripts = useInterviewStore((state) => state.transcripts);
-  const jobDescription = useInterviewStore((state) => state.jobDescription);
-  const setResumeContent = useInterviewStore((state) => state.setResumeContent);
 
   // Task polling for resume parsing
   const { progress: taskProgress } = useTaskPolling({
@@ -171,10 +191,10 @@ export function InterviewRoom() {
   }, [isSupported, isPreparing]); // Intentionally exclude connect/disconnect to avoid infinite loops
 
   // Determine which audio level to show
+  // Fix: Always use local mic level for self-view, never the AI output volume
   const getDisplayAudioLevel = (): number => {
     if (!isMicOn) return 0; // Muted
-    if (isConnected) return visualizerVolume; // Use API's volume when connected
-    return micAudioLevel; // Use local mic monitoring when not connected
+    return micAudioLevel; // Always use local mic monitoring for self-view
   };
   const displayAudioLevel = getDisplayAudioLevel();
 
@@ -227,19 +247,20 @@ export function InterviewRoom() {
       });
 
       const appError = toAppError(error);
+      const localizedMessage = getLocalizedError(appError);
 
       // Show error in dialog (keep dialog open)
-      setSaveError(appError.message);
+      setSaveError(localizedMessage);
 
       // Also show toast notification
       showErrorToast({
         title: t('saveDialog.errorTitle'),
-        description: appError.message,
+        description: localizedMessage,
       });
 
       setIsSaving(false);
     }
-  }, [transcripts, elapsedSeconds, locale, jobDescription, router, t]);
+  }, [transcripts, elapsedSeconds, locale, jobDescription, router, t, getLocalizedError]);
 
   // Handle discard interview
   const handleDiscard = useCallback(() => {
@@ -330,7 +351,7 @@ export function InterviewRoom() {
         <div className="z-10 mt-4 max-w-md rounded-lg bg-red-50 px-4 py-3 text-red-700">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
-            <span>{lastError.message}</span>
+            <span>{getLocalizedError(lastError)}</span>
           </div>
         </div>
       )}
