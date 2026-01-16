@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.2.0...v2.2.1) (2026-01-16)
+
+
+### Bug Fixes
+
+* live language handling + remove zeabur template ([#24](https://github.com/Mapleeeeeeeeeee/hireready/issues/24)) ([432d664](https://github.com/Mapleeeeeeeeeee/hireready/commit/432d664fefe7710ad77f4a32086b18ebd7b7153e))
+
 ## [2.2.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.1.2...v2.2.0) (2026-01-16)
 
 
