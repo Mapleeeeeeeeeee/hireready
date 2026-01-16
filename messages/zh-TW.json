@@ -38,12 +38,12 @@
           "description": "利用隱私友善的臉部位點技術，追蹤眼神接觸、坐姿與表情自信度。"
         },
         "tone": {
-          "title": "口語表達",
-          "description": "分析您的自信度變化以及填充詞（嗯、阿）的使用頻率，確保溝通清晰。"
+          "title": "AI 即時回饋",
+          "description": "面試結束後獲得詳細的 AI 分析報告，包含優點、改進建議及整體表現評分。"
         },
         "context": {
-          "title": "情境智能",
-          "description": "根據特定的職缺描述 (JD) 與角色要求，對您的回答進行評分。",
+          "title": "模範回答生成",
+          "description": "AI 根據您的履歷與職缺描述，為每個問題生成專屬的模範回答供您參考學習。",
           "matchLabel": "匹配度：{percent}%"
         }
       }
@@ -116,6 +116,12 @@
       "optional": "選填",
       "startButton": "開始面試",
       "startHint": "即使沒有新增職缺描述也可以開始面試",
+      "guestWarning": {
+        "title": "以訪客身份繼續？",
+        "message": "您尚未登入。以訪客模式進行面試將**無法儲存紀錄**，也**無法獲得 AI 分析報告**。建議您先登入，以獲得最佳體驗。",
+        "continueAsGuest": "仍要繼續",
+        "loginFirst": "先登入"
+      },
       "resumeTitle": "履歷",
       "resumeDescription": "上傳您的履歷以獲得更個人化的面試問題",
       "resumeLoginRequired": "登入後即可上傳履歷",
@@ -214,7 +220,9 @@
       "errorOccurred": "發生錯誤",
       "loginRequiredTitle": "需要登入",
       "loginRequiredMessage": "請先登入以儲存您的面試記錄與取得分析報告。登入後將自動繼續儲存。",
-      "loginAndSave": "登入並儲存"
+      "loginAndSave": "登入並儲存",
+      "cannotSaveTitle": "無法儲存紀錄",
+      "cannotSaveMessage": "儲存與 AI 分析功能需登入才能使用，本次面試紀錄無法保存。建議您下次面試前先登入，以獲得完整體驗。"
     }
   },
   "auth": {
@@ -272,6 +280,7 @@
     "transcriptTabs": "對話記錄切換",
     "strengths": "優點",
     "improvements": "改進建議",
+    "transcriptionDisclaimer": "對話紀錄為即時語音轉文字，可能存在部分用字錯誤，不影響 AI 分析結果。",
     "retryInterview": "以相同職缺再次面試",
     "audio": {
       "play": "播放",

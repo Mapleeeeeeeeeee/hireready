@@ -43,11 +43,11 @@ export function extractResourceId(url: string, resourceName: string): string {
  * @throws NotFoundError if resource is null
  * @throws ForbiddenError if resource belongs to a different user
  */
-export function verifyOwnership<T extends { userId: string }>(
+export function verifyOwnership<T extends { userId: string | null }>(
   resource: T | null,
   userId: string,
   resourceName: string
-): T {
+): T & { userId: string } {
   if (!resource) {
     throw new NotFoundError(resourceName);
   }
@@ -56,7 +56,7 @@ export function verifyOwnership<T extends { userId: string }>(
     throw new ForbiddenError(`Access denied to this ${resourceName.toLowerCase()}`);
   }
 
-  return resource;
+  return resource as T & { userId: string };
 }
 
 /**

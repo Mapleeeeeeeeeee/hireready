@@ -261,63 +261,123 @@ async function callGeminiApi(
   logContext: { module: string; action: string; [key: string]: unknown },
   responseSchemaProperties: Record<string, unknown>
 ): Promise<string> {
+  const MAX_RETRIES = 3;
+  const INITIAL_DELAY_MS = 1000;
+
   logger.info('Calling Gemini API', {
     ...logContext,
     promptLength: prompt.length,
     endpoint: GEMINI_API_ENDPOINT,
   });
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let lastError: Error | null = null;
 
-  try {
-    const response = await fetch(GEMINI_API_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 8192,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: 'object',
-            properties: responseSchemaProperties,
-            required: Object.keys(responseSchemaProperties),
-          },
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(GEMINI_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
         },
-      }),
-    });
+        signal: controller.signal,
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 8192,
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'object',
+              properties: responseSchemaProperties,
+              required: Object.keys(responseSchemaProperties),
+            },
+          },
+        }),
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API returned ${response.status}: ${errorText}`);
+      // Check for rate limit or server errors - these are retryable
+      if (response.status === 429 || response.status >= 500) {
+        const errorText = await response.text();
+        lastError = new Error(`Gemini API returned ${response.status}: ${errorText}`);
+        logger.warn('Gemini API retryable error', {
+          ...logContext,
+          attempt,
+          maxRetries: MAX_RETRIES,
+          status: response.status,
+        });
+
+        if (attempt < MAX_RETRIES) {
+          const delayMs = INITIAL_DELAY_MS * Math.pow(2, attempt - 1);
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+          continue;
+        }
+        throw lastError;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Gemini API returned ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      // Empty response is retryable
+      if (!responseText) {
+        lastError = new Error('No text content in Gemini API response');
+        logger.warn('Gemini API returned empty response, retrying', {
+          ...logContext,
+          attempt,
+          maxRetries: MAX_RETRIES,
+          candidatesCount: data.candidates?.length ?? 0,
+          finishReason: data.candidates?.[0]?.finishReason,
+        });
+
+        if (attempt < MAX_RETRIES) {
+          const delayMs = INITIAL_DELAY_MS * Math.pow(2, attempt - 1);
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+          continue;
+        }
+        throw lastError;
+      }
+
+      return responseText;
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        lastError = new Error('Analysis request timeout');
+        logger.warn('Gemini API request timed out', {
+          ...logContext,
+          attempt,
+          maxRetries: MAX_RETRIES,
+        });
+
+        if (attempt < MAX_RETRIES) {
+          const delayMs = INITIAL_DELAY_MS * Math.pow(2, attempt - 1);
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+          continue;
+        }
+        throw lastError;
+      }
+
+      // Non-retryable error
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const data = await response.json();
-    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!responseText) {
-      throw new Error('No text content in Gemini API response');
-    }
-
-    return responseText;
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Analysis request timeout');
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
   }
+
+  // Should never reach here, but TypeScript needs it
+  throw lastError || new Error('Unexpected error in callGeminiApi');
 }
 
 function buildFeedbackAnalysisPrompt(
@@ -338,6 +398,8 @@ ${jdSection}${resumeSection}
 ${formatTranscripts(transcripts)}
 
 ## Analysis Requirements
+**IMPORTANT**: The transcript was generated by real-time speech-to-text and may contain transcription errors (e.g., homophones, mishearings like "非城市人員" instead of "非程式人員"). Please IGNORE these speech recognition errors when evaluating the candidate. Focus on the meaning and intent, not the literal words.
+
 - score: Overall performance score from 0 to 100 based on INTERVIEW PERFORMANCE (clarity, structure, logic), not job fit.
   - CRITICAL: Score MUST be based ONLY on the 'Candidate' actual responses in the transcript.
   - CRITICAL: Do NOT score based on the Resume or the Job Description.
@@ -345,9 +407,11 @@ ${formatTranscripts(transcripts)}
 - strengths: At least 2 specific strengths related to **communication style, answer structure, or logical clarity**.
   - Do NOT evaluate "technical fit" or "experience match" unless the candidate explained technical concepts exceptionally well.
   - Focus on HOW they answered, not just WHAT they have done.
+  - Do NOT comment on transcription errors or mispronunciations.
 - improvements: At least 2 actionable improvement suggestions.
   - Focus on **speaking pace, structure (STAR method), clarity, or specific missing details** in their answers.
   - Do NOT say "gain more experience in X". Instead say "When describing X, explain the challenges you faced more clearly."
+  - Do NOT mention transcription errors, typos, or speech recognition mistakes as these are technical artifacts.
 
 ## Scoring Guidelines (STRICTLY FOLLOW)
 - **0-25 (Critical Fail)**: Almost no meaningful content, silent, or one-word answers.
@@ -389,6 +453,8 @@ ${jdSection}${resumeSection}
 ${formatTranscripts(transcripts)}
 
 ## Requirements
+**IMPORTANT**: The transcript was generated by real-time speech-to-text and may contain transcription errors (e.g., homophones, mishearings). Please interpret the candidate's intent rather than literal transcription.
+
 - modelTranscript: A generated transcript that mirrors the input transcript structure EXACTLY.
   - STRICTLY maintain the same number of turns and order as the input transcript.
   - For role "interviewer": COPY the text EXACTLY from the input transcript. Do NOT rephrase.
