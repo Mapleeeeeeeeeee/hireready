@@ -211,7 +211,10 @@
       "savingNotice": "AI is generating analysis and model responses...",
       "errorTitle": "Save Failed",
       "errorRetry": "Please try again or contact support.",
-      "errorOccurred": "An error occurred"
+      "errorOccurred": "An error occurred",
+      "loginRequiredTitle": "Login Required",
+      "loginRequiredMessage": "Please login to save your interview and receive analysis.",
+      "loginAndSave": "Login & Save"
     }
   },
   "auth": {

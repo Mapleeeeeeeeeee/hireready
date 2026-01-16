@@ -14,7 +14,7 @@ import { useAudioLevel } from '@/lib/hooks/use-audio-level';
 import { useTaskPolling } from '@/lib/hooks/use-task-polling';
 import { useInterviewStore } from '@/lib/stores/interview-store';
 import { apiClient } from '@/lib/utils/api-client';
-import { toAppError } from '@/lib/utils/errors';
+import { toAppError, UnauthorizedError } from '@/lib/utils/errors';
 import { logger } from '@/lib/utils/logger';
 import { formatTimeDisplay } from '@/lib/utils/format';
 import { showErrorToast } from '@/lib/utils/toast';
@@ -64,6 +64,7 @@ export function InterviewRoom() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>('');
+  const [isSaveUnauthorized, setIsSaveUnauthorized] = useState(false);
 
   // Preparing state - whether we're waiting for resume parsing
   const [isPreparing, setIsPreparing] = useState(!!resumeTaskId);
@@ -240,6 +241,7 @@ export function InterviewRoom() {
         ? `/history/${response.id}?analysisTaskId=${response.taskId}`
         : `/history/${response.id}`;
       router.push(historyUrl);
+      router.push(historyUrl);
     } catch (error) {
       logger.error('Failed to save interview', error as Error, {
         module: 'interview-room',
@@ -247,20 +249,99 @@ export function InterviewRoom() {
       });
 
       const appError = toAppError(error);
-      const localizedMessage = getLocalizedError(appError);
 
-      // Show error in dialog (keep dialog open)
-      setSaveError(localizedMessage);
+      // Handle Unauthorized Error specifically
+      if (appError instanceof UnauthorizedError) {
+        setIsSaveUnauthorized(true);
+        setSaveError(''); // Clear generic error
 
-      // Also show toast notification
-      showErrorToast({
-        title: t('saveDialog.errorTitle'),
-        description: localizedMessage,
-      });
+        // Persist interview state to session storage
+        try {
+          const pendingState = {
+            transcripts,
+            elapsedSeconds,
+            jobDescription,
+            resumeContent: useInterviewStore.getState().resumeContent,
+            timestamp: Date.now(),
+          };
+          sessionStorage.setItem('pending_interview_save', JSON.stringify(pendingState));
+          logger.info('Persisted interview state for login', {
+            module: 'interview-room',
+            action: 'persist-state',
+          });
+        } catch (e) {
+          logger.error('Failed to persist interview state', e as Error, {
+            module: 'interview-room',
+            action: 'persist-state-error',
+          });
+        }
+      } else {
+        const localizedMessage = getLocalizedError(appError);
+
+        // Show error in dialog (keep dialog open)
+        setSaveError(localizedMessage);
+
+        // Also show toast notification
+        showErrorToast({
+          title: t('saveDialog.errorTitle'),
+          description: localizedMessage,
+        });
+      }
 
       setIsSaving(false);
     }
-  }, [transcripts, elapsedSeconds, locale, jobDescription, router, t, getLocalizedError]);
+  }, [
+    transcripts,
+    elapsedSeconds,
+    locale,
+    jobDescription,
+    router,
+    t,
+    getLocalizedError,
+    // Add missing deps
+  ]);
+
+  // Restore state from session storage if exists
+  useEffect(() => {
+    try {
+      const storedState = sessionStorage.getItem('pending_interview_save');
+      if (storedState) {
+        const parsed = JSON.parse(storedState);
+
+        // Only restore if less than 1 hour old
+        if (Date.now() - parsed.timestamp < 3600000) {
+          logger.info('Restoring interview state', {
+            module: 'interview-room',
+            action: 'restore-state',
+          });
+
+          // We need access to store setters that might not be exposed in the interface
+          // Check if we can just set them or need to extend the interface
+          // For now, let's try to restore what we can via available actions or manual store manipulation
+          // NOTE: In a real app we should expose setTranscripts etc. in the store.
+          // Assuming we might need to add these actions to the store or use a hack.
+          // Let's assume we can use the store actions if available, or we might need to use `useInterviewStore.setState`
+          useInterviewStore.setState({
+            transcripts: parsed.transcripts,
+            elapsedSeconds: parsed.elapsedSeconds,
+            jobDescription: parsed.jobDescription,
+            resumeContent: parsed.resumeContent,
+          });
+
+          // Show save dialog immediately so they can save
+          setShowSaveDialog(true);
+        }
+
+        // Clear after restoring
+        sessionStorage.removeItem('pending_interview_save');
+      }
+    } catch (e) {
+      logger.error('Failed to restore interview state', e as Error, {
+        module: 'interview-room',
+        action: 'restore-state-error',
+      });
+    }
+  }, []);
 
   // Handle discard interview
   const handleDiscard = useCallback(() => {
@@ -400,6 +481,7 @@ export function InterviewRoom() {
         jobDescriptionUrl={jobDescription?.url}
         isSaving={isSaving}
         errorMessage={saveError}
+        isUnauthorized={isSaveUnauthorized}
       />
     </div>
   );

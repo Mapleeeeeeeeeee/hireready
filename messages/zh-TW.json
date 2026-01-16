@@ -211,7 +211,10 @@
       "savingNotice": "AI 正在生成分析與模範回答...",
       "errorTitle": "儲存失敗",
       "errorRetry": "請重試或聯絡客服。",
-      "errorOccurred": "發生錯誤"
+      "errorOccurred": "發生錯誤",
+      "loginRequiredTitle": "需要登入",
+      "loginRequiredMessage": "請先登入以儲存您的面試記錄與取得分析報告。登入後將自動繼續儲存。",
+      "loginAndSave": "登入並儲存"
     }
   },
   "auth": {

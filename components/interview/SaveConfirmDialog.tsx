@@ -3,8 +3,17 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Clock, MessageSquare, Briefcase, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Clock,
+  MessageSquare,
+  Briefcase,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  LogIn,
+} from 'lucide-react';
 import { formatTimeDisplay } from '@/lib/utils/format';
+import { useGoogleLogin } from '@/lib/auth/hooks';
 
 // ============================================================
 // Types
@@ -19,11 +28,8 @@ export interface SaveConfirmDialogProps {
   jobDescriptionUrl?: string;
   isSaving: boolean;
   errorMessage?: string;
+  isUnauthorized?: boolean;
 }
-
-// ============================================================
-// Component
-// ============================================================
 
 export function SaveConfirmDialog({
   isOpen,
@@ -34,9 +40,13 @@ export function SaveConfirmDialog({
   jobDescriptionUrl,
   isSaving,
   errorMessage,
+  isUnauthorized = false,
 }: SaveConfirmDialogProps) {
   const t = useTranslations('interview.saveDialog');
   const [isErrorExpanded, setIsErrorExpanded] = useState(false);
+  const handleLogin = useGoogleLogin();
+  const showNotice = !isUnauthorized && (isSaving || !errorMessage);
+  const noticeText = isSaving ? t('savingNotice') : t('analysisNotice');
 
   return (
     <Modal
@@ -136,29 +146,47 @@ export function SaveConfirmDialog({
               </div>
             )}
 
-            {/* Error message */}
-            {errorMessage && (
-              <div className="overflow-hidden rounded-lg bg-red-50 ring-1 ring-red-100 transition-all duration-200">
+            {/* Error or Unauthorized Message */}
+            {(errorMessage || isUnauthorized) && (
+              <div
+                className={`overflow-hidden rounded-lg border transition-all duration-200 ${
+                  isUnauthorized
+                    ? 'border-blue-200 bg-blue-50 ring-1 ring-blue-100'
+                    : 'border-red-200 bg-red-50 ring-1 ring-red-100'
+                }`}
+              >
                 <div
-                  className="flex cursor-pointer items-start gap-3 p-4 hover:bg-red-50/80"
-                  onClick={() => setIsErrorExpanded(!isErrorExpanded)}
+                  className={`flex items-start gap-3 p-4 ${errorMessage ? 'cursor-pointer hover:bg-red-50/80' : ''}`}
+                  onClick={() => errorMessage && setIsErrorExpanded(!isErrorExpanded)}
                 >
-                  <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+                  <AlertCircle
+                    className={`mt-0.5 h-5 w-5 flex-shrink-0 ${isUnauthorized ? 'text-blue-600' : 'text-red-600'}`}
+                  />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <p className="mb-1 font-medium text-red-900">{t('errorTitle')}</p>
-                      {isErrorExpanded ? (
-                        <ChevronUp className="h-4 w-4 text-red-700" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-red-700" />
+                      <p
+                        className={`mb-1 font-medium ${isUnauthorized ? 'text-blue-900' : 'text-red-900'}`}
+                      >
+                        {isUnauthorized ? t('loginRequiredTitle') : t('errorTitle')}
+                      </p>
+                      {!isUnauthorized && (
+                        <>
+                          {isErrorExpanded ? (
+                            <ChevronUp className="h-4 w-4 text-red-700" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-red-700" />
+                          )}
+                        </>
                       )}
                     </div>
-                    <p className="text-sm text-red-700">{t('errorRetry')}</p>
+                    <p className={`text-sm ${isUnauthorized ? 'text-blue-700' : 'text-red-700'}`}>
+                      {isUnauthorized ? t('loginRequiredMessage') : t('errorRetry')}
+                    </p>
                   </div>
                 </div>
 
-                {/* Expandable Technical Details */}
-                {isErrorExpanded && (
+                {/* Expandable Technical Details (only for errors) */}
+                {!isUnauthorized && isErrorExpanded && errorMessage && (
                   <div className="-mt-1 px-4 px-11 pb-4">
                     <div className="max-h-[150px] overflow-y-auto rounded bg-red-100/50 p-2 font-mono text-xs break-words whitespace-pre-wrap text-red-800">
                       {errorMessage}
@@ -169,16 +197,18 @@ export function SaveConfirmDialog({
             )}
 
             {/* AI Analysis Notice */}
-            <div className="bg-soft-clay/30 rounded-xl p-4 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className="mt-1">
-                  <div className="bg-terracotta/20 ring-terracotta/10 h-4 w-4 rounded-full ring-4" />
-                </div>
-                <div>
-                  <p className="text-charcoal/90 text-sm font-medium">{t('analysisNotice')}</p>
+            {showNotice && (
+              <div className="bg-soft-clay/30 rounded-xl p-4 transition-colors">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1">
+                    <div className="bg-terracotta/20 ring-terracotta/10 h-4 w-4 rounded-full ring-4" />
+                  </div>
+                  <div>
+                    <p className="text-charcoal/90 text-sm font-medium">{noticeText}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </ModalBody>
         <ModalFooter className="flex-col gap-3 sm:flex-row sm:gap-4">
@@ -191,19 +221,33 @@ export function SaveConfirmDialog({
           >
             {t('discard')}
           </Button>
-          <Button
-            size="lg"
-            color="primary"
-            onPress={onSave}
-            isDisabled={isSaving}
-            className="bg-terracotta hover:bg-terracotta/90 shadow-terracotta/20 w-full justify-center px-8 font-medium text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-70 data-[disabled=true]:opacity-70 sm:w-[100px]"
-          >
-            {isSaving ? (
-              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            ) : (
-              t('save')
-            )}
-          </Button>
+
+          {isUnauthorized ? (
+            <Button
+              size="lg"
+              color="primary"
+              onPress={handleLogin}
+              className="w-full justify-center bg-blue-600 px-8 font-medium text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 sm:w-auto"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              {t('loginAndSave')}
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              color="primary"
+              onPress={onSave}
+              isDisabled={isSaving}
+              aria-label={t('save')}
+              className="bg-terracotta hover:bg-terracotta/90 shadow-terracotta/20 w-full justify-center px-8 font-medium text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-70 data-[disabled=true]:opacity-70 sm:w-[100px]"
+            >
+              {isSaving ? (
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                t('save')
+              )}
+            </Button>
+          )}
         </ModalFooter>
       </ModalContent>
     </Modal>
