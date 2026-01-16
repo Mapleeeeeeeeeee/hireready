@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.1.0...v2.1.1) (2026-01-16)
+
+
+### Bug Fixes
+
+* Remove Markdown Instruction ([#17](https://github.com/Mapleeeeeeeeeee/hireready/issues/17)) ([133788c](https://github.com/Mapleeeeeeeeeee/hireready/commit/133788c5aa1196f5f4c745bb21d944dca9923936))
+
 ## [2.1.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.0.0...v2.1.0) (2026-01-16)
 
 
