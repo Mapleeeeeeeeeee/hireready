@@ -42,6 +42,7 @@ export function DeleteConfirmDialog({
       isOpen={isOpen}
       onClose={onClose}
       size="sm"
+      placement="center"
       hideCloseButton
       classNames={{
         base: 'bg-warm-paper shadow-lg rounded-xl max-w-[360px] mx-4 relative z-[99999]',

@@ -49,7 +49,7 @@ export default function TestLoadingPage() {
 
         <AnalysisLoading progress={progress} />
 
-        <div className="mt-12 flex w-full justify-center gap-4">
+        <div className="mt-12 flex w-full flex-wrap justify-center gap-4">
           <Button
             onPress={handleRestart}
             color="primary"

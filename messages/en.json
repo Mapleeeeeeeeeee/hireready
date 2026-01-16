@@ -4,7 +4,8 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "retry": "Retry",
-    "startInterview": "Start Mock Interview"
+    "startInterview": "Start Mock Interview",
+    "close": "Close"
   },
   "marketing": {
     "hero": {
@@ -257,7 +258,9 @@
     "transcript": {
       "title": "Transcript",
       "messages": "messages",
-      "emptyTranscript": "No transcript available"
+      "emptyTranscript": "No transcript available",
+      "viewTranscript": "View Full Transcript",
+      "viewFullTranscriptDescription": "View main transcript and compare with model answers"
     },
     "jobPosition": "Job Position",
     "viewOriginalJob": "View Original Job",

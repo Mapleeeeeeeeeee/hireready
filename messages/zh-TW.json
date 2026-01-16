@@ -4,7 +4,8 @@
     "loading": "載入中...",
     "error": "發生錯誤",
     "retry": "重試",
-    "startInterview": "開始面試"
+    "startInterview": "開始面試",
+    "close": "關閉"
   },
   "marketing": {
     "hero": {
@@ -257,7 +258,9 @@
     "transcript": {
       "title": "對話記錄",
       "messages": "則訊息",
-      "emptyTranscript": "尚無對話記錄"
+      "emptyTranscript": "尚無對話記錄",
+      "viewTranscript": "查看完整對話",
+      "viewFullTranscriptDescription": "檢視您與面試官的完整對話內容並進行比較"
     },
     "jobPosition": "面試職缺",
     "viewOriginalJob": "查看原始職缺",

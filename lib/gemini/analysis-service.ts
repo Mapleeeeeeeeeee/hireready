@@ -165,6 +165,12 @@ ${formatTranscripts(transcripts)}
   - Use role "candidate" for the ideal candidate responses
   - ${modelAnswerInstruction}
 
+## Scoring Guidelines (STRICTLY FOLLOW)
+- **0-59 (Fail/Low)**: Candidate provided very little information, transcripts are extremely short (e.g. < 5 turns), or answers were one-word/non-substantive. **IF THE CANDIDATE SAID ALMOST NOTHING, SCORE MUST BE < 40.**
+- **60-79 (Average)**: Answers were relevant but generic, lacking specific examples or depth.
+- **80-89 (Good)**: Clear, structured answers with relevant examples. Good communication.
+- **90-100 (Excellent)**: Outstanding responses with specific metrics, deep insights, and perfect alignment with the role.
+
 ${isZhTW ? 'Output all text content in Traditional Chinese (繁體中文).' : 'Output all text content in English.'}`;
 }
 
