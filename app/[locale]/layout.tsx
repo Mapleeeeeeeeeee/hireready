@@ -25,7 +25,7 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: 'HireReady - AI 面試模擬平台',
+  title: 'HireReady - AI 語音面試模擬平台',
   description: 'AI 驅動的語音面試模擬平台，幫助你練習行為面試',
   icons: {
     icon: '/logo.png',
