@@ -73,9 +73,29 @@ function initAuth() {
   return _auth;
 }
 
+// Create a Proxy that lazily initializes auth on first access
+// This avoids accessing environment variables during build time
 export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
   get(_, prop) {
-    return initAuth()[prop as keyof ReturnType<typeof betterAuth>];
+    const authInstance = initAuth();
+    const value = authInstance[prop as keyof ReturnType<typeof betterAuth>];
+    // If the property is a function, bind it to the auth instance
+    if (typeof value === 'function') {
+      return value.bind(authInstance);
+    }
+    return value;
+  },
+  // Support for 'in' operator checks
+  has(_, prop) {
+    return prop in initAuth();
+  },
+  // Support for Object.keys(), etc.
+  ownKeys() {
+    return Reflect.ownKeys(initAuth());
+  },
+  // Support for Object.getOwnPropertyDescriptor()
+  getOwnPropertyDescriptor(_, prop) {
+    return Object.getOwnPropertyDescriptor(initAuth(), prop);
   },
 });
 

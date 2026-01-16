@@ -1,8 +1,9 @@
-'use server';
-
 /**
  * Resume service for file management and database operations
  * Handles saving, retrieving, and deleting user resumes
+ *
+ * Note: This file is server-only due to fs and prisma usage.
+ * Do NOT add 'use server' directive - this is a service module, not Server Actions.
  */
 
 import { promises as fs } from 'fs';
@@ -19,13 +20,13 @@ import {
 } from './types';
 
 // ============================================================
-// Constants
+// Constants (exported for reuse in workers)
 // ============================================================
 
-const STORAGE_DIR = 'storage';
-const RESUMES_DIR = 'resumes';
-const RESUME_FILENAME = 'resume'; // Fixed filename, extension varies
-const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.png'];
+export const STORAGE_DIR = 'storage';
+export const RESUMES_DIR = 'resumes';
+export const RESUME_FILENAME = 'resume'; // Fixed filename, extension varies
+export const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.png'];
 
 // ============================================================
 // Path Utilities
@@ -241,6 +242,7 @@ export async function saveResume(
       url,
       fileName,
       content,
+      taskId: null, // Synchronous save has no background task
       updatedAt,
     };
   } catch (error) {
@@ -297,10 +299,27 @@ export async function getResume(userId: string): Promise<ResumeData | null> {
     }
   }
 
+  // Check for pending resume parsing task
+  let taskId: string | null = null;
+  const pendingTask = await prisma.backgroundTask.findFirst({
+    where: {
+      userId,
+      type: 'resume_parsing',
+      status: { in: ['pending', 'processing'] },
+    },
+    select: { id: true },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (pendingTask) {
+    taskId = pendingTask.id;
+  }
+
   return {
     url: user.resumeUrl,
     fileName: user.resumeFileName || 'resume',
     content,
+    taskId,
     updatedAt: user.resumeUpdatedAt || new Date(),
   };
 }

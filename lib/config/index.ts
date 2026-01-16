@@ -13,7 +13,7 @@ export const appConfig = {
 // Gemini API configuration (non-live API settings)
 // For Live API config, see lib/gemini/types.ts
 export const geminiConfig = {
-  model: 'gemini-3-flash-preview' as const,
+  model: 'gemini-2.5-flash' as const,
   timeouts: {
     analysis: 20000, // 20 seconds
     tts: 20000, // 20 seconds

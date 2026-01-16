@@ -49,6 +49,11 @@ export const serverEnv = {
     return getEnvVar('GEMINI_API_KEY', '');
   },
 
+  // Redis (optional - for background job queue)
+  get redisUrl() {
+    return getEnvVar('REDIS_URL', '');
+  },
+
   // Database (lazy evaluation - will throw at runtime if not set)
   get databaseUrl() {
     return getRequiredEnvVar('DATABASE_URL');

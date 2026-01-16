@@ -186,7 +186,7 @@
         "live": "LIVE"
       },
       "ai": {
-        "name": "Alex (Interviewer)",
+        "name": "Interviewer",
         "speaking": "Speaking...",
         "thinking": "Thinking...",
         "listening": "Listening...",
@@ -194,6 +194,11 @@
       },
       "caption": "AI Captions"
     },
+    "interviewerPreparing": "The interviewer is preparing...",
+    "preparingDescription": "Please wait, the interview will begin shortly",
+    "interviewerReady": "The interviewer is ready",
+    "readyDescription": "Click the button below to start the interview",
+    "startButton": "Start Interview",
     "saveDialog": {
       "title": "Save Interview Record",
       "duration": "Interview Duration",
@@ -278,7 +283,12 @@
     },
     "untitledInterview": "Untitled Interview",
     "scoreLabel": "Score",
-    "noScore": "No Score"
+    "noScore": "No Score",
+    "analyzingInterview": "Analyzing your interview performance...",
+    "analysisProgress": "Analysis Progress",
+    "analysisDescription": "AI is evaluating your responses and generating scores and feedback",
+    "analysisFailed": "Analysis Failed",
+    "analysisFailedDescription": "Unable to complete interview analysis. Please try again later."
   },
   "profile": {
     "title": "Profile",
@@ -334,6 +344,12 @@
         "description": "Basic resume template"
       }
     }
+  },
+  "task": {
+    "pending": "Pending",
+    "processing": "Processing",
+    "completed": "Completed",
+    "failed": "Failed"
   },
   "errors": {
     "UNKNOWN_ERROR": "An unknown error occurred, please try again later",

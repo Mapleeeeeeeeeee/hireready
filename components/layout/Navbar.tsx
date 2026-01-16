@@ -17,6 +17,7 @@ import {
   DropdownSection,
 } from '@heroui/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -73,8 +74,11 @@ export function Navbar() {
           srOnlyText={isMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
         />
         <NavbarBrand>
-          <Link href="/" className="text-charcoal transition-opacity hover:opacity-80">
-            <p className="font-serif text-2xl font-semibold tracking-tight text-inherit">
+          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
+            <div className="relative h-8 w-8 overflow-hidden rounded-lg shadow-sm">
+              <Image src="/logo.png" alt="HireReady Logo" fill className="object-cover" priority />
+            </div>
+            <p className="text-charcoal font-serif text-2xl font-semibold tracking-tight">
               HireReady
             </p>
           </Link>

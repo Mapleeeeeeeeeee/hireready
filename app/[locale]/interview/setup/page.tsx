@@ -118,8 +118,15 @@ export default function InterviewSetupPage() {
 
   // Handle start interview
   const handleStartInterview = useCallback(() => {
-    router.push(`/${locale}/interview`);
-  }, [router, locale]);
+    // Only pass resumeTaskId if the resume parsing is still in progress
+    // (taskId exists but content has not been parsed yet).
+    // If content already exists, parsing is complete and we don't need to wait.
+    const isParsing = resume?.taskId && !resume?.content;
+    const url = isParsing
+      ? `/${locale}/interview?resumeTaskId=${resume.taskId}`
+      : `/${locale}/interview`;
+    router.push(url);
+  }, [router, locale, resume]);
 
   return (
     <div className="bg-warm-paper text-charcoal min-h-screen">

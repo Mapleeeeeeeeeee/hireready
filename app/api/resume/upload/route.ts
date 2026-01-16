@@ -1,19 +1,34 @@
 /**
  * Resume Upload API Route
  * POST /api/resume/upload
- * Handles resume file upload, saves to disk, and parses content using Gemini
+ * Handles resume file upload, saves to disk, and queues parsing job
  */
 
+import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
 import { BadRequestError, ValidationError } from '@/lib/utils/errors';
 import { logger } from '@/lib/utils/logger';
 import {
-  saveResume,
+  saveResumeFile,
   RESUME_CONSTRAINTS,
   isAllowedResumeType,
   validateFileSignature,
 } from '@/lib/resume';
-import type { ResumeData } from '@/lib/resume';
+import { getResumeParsingQueue } from '@/lib/queue/queues';
+import { isRedisAvailable } from '@/lib/queue/connection';
+import type { ResumeParsingJobData } from '@/lib/queue/types';
+
+// ============================================================
+// Types
+// ============================================================
+
+interface ResumeUploadResponse {
+  url: string;
+  fileName: string;
+  content: null;
+  taskId: string | null;
+  updatedAt: Date;
+}
 
 // ============================================================
 // Constants
@@ -25,7 +40,7 @@ const MAX_FILE_SIZE_MB = RESUME_CONSTRAINTS.maxFileSize / 1024 / 1024;
 // Route Handler
 // ============================================================
 
-async function handleUploadResume(request: Request, userId: string): Promise<ResumeData> {
+async function handleUploadResume(request: Request, userId: string): Promise<ResumeUploadResponse> {
   const logContext = { module: 'api-resume', action: 'upload', userId };
 
   logger.info('Processing resume upload', logContext);
@@ -97,21 +112,72 @@ async function handleUploadResume(request: Request, userId: string): Promise<Res
     );
   }
 
-  // Save resume (includes file save + Gemini parsing + DB update)
-  try {
-    const resumeData = await saveResume(userId, fileBuffer, file.type, fileName);
+  // Step 1: Save file to disk
+  const { url } = await saveResumeFile(userId, fileBuffer, file.type, fileName);
 
-    logger.info('Resume uploaded successfully', {
-      ...logContext,
-      url: resumeData.url,
-      hasParsedContent: !!resumeData.content,
+  // Step 2: Update database with file info (without parsed content)
+  const updatedAt = new Date();
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      resumeUrl: url,
+      resumeFileName: fileName,
+      resumeContent: null, // Will be updated when parsing completes
+      resumeUpdatedAt: updatedAt,
+    },
+  });
+
+  // Step 3: Create background task and queue parsing job
+  let taskId: string | null = null;
+
+  if (isRedisAvailable()) {
+    // Create background task record
+    const task = await prisma.backgroundTask.create({
+      data: {
+        userId,
+        type: 'resume_parsing',
+        status: 'pending',
+        progress: 0,
+      },
     });
 
-    return resumeData;
-  } catch (error) {
-    logger.error('Failed to save resume', error as Error, logContext);
-    throw error;
+    taskId = task.id;
+
+    // Queue the parsing job
+    const jobData: ResumeParsingJobData = {
+      taskId: task.id,
+      userId,
+      resumeUrl: url,
+      resumeFileName: fileName,
+    };
+
+    const queue = getResumeParsingQueue();
+    await queue.add('parse-resume', jobData, {
+      jobId: task.id,
+    });
+
+    logger.info('Resume parsing job queued', {
+      ...logContext,
+      taskId: task.id,
+      url,
+    });
+  } else {
+    logger.warn('Redis not available, skipping queue', logContext);
   }
+
+  logger.info('Resume uploaded successfully', {
+    ...logContext,
+    url,
+    taskId,
+  });
+
+  return {
+    url,
+    fileName,
+    content: null,
+    taskId,
+    updatedAt,
+  };
 }
 
 export const POST = withAuthHandler(handleUploadResume, {

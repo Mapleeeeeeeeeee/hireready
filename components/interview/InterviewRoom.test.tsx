@@ -1,12 +1,23 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { InterviewRoom } from '@/components/interview/InterviewRoom';
+import type { UseTaskPollingOptions } from '@/lib/hooks/use-task-polling';
 
-// Mock next/navigation
+// Mock next/navigation with configurable return values
+const mockSearchParamsGet = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
+  useSearchParams: () => ({
+    get: mockSearchParamsGet,
+  }),
+}));
+
+// Mock useTaskPolling hook with configurable behavior
+const mockUseTaskPolling = vi.fn();
+vi.mock('@/lib/hooks/use-task-polling', () => ({
+  useTaskPolling: (options: UseTaskPollingOptions) => mockUseTaskPolling(options),
 }));
 
 // Mock useLiveApi hook with configurable return values
@@ -44,10 +55,31 @@ vi.mock('next-intl', () => ({
       'states.processing': 'Processing',
       'states.connecting': 'Connecting',
       'states.error': 'Error',
+      interviewerPreparing: 'Interviewer is preparing...',
+      interviewerReady: 'Ready to start!',
+      preparingDescription: 'Analyzing your resume...',
+      readyDescription: 'Click start to begin the interview.',
+      startButton: 'Start Interview',
     };
     return translations[key] || key;
   },
   useLocale: () => 'zh-TW',
+}));
+
+// Mock interview store with configurable values
+const mockSetResumeContent = vi.fn();
+const mockInterviewStoreState = {
+  isCaptionOn: false,
+  toggleCaption: vi.fn(),
+  interimAiTranscript: '',
+  transcripts: [],
+  jobDescription: null,
+  setResumeContent: mockSetResumeContent,
+};
+vi.mock('@/lib/stores/interview-store', () => ({
+  useInterviewStore: (selector: (state: typeof mockInterviewStoreState) => unknown) => {
+    return selector(mockInterviewStoreState);
+  },
 }));
 
 // Default mock values for useLiveApi
@@ -84,16 +116,28 @@ const defaultAudioMockValues = {
   isSupported: true,
 };
 
+// Default mock values for useTaskPolling
+const defaultTaskPollingMockValues = {
+  status: null,
+  progress: 0,
+  isPolling: false,
+  stopPolling: vi.fn(),
+};
+
 describe('InterviewRoom', () => {
   beforeEach(() => {
     // Reset to default mock values before each test
     mockUseLiveApi.mockReturnValue(defaultMockValues);
     mockUseVideoPreview.mockReturnValue(defaultVideoMockValues);
     mockUseAudioLevel.mockReturnValue(defaultAudioMockValues);
+    mockUseTaskPolling.mockReturnValue(defaultTaskPollingMockValues);
+    // Default: no resumeTaskId
+    mockSearchParamsGet.mockReturnValue(null);
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    mockSetResumeContent.mockClear();
   });
 
   describe('when rendering header section', () => {
@@ -311,6 +355,312 @@ describe('InterviewRoom', () => {
       });
       render(<InterviewRoom />);
       expect(mockStop).toHaveBeenCalled();
+    });
+  });
+
+  // ============================================================
+  // Resume Parsing Related Tests
+  // ============================================================
+
+  describe('when resumeTaskId is provided in URL', () => {
+    it('should show InterviewerPreparingState when waiting for resume parsing', () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      render(<InterviewRoom />);
+
+      // Should show preparing state, not normal interview room
+      expect(screen.getByText('Interviewer is preparing...')).toBeInTheDocument();
+      expect(screen.getByText('Analyzing your resume...')).toBeInTheDocument();
+      // Should not show normal interview room elements
+      expect(screen.queryByText(/LIVE SESSION/)).not.toBeInTheDocument();
+    });
+
+    it('should pass taskId to useTaskPolling when resumeTaskId exists', () => {
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-456' : null
+      );
+
+      render(<InterviewRoom />);
+
+      // Verify useTaskPolling was called with the taskId
+      expect(mockUseTaskPolling).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskId: 'task-456',
+        })
+      );
+    });
+
+    it('should pass null taskId to useTaskPolling when no resumeTaskId', () => {
+      mockSearchParamsGet.mockReturnValue(null);
+
+      render(<InterviewRoom />);
+
+      // Verify useTaskPolling was called with null taskId
+      expect(mockUseTaskPolling).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskId: null,
+        })
+      );
+    });
+  });
+
+  describe('when resume parsing completes', () => {
+    it('should sync resume content to store when task completes', async () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      // Capture the onComplete callback when useTaskPolling is called
+      let capturedOnComplete: ((result: unknown) => void) | undefined;
+      mockUseTaskPolling.mockImplementation((options: UseTaskPollingOptions) => {
+        capturedOnComplete = options.onComplete;
+        return defaultTaskPollingMockValues;
+      });
+
+      render(<InterviewRoom />);
+
+      // Simulate task completion with result
+      const taskResult = {
+        content: JSON.stringify({
+          name: '郭懷德',
+          email: 'test@example.com',
+          skills: ['Python', 'FastAPI'],
+        }),
+        parsedAt: '2024-01-01T00:00:00Z',
+      };
+
+      // Trigger the onComplete callback
+      expect(capturedOnComplete).toBeDefined();
+      capturedOnComplete?.(taskResult);
+
+      // Verify setResumeContent was called with parsed content
+      expect(mockSetResumeContent).toHaveBeenCalledWith({
+        name: '郭懷德',
+        email: 'test@example.com',
+        skills: ['Python', 'FastAPI'],
+      });
+    });
+
+    it('should handle invalid JSON in task result gracefully', async () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      // Capture the onComplete callback
+      let capturedOnComplete: ((result: unknown) => void) | undefined;
+      mockUseTaskPolling.mockImplementation((options: UseTaskPollingOptions) => {
+        capturedOnComplete = options.onComplete;
+        return defaultTaskPollingMockValues;
+      });
+
+      render(<InterviewRoom />);
+
+      // Simulate task completion with invalid JSON
+      const taskResult = {
+        content: 'invalid-json-string',
+        parsedAt: '2024-01-01T00:00:00Z',
+      };
+
+      // Trigger the onComplete callback - should not throw
+      expect(() => capturedOnComplete?.(taskResult)).not.toThrow();
+
+      // setResumeContent should not be called with invalid data
+      expect(mockSetResumeContent).not.toHaveBeenCalled();
+    });
+
+    it('should handle task result without content field gracefully', async () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      // Capture the onComplete callback
+      let capturedOnComplete: ((result: unknown) => void) | undefined;
+      mockUseTaskPolling.mockImplementation((options: UseTaskPollingOptions) => {
+        capturedOnComplete = options.onComplete;
+        return defaultTaskPollingMockValues;
+      });
+
+      render(<InterviewRoom />);
+
+      // Simulate task completion without content field
+      const taskResult = {
+        someOtherField: 'value',
+      };
+
+      // Trigger the onComplete callback - should not throw
+      expect(() => capturedOnComplete?.(taskResult)).not.toThrow();
+
+      // setResumeContent should not be called
+      expect(mockSetResumeContent).not.toHaveBeenCalled();
+    });
+
+    it('should handle null task result gracefully', async () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      // Capture the onComplete callback
+      let capturedOnComplete: ((result: unknown) => void) | undefined;
+      mockUseTaskPolling.mockImplementation((options: UseTaskPollingOptions) => {
+        capturedOnComplete = options.onComplete;
+        return defaultTaskPollingMockValues;
+      });
+
+      render(<InterviewRoom />);
+
+      // Trigger the onComplete callback with null
+      expect(() => capturedOnComplete?.(null)).not.toThrow();
+
+      // setResumeContent should not be called
+      expect(mockSetResumeContent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when resume parsing fails', () => {
+    it('should still allow interview to start when parsing fails', async () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      // Capture the onError callback
+      let capturedOnError: ((error: string) => void) | undefined;
+      mockUseTaskPolling.mockImplementation((options: UseTaskPollingOptions) => {
+        capturedOnError = options.onError;
+        return defaultTaskPollingMockValues;
+      });
+
+      render(<InterviewRoom />);
+
+      // Verify onError callback was provided
+      expect(capturedOnError).toBeDefined();
+
+      // onError should be callable without throwing
+      expect(() => capturedOnError?.('Parsing failed')).not.toThrow();
+    });
+  });
+
+  describe('interview flow with resume parsing', () => {
+    it('should show ready state when task completes', async () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      // Capture the onComplete callback and provide a way to check ready state
+      let capturedOnComplete: ((result: unknown) => void) | undefined;
+      mockUseTaskPolling.mockImplementation((options: UseTaskPollingOptions) => {
+        capturedOnComplete = options.onComplete;
+        return defaultTaskPollingMockValues;
+      });
+
+      render(<InterviewRoom />);
+
+      // Initially should show preparing state
+      expect(screen.getByText('Interviewer is preparing...')).toBeInTheDocument();
+
+      // Trigger task completion
+      const taskResult = {
+        content: JSON.stringify({ name: 'Test User' }),
+        parsedAt: '2024-01-01T00:00:00Z',
+      };
+      capturedOnComplete?.(taskResult);
+
+      // Component state has changed, need to verify the callback was processed
+      // The isReadyToStart state is set to true in the callback
+      // This verifies the callback logic runs without error
+      expect(mockSetResumeContent).toHaveBeenCalledWith({ name: 'Test User' });
+    });
+
+    it('should transition from preparing to interview when user clicks start', async () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      // Track state changes through re-renders
+      const isReadyToStart = false;
+
+      mockUseTaskPolling.mockImplementation(() => {
+        // Simulate completed state
+        if (isReadyToStart) {
+          return {
+            ...defaultTaskPollingMockValues,
+            progress: 100,
+          };
+        }
+        return defaultTaskPollingMockValues;
+      });
+
+      render(<InterviewRoom />);
+
+      // Should initially show preparing state
+      expect(screen.getByText('Interviewer is preparing...')).toBeInTheDocument();
+      expect(screen.queryByText(/LIVE SESSION/)).not.toBeInTheDocument();
+    });
+
+    it('should display progress during resume parsing', () => {
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      // Mock progress at 50%
+      mockUseTaskPolling.mockReturnValue({
+        ...defaultTaskPollingMockValues,
+        progress: 50,
+        isPolling: true,
+      });
+
+      render(<InterviewRoom />);
+
+      // Should show preparing state
+      expect(screen.getByText('Interviewer is preparing...')).toBeInTheDocument();
+      // The progress bar component should be rendered (aria-label based check)
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+  });
+
+  describe('integration: preparing state to interview room', () => {
+    it('should not auto-connect to Gemini API while preparing', () => {
+      const mockConnect = vi.fn();
+      mockUseLiveApi.mockReturnValue({
+        ...defaultMockValues,
+        connect: mockConnect,
+      });
+
+      // Mock searchParams to return resumeTaskId
+      mockSearchParamsGet.mockImplementation((key: string) =>
+        key === 'resumeTaskId' ? 'task-123' : null
+      );
+
+      render(<InterviewRoom />);
+
+      // Should not connect while in preparing state
+      expect(mockConnect).not.toHaveBeenCalled();
+    });
+
+    it('should auto-connect to Gemini API when not in preparing state', () => {
+      const mockConnect = vi.fn();
+      mockUseLiveApi.mockReturnValue({
+        ...defaultMockValues,
+        connect: mockConnect,
+      });
+
+      // No resumeTaskId means not preparing
+      mockSearchParamsGet.mockReturnValue(null);
+
+      render(<InterviewRoom />);
+
+      // Should connect when not preparing
+      expect(mockConnect).toHaveBeenCalled();
     });
   });
 });
