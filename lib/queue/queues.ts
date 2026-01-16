@@ -4,7 +4,7 @@
 
 import { Queue, type ConnectionOptions } from 'bullmq';
 
-import { logger } from '@/lib/utils/logger';
+import { logger } from '../utils/logger';
 
 import { getRedisConnection } from './connection';
 import { type InterviewAnalysisJobData, QUEUE_NAMES, type ResumeParsingJobData } from './types';

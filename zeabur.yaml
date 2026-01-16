@@ -6,6 +6,8 @@ services:
   - name: hireready
     type: github
     root: /
+    # Match the PORT defined in Dockerfile
+    port: 5555
     env:
       # Better Auth
       BETTER_AUTH_URL: https://${ZEABUR_WEB_URL}

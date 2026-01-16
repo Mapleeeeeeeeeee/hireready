@@ -5,13 +5,13 @@
 
 import { Worker, type Job, type ConnectionOptions } from 'bullmq';
 
-import { prisma } from '@/lib/db';
-import { logger } from '@/lib/utils/logger';
-import { analyzeInterviewFeedback, generateModelAnswer } from '@/lib/gemini/analysis-service';
+import { prisma } from '../../db';
+import { logger } from '../../utils/logger';
+import { analyzeInterviewFeedback, generateModelAnswer } from '../../gemini/analysis-service';
 import { getRedisConnection } from '../connection';
 import { QUEUE_NAMES, type InterviewAnalysisJobData } from '../types';
 import { updateTaskStatus } from '../worker-utils';
-import type { TranscriptEntry } from '@/lib/gemini/types';
+import type { TranscriptEntry } from '../../gemini/types';
 
 // ============================================================
 // Global Worker Instance (Singleton)

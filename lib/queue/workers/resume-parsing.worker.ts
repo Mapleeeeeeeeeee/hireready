@@ -5,10 +5,10 @@
 
 import { Worker, type Job, type ConnectionOptions } from 'bullmq';
 
-import { prisma } from '@/lib/db';
-import { logger } from '@/lib/utils/logger';
-import { parseResume } from '@/lib/resume/gemini-parser';
-import { getResumeFilePath } from '@/lib/resume/resume-service';
+import { prisma } from '../../db';
+import { logger } from '../../utils/logger';
+import { parseResume } from '../../resume/gemini-parser';
+import { getResumeFilePath } from '../../resume/resume-service';
 import { getRedisConnection } from '../connection';
 import { QUEUE_NAMES, type ResumeParsingJobData, type ResumeParsingResult } from '../types';
 import { updateTaskStatus } from '../worker-utils';

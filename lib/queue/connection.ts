@@ -4,8 +4,8 @@
 
 import Redis from 'ioredis';
 
-import { serverEnv } from '@/lib/config/server';
-import { logger } from '@/lib/utils/logger';
+import { serverEnv } from '../config/server';
+import { logger } from '../utils/logger';
 
 // Use global to prevent HMR from creating multiple connections
 const globalForRedis = global as unknown as {
