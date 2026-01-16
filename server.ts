@@ -13,6 +13,16 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { GoogleGenAI, type LiveServerMessage } from '@google/genai';
 import { serverEnv } from './lib/config/server';
 import { logger, configureLogger } from './lib/utils/logger';
+import { isRedisAvailable, closeRedisConnection } from './lib/queue/connection';
+import { closeAllQueues } from './lib/queue/queues';
+import {
+  startResumeParsingWorker,
+  closeResumeParsingWorker,
+} from './lib/queue/workers/resume-parsing.worker';
+import {
+  startInterviewAnalysisWorker,
+  closeInterviewAnalysisWorker,
+} from './lib/queue/workers/interview-analysis.worker';
 
 // Configure logger at startup
 configureLogger(serverEnv.nodeEnv);
@@ -286,5 +296,83 @@ app.prepare().then(() => {
       action: 'startup',
       wsPath: '/ws/gemini',
     });
+
+    // Initialize background workers if Redis is available
+    if (isRedisAvailable()) {
+      try {
+        startResumeParsingWorker();
+        startInterviewAnalysisWorker();
+        logger.info('Background workers started', {
+          ...LOG_CONTEXT,
+          action: 'workers-start',
+        });
+      } catch (error) {
+        logger.error('Failed to start background workers', error as Error, {
+          ...LOG_CONTEXT,
+          action: 'workers-start-error',
+        });
+      }
+    } else {
+      logger.warn('Redis not available, background workers not started', {
+        ...LOG_CONTEXT,
+        action: 'workers-skip',
+      });
+    }
   });
+
+  // Graceful shutdown handler
+  const gracefulShutdown = async (signal: string) => {
+    logger.info(`Received ${signal}, starting graceful shutdown...`, {
+      ...LOG_CONTEXT,
+      action: 'shutdown',
+      signal,
+    });
+
+    // Close all client WebSocket connections
+    wss.clients.forEach((client) => {
+      try {
+        client.close();
+      } catch {
+        // Ignore close errors
+      }
+    });
+
+    // Close background workers
+    try {
+      await closeResumeParsingWorker();
+      await closeInterviewAnalysisWorker();
+      await closeAllQueues();
+      await closeRedisConnection();
+      logger.info('Background workers and queues closed', {
+        ...LOG_CONTEXT,
+        action: 'shutdown',
+      });
+    } catch (error) {
+      logger.error('Error closing background workers', error as Error, {
+        ...LOG_CONTEXT,
+        action: 'shutdown-error',
+      });
+    }
+
+    // Close HTTP server
+    server.close(() => {
+      logger.info('Server closed', {
+        ...LOG_CONTEXT,
+        action: 'shutdown-complete',
+      });
+      process.exit(0);
+    });
+
+    // Force exit after timeout
+    setTimeout(() => {
+      logger.warn('Forcing exit after timeout', {
+        ...LOG_CONTEXT,
+        action: 'shutdown-timeout',
+      });
+      process.exit(1);
+    }, 10000);
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 });

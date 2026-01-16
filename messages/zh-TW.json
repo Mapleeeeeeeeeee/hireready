@@ -186,7 +186,7 @@
         "live": "鏡頭開啟中"
       },
       "ai": {
-        "name": "小安（面試官）",
+        "name": "面試官",
         "speaking": "說話中...",
         "thinking": "思考中...",
         "listening": "聆聽中...",
@@ -194,6 +194,11 @@
       },
       "caption": "AI 字幕"
     },
+    "interviewerPreparing": "面試官正在準備中...",
+    "preparingDescription": "請稍候，面試即將開始",
+    "interviewerReady": "面試官已經準備好了",
+    "readyDescription": "點擊下方按鈕開始面試",
+    "startButton": "開始面試",
     "saveDialog": {
       "title": "儲存面試記錄",
       "duration": "面試時長",
@@ -278,7 +283,12 @@
     },
     "untitledInterview": "未命名面試",
     "scoreLabel": "分數",
-    "noScore": "無分數"
+    "noScore": "無分數",
+    "analyzingInterview": "正在分析您的面試表現...",
+    "analysisProgress": "分析進度",
+    "analysisDescription": "AI 正在評估您的回答並生成評分與建議",
+    "analysisFailed": "分析失敗",
+    "analysisFailedDescription": "無法完成面試分析，請稍後重試"
   },
   "profile": {
     "title": "個人資料",
@@ -334,6 +344,12 @@
         "description": "基礎履歷模板"
       }
     }
+  },
+  "task": {
+    "pending": "等待中",
+    "processing": "處理中",
+    "completed": "已完成",
+    "failed": "失敗"
   },
   "errors": {
     "UNKNOWN_ERROR": "發生未知錯誤，請稍後再試",

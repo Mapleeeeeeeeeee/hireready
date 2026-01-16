@@ -2,15 +2,12 @@
 
 /**
  * AI interview analysis service using Gemini API
- * Analyzes interview transcripts and generates model answers with TTS audio
+ * Analyzes interview transcripts and generates model answers
  */
 
-import { promises as fs } from 'fs';
-import * as path from 'path';
 import * as crypto from 'crypto';
 import { serverEnv } from '@/lib/config/server';
 import { geminiConfig } from '@/lib/config';
-import { LIVE_API_VOICES } from './types';
 import { parseGeminiJSONResponse } from './utils';
 import { logger } from '@/lib/utils/logger';
 import type { TranscriptEntry } from '@/lib/gemini/types';
@@ -25,7 +22,7 @@ export interface AnalyzeInterviewInput {
   transcripts: TranscriptEntry[];
   /** Optional job description URL for context */
   jobDescriptionUrl?: string;
-  /** Language for analysis and TTS */
+  /** Language for analysis */
   language: 'en' | 'zh-TW';
 }
 
@@ -45,7 +42,7 @@ interface GeminiAnalysisResponse {
   strengths: string[];
   improvements: string[];
   modelTranscript: Array<{
-    role: 'user' | 'ai';
+    role: 'interviewer' | 'candidate';
     text: string;
     timestamp: number;
     isFinal: boolean;
@@ -58,7 +55,6 @@ interface GeminiAnalysisResponse {
 
 const GEMINI_API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${geminiConfig.model}:generateContent`;
 const REQUEST_TIMEOUT_MS = geminiConfig.timeouts.analysis;
-const MODEL_ANSWERS_DIR = 'model-answers';
 
 // ============================================================
 // Prompt Builder
@@ -93,154 +89,15 @@ ${jobDescriptionUrl ? `Job Description: ${jobDescriptionUrl}\n` : ''}
 Interview Transcript:
 ${formatTranscripts(transcripts)}
 
-Analyze this interview and output ONLY valid JSON with this structure:
-{
-  "score": <number 0-100>,
-  "strengths": [<string>, ...],
-  "improvements": [<string>, ...],
-  "modelTranscript": [
-    {"role": "user", "text": "<question>", "timestamp": <ms>, "isFinal": true},
-    {"role": "ai", "text": "<ideal answer>", "timestamp": <ms>, "isFinal": true}
-  ]
-}
-
-Requirements:
+Analysis Requirements:
 - score: Overall performance score from 0 to 100
-- strengths: At least 2 specific strengths with examples
-- improvements: At least 2 actionable improvement suggestions
-- modelTranscript: Recreate the interview with ideal candidate responses (keep original questions, improve answers)
+- strengths: At least 2 specific strengths with concrete examples from the transcript
+- improvements: At least 2 actionable improvement suggestions with specific references
+- modelTranscript: Recreate the interview with ideal candidate responses
+  - Use role "interviewer" for the interviewer's questions (keep original questions exactly)
+  - Use role "candidate" for the ideal candidate responses (rewrite to be exemplary)
 
-${isZhTW ? 'Output all text content in Traditional Chinese (繁體中文).' : 'Output all text content in English.'}
-
-CRITICAL: Respond ONLY with the JSON object. No markdown code blocks, no explanations, no additional text.`;
-}
-
-// ============================================================
-// TTS Generation
-// ============================================================
-
-/**
- * Generate TTS audio for model answer using Gemini API
- * @returns URL path to the generated audio file (e.g., "/model-answers/abc123.mp3")
- */
-async function generateTTS(
-  transcript: TranscriptEntry[],
-  language: 'en' | 'zh-TW'
-): Promise<string> {
-  const logContext = { module: 'analysis-service', action: 'generateTTS' };
-
-  // Extract only AI responses for TTS
-  const aiResponses = transcript.filter((t) => t.role === 'ai').map((t) => t.text);
-
-  if (aiResponses.length === 0) {
-    logger.warn('No AI responses found in transcript for TTS', logContext);
-    throw new Error('No AI responses to generate audio');
-  }
-
-  const textToSpeak = aiResponses.join('\n\n');
-
-  logger.info('Generating TTS audio', {
-    ...logContext,
-    textLength: textToSpeak.length,
-    language,
-  });
-
-  try {
-    const apiKey = serverEnv.geminiApiKey;
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY not configured');
-    }
-
-    // Select voice based on language
-    const voiceName = LIVE_API_VOICES[language];
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), geminiConfig.timeouts.tts);
-
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${geminiConfig.model}:generateContent`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
-          signal: controller.signal,
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: textToSpeak }],
-              },
-            ],
-            generationConfig: {
-              responseModalities: ['AUDIO'],
-              speechConfig: {
-                voiceConfig: {
-                  prebuiltVoiceConfig: {
-                    voiceName,
-                  },
-                },
-              },
-            },
-          }),
-        }
-      );
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        logger.error('Gemini TTS API error', undefined, {
-          ...logContext,
-          status: response.status,
-          error: errorText,
-        });
-        throw new Error(`Gemini TTS API returned ${response.status}: ${errorText}`);
-      }
-
-      const data = await response.json();
-
-      // Extract base64 audio data
-      const audioBase64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      if (!audioBase64) {
-        logger.error('Invalid TTS response structure', undefined, {
-          ...logContext,
-          response: JSON.stringify(data).slice(0, 500),
-        });
-        throw new Error('No audio data in Gemini TTS response');
-      }
-
-      // Save audio file to public directory
-      const audioId = crypto.randomUUID();
-      const audioFileName = `${audioId}.mp3`;
-      const audioPath = `/${MODEL_ANSWERS_DIR}/${audioFileName}`;
-      const fullPath = path.join(process.cwd(), 'public', MODEL_ANSWERS_DIR, audioFileName);
-
-      // Ensure directory exists
-      await fs.mkdir(path.dirname(fullPath), { recursive: true });
-
-      // Write audio file
-      const audioBuffer = Buffer.from(audioBase64, 'base64');
-      await fs.writeFile(fullPath, audioBuffer);
-
-      logger.info('TTS audio generated successfully', {
-        ...logContext,
-        audioPath,
-        audioSize: audioBuffer.length,
-      });
-
-      return audioPath;
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('TTS generation timeout');
-      }
-      throw error;
-    }
-  } catch (error) {
-    logger.error('Failed to generate TTS audio', error as Error, logContext);
-    throw error;
-  }
+${isZhTW ? 'Output all text content in Traditional Chinese (繁體中文).' : 'Output all text content in English.'}`;
 }
 
 // ============================================================
@@ -249,7 +106,7 @@ async function generateTTS(
 
 /**
  * Analyze interview transcript using Gemini API
- * Generates score, feedback, and model answer with TTS audio
+ * Generates score, feedback, and model answer
  */
 export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<AnalysisResult> {
   const { transcripts, jobDescriptionUrl, language } = input;
@@ -312,6 +169,29 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 4096,
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'object',
+              properties: {
+                score: { type: 'number' },
+                strengths: { type: 'array', items: { type: 'string' } },
+                improvements: { type: 'array', items: { type: 'string' } },
+                modelTranscript: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      role: { type: 'string', enum: ['interviewer', 'candidate'] },
+                      text: { type: 'string' },
+                      timestamp: { type: 'number' },
+                      isFinal: { type: 'boolean' },
+                    },
+                    required: ['role', 'text', 'timestamp', 'isFinal'],
+                  },
+                },
+              },
+              required: ['score', 'strengths', 'improvements', 'modelTranscript'],
+            },
           },
         }),
       });
@@ -393,9 +273,11 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
     }
 
     // Step 3: Convert model transcript to TranscriptEntry format
+    // Map 'interviewer' -> 'ai' (shown as interviewer in UI)
+    // Map 'candidate' -> 'user' (shown as candidate/you in UI)
     const modelTranscript: TranscriptEntry[] = analysisData.modelTranscript.map((entry) => ({
       id: crypto.randomUUID(),
-      role: entry.role,
+      role: entry.role === 'interviewer' ? 'ai' : 'user',
       text: entry.text,
       timestamp: entry.timestamp || Date.now(),
       isFinal: entry.isFinal !== undefined ? entry.isFinal : true,
@@ -409,26 +291,12 @@ export async function analyzeInterview(input: AnalyzeInterviewInput): Promise<An
       modelTranscriptCount: modelTranscript.length,
     });
 
-    // Step 4: Generate TTS audio for model answer
-    let audioUrl: string | undefined;
-    try {
-      audioUrl = await generateTTS(modelTranscript, language);
-    } catch (error) {
-      // TTS is optional - log error but continue
-      logger.warn('Failed to generate TTS audio, continuing without audio', {
-        ...logContext,
-        error: (error as Error).message,
-      });
-      audioUrl = undefined;
-    }
-
     return {
       score: analysisData.score,
       strengths: analysisData.strengths,
       improvements: analysisData.improvements,
       modelAnswer: {
         transcript: modelTranscript,
-        audioUrl,
       },
     };
   } catch (error) {

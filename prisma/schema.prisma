@@ -29,10 +29,11 @@ model User {
   resumeContent   String?   @db.Text  // Gemini 解析的結構化內容 (JSON string)
   resumeUpdatedAt DateTime? // 履歷更新時間
 
-  sessions      Session[]
-  accounts      Account[]
-  interviews    Interview[]
-  settings      UserSettings?
+  sessions        Session[]
+  accounts        Account[]
+  interviews      Interview[]
+  settings        UserSettings?
+  backgroundTasks BackgroundTask[]
 
   @@map("users")
 }
@@ -132,4 +133,27 @@ model UserSettings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
+}
+
+// =============================================
+// Background Tasks (Job Queue)
+// =============================================
+
+model BackgroundTask {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String   // 'interview_analysis' | 'resume_parsing'
+  status     String   @default("pending")
+  resourceId String?  // interviewId or null
+  progress   Int      @default(0)
+  error      String?  @db.Text
+  result     Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([status])
+  @@map("background_tasks")
 }

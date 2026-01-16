@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, useCallback, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { ControlBar } from './ControlBar';
 import { VideoPreview } from './VideoPreview';
 import { SaveConfirmDialog } from './SaveConfirmDialog';
+import { InterviewerPreparingState } from './InterviewerPreparingState';
 import { Activity, AlertCircle, Loader2 } from 'lucide-react';
 import { useLiveApi } from '@/lib/hooks/use-live-api';
 import { useVideoPreview } from '@/lib/hooks/use-video-preview';
 import { useAudioLevel } from '@/lib/hooks/use-audio-level';
+import { useTaskPolling } from '@/lib/hooks/use-task-polling';
 import { useInterviewStore } from '@/lib/stores/interview-store';
 import { apiClient } from '@/lib/utils/api-client';
 import { toAppError } from '@/lib/utils/errors';
@@ -17,6 +19,7 @@ import { logger } from '@/lib/utils/logger';
 import { formatTimeDisplay } from '@/lib/utils/format';
 import { showErrorToast } from '@/lib/utils/toast';
 import type { SupportedLanguage } from '@/lib/gemini/prompts';
+import type { ResumeContent } from '@/lib/resume/types';
 
 // ============================================================
 // Types
@@ -25,12 +28,17 @@ import type { SupportedLanguage } from '@/lib/gemini/prompts';
 interface SaveInterviewResponse {
   id: string;
   createdAt: string;
+  taskId: string | null;
 }
 
 export function InterviewRoom() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations('interview.room');
   const locale = useLocale() as SupportedLanguage;
+
+  // Get resumeTaskId from URL search params
+  const resumeTaskId = searchParams.get('resumeTaskId');
 
   // Ref to prevent double connection in StrictMode
   const hasConnectedRef = useRef(false);
@@ -39,6 +47,12 @@ export function InterviewRoom() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>('');
+
+  // Preparing state - whether we're waiting for resume parsing
+  const [isPreparing, setIsPreparing] = useState(!!resumeTaskId);
+
+  // Ready to start state - task completed but waiting for user to click start
+  const [isReadyToStart, setIsReadyToStart] = useState(false);
 
   // Use the Live API hook
   const {
@@ -65,6 +79,63 @@ export function InterviewRoom() {
   // Interview data from store
   const transcripts = useInterviewStore((state) => state.transcripts);
   const jobDescription = useInterviewStore((state) => state.jobDescription);
+  const setResumeContent = useInterviewStore((state) => state.setResumeContent);
+
+  // Task polling for resume parsing
+  const { progress: taskProgress } = useTaskPolling({
+    taskId: isPreparing ? resumeTaskId : null,
+    onComplete: useCallback(
+      (result: unknown) => {
+        logger.info('Resume parsing completed', {
+          module: 'interview-room',
+          action: 'task-complete',
+          taskId: resumeTaskId,
+        });
+
+        // Sync parsed resume content to store
+        if (result && typeof result === 'object' && 'content' in result) {
+          try {
+            const taskResult = result as { content: string; parsedAt: string };
+            const parsedContent: ResumeContent = JSON.parse(taskResult.content);
+            setResumeContent(parsedContent);
+            logger.info('Resume content synced to store', {
+              module: 'interview-room',
+              action: 'sync-resume',
+              resumeName: parsedContent.name,
+            });
+          } catch (error) {
+            logger.error('Failed to parse resume content from task result', error as Error, {
+              module: 'interview-room',
+              action: 'sync-resume-error',
+            });
+          }
+        }
+
+        // Set ready to start instead of starting immediately
+        setIsReadyToStart(true);
+      },
+      [resumeTaskId, setResumeContent]
+    ),
+    onError: useCallback(
+      (error: string) => {
+        logger.warn('Resume parsing failed, proceeding anyway', {
+          module: 'interview-room',
+          action: 'task-error',
+          taskId: resumeTaskId,
+          error,
+        });
+        // Even if parsing fails, we can still proceed with the interview
+        setIsReadyToStart(true);
+      },
+      [resumeTaskId]
+    ),
+  });
+
+  // Handle start interview when user clicks the start button
+  const handleStartInterview = useCallback(() => {
+    setIsPreparing(false);
+    setIsReadyToStart(false);
+  }, []);
 
   // Use the Audio Level hook for real-time microphone visualization
   const {
@@ -83,8 +154,9 @@ export function InterviewRoom() {
   }, [isMicOn, startMicMonitoring, stopMicMonitoring]);
 
   // Auto-connect to Gemini API on mount (with guard to prevent double connection)
+  // Only connect when not preparing (resume parsing is complete)
   useEffect(() => {
-    if (isSupported && !hasConnectedRef.current) {
+    if (isSupported && !hasConnectedRef.current && !isPreparing) {
       hasConnectedRef.current = true;
       connect();
     }
@@ -96,7 +168,7 @@ export function InterviewRoom() {
       disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSupported]); // Intentionally exclude connect/disconnect to avoid infinite loops
+  }, [isSupported, isPreparing]); // Intentionally exclude connect/disconnect to avoid infinite loops
 
   // Determine which audio level to show
   const getDisplayAudioLevel = (): number => {
@@ -139,10 +211,15 @@ export function InterviewRoom() {
         module: 'interview-room',
         action: 'save',
         interviewId: response.id,
+        taskId: response.taskId,
         transcriptCount: transcripts.length,
       });
 
-      router.push(`/history/${response.id}`);
+      // Navigate to history detail page, with taskId if analysis is queued
+      const historyUrl = response.taskId
+        ? `/history/${response.id}?analysisTaskId=${response.taskId}`
+        : `/history/${response.id}`;
+      router.push(historyUrl);
     } catch (error) {
       logger.error('Failed to save interview', error as Error, {
         module: 'interview-room',
@@ -212,6 +289,17 @@ export function InterviewRoom() {
         <h2 className="mb-2 text-xl font-semibold">{t('notSupported')}</h2>
         <p className="text-charcoal/60 text-center">{t('notSupportedMessage')}</p>
       </div>
+    );
+  }
+
+  // Show preparing state while waiting for resume parsing
+  if (isPreparing) {
+    return (
+      <InterviewerPreparingState
+        progress={taskProgress}
+        isReady={isReadyToStart}
+        onStart={handleStartInterview}
+      />
     );
   }
 

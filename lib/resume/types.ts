@@ -60,6 +60,8 @@ export interface ResumeData {
   fileName: string;
   /** Parsed content from Gemini */
   content: ResumeContent | null;
+  /** Background task ID for resume parsing (null if parsing is complete or not queued) */
+  taskId: string | null;
   /** Last updated timestamp */
   updatedAt: Date;
 }

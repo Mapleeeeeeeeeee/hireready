@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
-import { Button, Card, CardBody, Tabs, Tab, Tooltip } from '@heroui/react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { Button, Card, CardBody, Tabs, Tab, Tooltip, Progress } from '@heroui/react';
 import {
   ArrowLeft,
   Calendar,
@@ -14,16 +14,19 @@ import {
   AlertCircle,
   Trash2,
   RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { PageLoadingState, StatusChip } from '@/components/common';
 import { TranscriptViewer, type TranscriptEntry } from '@/components/history/TranscriptViewer';
-import { AudioPlayer } from '@/components/history/AudioPlayer';
 import { DeleteConfirmDialog } from '@/components/history';
 import { useUserStore } from '@/lib/stores/user-store';
 import { useInterviewStore } from '@/lib/stores/interview-store';
+import { useTaskPolling } from '@/lib/hooks/use-task-polling';
 import { toJobDescription } from '@/lib/jd';
 import { formatDate, formatDateLong, formatDuration } from '@/lib/utils/date-format';
+import { ERROR_CODES } from '@/lib/utils/errors';
+import { logger } from '@/lib/utils/logger';
 import type { InterviewStatus } from '@/lib/constants/enums';
 
 // ============================================================
@@ -63,8 +66,10 @@ function HistoryDetailContent() {
   const tCommon = useTranslations('common');
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const interviewId = params.id as string;
+  const analysisTaskId = searchParams.get('analysisTaskId');
 
   const {
     selectedInterview,
@@ -79,6 +84,35 @@ function HistoryDetailContent() {
   const setJobDescription = useInterviewStore((state) => state.setJobDescription);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(!!analysisTaskId);
+
+  // Task polling for analysis progress
+  const { progress: analysisProgress, status: analysisStatus } = useTaskPolling({
+    taskId: isAnalyzing ? analysisTaskId : null,
+    onComplete: useCallback(() => {
+      logger.info('Interview analysis completed', {
+        module: 'history-detail',
+        action: 'analysis-complete',
+        interviewId,
+        taskId: analysisTaskId,
+      });
+      setIsAnalyzing(false);
+      // Refresh the interview data to get the analysis results
+      fetchInterviewById(interviewId);
+    }, [interviewId, analysisTaskId, fetchInterviewById]),
+    onError: useCallback(
+      (error: string) => {
+        logger.error('Interview analysis failed', new Error(error), {
+          module: 'history-detail',
+          action: 'analysis-error',
+          interviewId,
+          taskId: analysisTaskId,
+        });
+        setIsAnalyzing(false);
+      },
+      [interviewId, analysisTaskId]
+    ),
+  });
 
   useEffect(() => {
     if (interviewId) {
@@ -89,6 +123,11 @@ function HistoryDetailContent() {
       clearSelectedInterview();
     };
   }, [interviewId, fetchInterviewById, clearSelectedInterview]);
+
+  // Check if analysis is still needed (score is null and we have a taskId)
+  // Use a more immediate check when data loads rather than relying on effect
+  const shouldShowAnalyzing =
+    isAnalyzing && (!selectedInterview || selectedInterview.score === null);
 
   const handleRetry = () => {
     if (!selectedInterview?.jobDescription) return;
@@ -119,11 +158,13 @@ function HistoryDetailContent() {
     return <PageLoadingState />;
   }
 
-  // Error state
+  // Error state - differentiate between 404 and other errors
   if (error || !selectedInterview) {
+    // NOT_FOUND error should show "not found" message, not generic error
+    const isNotFound = !selectedInterview || error?.code === ERROR_CODES.NOT_FOUND;
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <p className="text-charcoal/60">{error ? tCommon('error') : t('notFound')}</p>
+        <p className="text-charcoal/60">{isNotFound ? t('notFound') : tCommon('error')}</p>
         <Button color="primary" variant="flat" onPress={handleBack}>
           {t('backToHistory')}
         </Button>
@@ -213,6 +254,38 @@ function HistoryDetailContent() {
               <div className="text-center">
                 <p className="text-charcoal/60 mb-1 text-sm">{t('score')}</p>
                 <p className="text-terracotta text-5xl font-bold">{score}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Analysis In Progress */}
+          {shouldShowAnalyzing && (
+            <div className="bg-terracotta/5 border-terracotta/10 rounded-xl border p-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="text-terracotta h-6 w-6 animate-spin" />
+                  <span className="text-charcoal font-medium">{t('analyzingInterview')}</span>
+                </div>
+                <Progress
+                  aria-label={t('analysisProgress')}
+                  value={analysisProgress}
+                  className="max-w-md"
+                  color="primary"
+                  size="md"
+                  showValueLabel
+                />
+                <p className="text-charcoal/60 text-sm">{t('analysisDescription')}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Analysis Failed or No Analysis */}
+          {!shouldShowAnalyzing && score === null && analysisStatus === 'failed' && (
+            <div className="rounded-xl border border-red-100 bg-red-50 p-6">
+              <div className="flex flex-col items-center gap-2">
+                <AlertCircle className="h-6 w-6 text-red-500" />
+                <span className="text-charcoal font-medium">{t('analysisFailed')}</span>
+                <p className="text-charcoal/60 text-sm">{t('analysisFailedDescription')}</p>
               </div>
             </div>
           )}
@@ -307,13 +380,7 @@ function HistoryDetailContent() {
 
               {/* Model Answer Tab */}
               <Tab key="model" title={t('modelAnswer')}>
-                <div className="space-y-4">
-                  {/* Audio Player for TTS */}
-                  {modelAnswer.audioUrl && <AudioPlayer src={modelAnswer.audioUrl} />}
-
-                  {/* Model Transcript */}
-                  <TranscriptViewer transcript={modelAnswer.transcript as TranscriptEntry[]} />
-                </div>
+                <TranscriptViewer transcript={modelAnswer.transcript as TranscriptEntry[]} />
               </Tab>
             </Tabs>
           </CardBody>

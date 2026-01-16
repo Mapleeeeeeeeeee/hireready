@@ -2,12 +2,11 @@
  * Interview Save API Route
  * POST /api/interview/save
  * Saves interview transcript and metadata to database
+ * Analysis is performed asynchronously via background queue
  */
 
 export const dynamic = 'force-dynamic';
 
-import { promises as fs } from 'fs';
-import path from 'path';
 import { prisma } from '@/lib/db';
 import { withAuthHandler } from '@/lib/utils/api-response';
 import { validators } from '@/lib/utils/validation';
@@ -15,10 +14,10 @@ import { Ok, Err, Result } from '@/lib/utils/result';
 import { ValidationError, BadRequestError } from '@/lib/utils/errors';
 import { parseJsonBody } from '@/lib/utils/resource-helpers';
 import { logger } from '@/lib/utils/logger';
-import { isPathWithinDirectory } from '@/lib/utils/security';
-import { analyzeInterview } from '@/lib/gemini/analysis-service';
+import { isRedisAvailable } from '@/lib/queue/connection';
+import { getInterviewAnalysisQueue } from '@/lib/queue/queues';
 import { isValidUrl } from '@/lib/jd/validators';
-import type { SaveInterviewResponse, TranscriptEntry } from '@/lib/gemini/types';
+import type { TranscriptEntry } from '@/lib/gemini/types';
 
 // ============================================================
 // Request Validation
@@ -91,13 +90,23 @@ function validateSaveInterviewInput(
 }
 
 // ============================================================
+// Response Type
+// ============================================================
+
+interface SaveInterviewApiResponse {
+  id: string;
+  createdAt: string;
+  taskId: string | null;
+}
+
+// ============================================================
 // Route Handler
 // ============================================================
 
 async function handleSaveInterview(
   request: Request,
   userId: string
-): Promise<SaveInterviewResponse> {
+): Promise<SaveInterviewApiResponse> {
   // Parse and validate request body
   const body = await parseJsonBody<unknown>(request);
   const validationResult = validateSaveInterviewInput(body);
@@ -123,120 +132,78 @@ async function handleSaveInterview(
       transcript: transcripts as unknown as Parameters<
         typeof prisma.interview.create
       >[0]['data']['transcript'],
-      // score, strengths, improvements, modelAnswer will be filled by AI analysis
+      // score, strengths, improvements, modelAnswer will be filled by AI analysis worker
     },
   });
 
-  // Step 2: Perform AI analysis asynchronously (errors should not fail the save)
-  try {
-    logger.info('Preparing for AI analysis', {
-      module: 'api-interview-save',
-      action: 'pre-analyze',
-      interviewId: interview.id,
-      transcriptCount: transcripts.length,
-      hasJobDescription: !!jobDescriptionUrl,
-      language,
-    });
+  logger.info('Interview saved', {
+    module: 'api-interview-save',
+    action: 'save',
+    interviewId: interview.id,
+    transcriptCount: transcripts.length,
+    hasJobDescription: !!jobDescriptionUrl,
+    language,
+  });
 
-    logger.info('Starting AI analysis', {
-      module: 'api-interview-save',
-      action: 'analyze',
-      interviewId: interview.id,
-    });
+  // Step 2: Create background task and push to queue (if Redis is available)
+  let taskId: string | null = null;
 
-    const analysis = await analyzeInterview({
-      transcripts,
-      jobDescriptionUrl,
-      language,
-    });
+  if (isRedisAvailable()) {
+    try {
+      // Create background task record
+      const task = await prisma.backgroundTask.create({
+        data: {
+          userId,
+          type: 'interview_analysis',
+          status: 'pending',
+          resourceId: interview.id,
+          progress: 0,
+        },
+      });
 
-    logger.info('AI analysis result received', {
-      module: 'api-interview-save',
-      action: 'analyze',
-      interviewId: interview.id,
-      hasScore: !!analysis.score,
-      strengthsCount: analysis.strengths.length,
-      improvementsCount: analysis.improvements.length,
-      hasAudio: !!analysis.modelAnswer.audioUrl,
-    });
+      taskId = task.id;
 
-    // Step 3: Rename audio file from UUID to interview ID
-    if (analysis.modelAnswer.audioUrl) {
-      // Validate interview ID format (CUID)
-      if (!/^c[a-z0-9]{24}$/i.test(interview.id)) {
-        logger.error('Invalid interview ID format', undefined, {
-          module: 'api-interview-save',
-          action: 'rename-audio',
+      // Push job to queue
+      const queue = getInterviewAnalysisQueue();
+      await queue.add(
+        `analysis-${interview.id}`,
+        {
+          taskId: task.id,
+          userId,
           interviewId: interview.id,
-        });
-        throw new Error('Invalid interview ID format');
-      }
+        },
+        {
+          // Job-specific options
+          jobId: `interview-analysis-${interview.id}`,
+        }
+      );
 
-      const modelAnswersDir = path.join(process.cwd(), 'public', 'model-answers');
-      const oldFileName = path.basename(analysis.modelAnswer.audioUrl);
-      const oldPath = path.resolve(modelAnswersDir, oldFileName);
-      const newPath = path.resolve(modelAnswersDir, `${interview.id}.mp3`);
-
-      // Verify resolved paths are within model-answers directory
-      if (
-        !isPathWithinDirectory(oldPath, modelAnswersDir) ||
-        !isPathWithinDirectory(newPath, modelAnswersDir)
-      ) {
-        logger.error('Invalid file path detected', undefined, {
-          module: 'api-interview-save',
-          action: 'rename-audio',
-          oldPath,
-          newPath,
-        });
-        throw new Error('Invalid file path');
-      }
-
-      try {
-        await fs.rename(oldPath, newPath);
-        analysis.modelAnswer.audioUrl = `/model-answers/${interview.id}.mp3`;
-      } catch (renameError) {
-        logger.error('Failed to rename audio file', renameError as Error, {
-          module: 'api-interview-save',
-          action: 'rename-audio',
-          interviewId: interview.id,
-        });
-        // Continue execution, keep original path
-      }
+      logger.info('Interview analysis job queued', {
+        module: 'api-interview-save',
+        action: 'queue',
+        interviewId: interview.id,
+        taskId: task.id,
+      });
+    } catch (error) {
+      logger.error('Failed to queue interview analysis', error as Error, {
+        module: 'api-interview-save',
+        action: 'queue',
+        interviewId: interview.id,
+      });
+      // Don't fail the request - interview is saved, analysis can be retried later
     }
-
-    // Step 4: Update interview with AI analysis results
-    await prisma.interview.update({
-      where: { id: interview.id },
-      data: {
-        score: analysis.score,
-        strengths: analysis.strengths,
-        improvements: analysis.improvements,
-        modelAnswer: analysis.modelAnswer as unknown as Parameters<
-          typeof prisma.interview.update
-        >[0]['data']['modelAnswer'],
-      },
-    });
-
-    logger.info('AI analysis completed', {
+  } else {
+    logger.warn('Redis not available, skipping analysis queue', {
       module: 'api-interview-save',
-      action: 'analyze',
+      action: 'queue',
       interviewId: interview.id,
-      score: analysis.score,
     });
-  } catch (error) {
-    logger.error('AI analysis failed, interview saved without analysis', error as Error, {
-      module: 'api-interview-save',
-      action: 'analyze',
-      interviewId: interview.id,
-      errorMessage: (error as Error).message,
-      errorStack: (error as Error).stack,
-    });
-    // Do not throw error - interview record is still saved
   }
 
   return {
     id: interview.id,
     createdAt: interview.createdAt.toISOString(),
+    taskId,
   };
 }
 

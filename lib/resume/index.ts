@@ -36,4 +36,9 @@ export {
   deleteResumeFile,
   reparseResume,
   getResumeFilePath,
+  // Constants
+  STORAGE_DIR,
+  RESUMES_DIR,
+  RESUME_FILENAME,
+  ALLOWED_EXTENSIONS,
 } from './resume-service';

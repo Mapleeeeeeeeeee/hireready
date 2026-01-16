@@ -16,6 +16,7 @@ interface ResumeResponse {
   url: string;
   fileName: string;
   content: ResumeData['content'];
+  taskId: string | null;
   updatedAt: string;
 }
 
@@ -38,6 +39,7 @@ async function handleGetResume(_request: Request, userId: string): Promise<Resum
     url: resume.url,
     fileName: resume.fileName,
     content: resume.content,
+    taskId: resume.taskId,
     updatedAt: resume.updatedAt.toISOString(),
   };
 }
