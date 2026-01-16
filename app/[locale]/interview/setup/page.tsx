@@ -342,6 +342,7 @@ export default function InterviewSetupPage() {
         isOpen={isGuestWarningOpen}
         onClose={() => setIsGuestWarningOpen(false)}
         placement="center"
+        backdrop="blur"
         size="sm"
         classNames={{
           base: 'bg-warm-paper',
@@ -358,7 +359,11 @@ export default function InterviewSetupPage() {
             <h3 className="text-charcoal text-lg font-semibold">{t('guestWarning.title')}</h3>
           </ModalHeader>
           <ModalBody>
-            <p className="text-charcoal/70 text-center text-sm">{t('guestWarning.message')}</p>
+            <p className="text-charcoal/70 text-center text-sm">
+              {t.rich('guestWarning.message', {
+                b: (chunks) => <span className="text-charcoal font-bold">{chunks}</span>,
+              })}
+            </p>
           </ModalBody>
           <ModalFooter className="flex-col gap-2">
             <Button

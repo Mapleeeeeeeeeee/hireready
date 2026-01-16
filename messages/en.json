@@ -118,7 +118,7 @@
       "startHint": "You can start the interview even without adding a job description",
       "guestWarning": {
         "title": "Continue as Guest?",
-        "message": "You are not logged in. As a guest, you will NOT be able to save your interview or receive AI analysis reports. For the best experience, we recommend logging in first.",
+        "message": "You are not logged in. As a guest, you will <b>NOT be able to save your interview</b> or <b>receive AI analysis reports</b>. For the best experience, we recommend logging in first.",
         "continueAsGuest": "Continue Anyway",
         "loginFirst": "Login First"
       },

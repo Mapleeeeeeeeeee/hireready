@@ -27,10 +27,10 @@ export function CaptionOverlay({ isOn, interimAiText, sessionState }: CaptionOve
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="absolute bottom-16 left-1/2 z-10 max-w-[90%] -translate-x-1/2"
+          className="absolute bottom-20 left-1/2 z-10 w-[95%] max-w-md -translate-x-1/2 sm:bottom-16 sm:w-[90%]"
         >
-          <div className="rounded-lg bg-black/70 px-4 py-3 backdrop-blur-sm">
-            <p className="text-center text-lg leading-relaxed font-medium break-words text-white">
+          <div className="rounded-xl bg-black/80 px-3 py-2.5 shadow-lg backdrop-blur-md sm:rounded-lg sm:px-4 sm:py-3">
+            <p className="text-center text-sm leading-relaxed font-medium break-words text-white sm:text-base md:text-lg">
               {interimAiText.trim()}
             </p>
           </div>
