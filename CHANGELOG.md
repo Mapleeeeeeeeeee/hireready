@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.1.1...v2.1.2) (2026-01-16)
+
+
+### Bug Fixes
+
+* add tsconfig.json to Dockerfile runner stage for tsx path alias resolution ([ca8eb76](https://github.com/Mapleeeeeeeeeee/hireready/commit/ca8eb76daf58afc8fbdaf82262ded621a1f50d63))
+
 ## [2.1.1](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.1.0...v2.1.1) (2026-01-16)
 
 
