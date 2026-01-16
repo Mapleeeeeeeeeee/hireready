@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v2.0.0...v2.1.0) (2026-01-16)
+
+
+### Features
+
+* add background task queue for async resume parsing ([#14](https://github.com/Mapleeeeeeeeeee/hireready/issues/14)) ([befeb26](https://github.com/Mapleeeeeeeeeee/hireready/commit/befeb2628555c28f5559da3113ed1cab747d613e))
+
 ## [2.0.0](https://github.com/Mapleeeeeeeeeee/hireready/compare/v1.2.2...v2.0.0) (2026-01-15)
 
 
